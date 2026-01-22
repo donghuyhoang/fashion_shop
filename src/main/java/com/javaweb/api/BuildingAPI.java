@@ -11,7 +11,7 @@ import Beans.*;
 @RestController
 public class BuildingAPI {
     @GetMapping(value = "/api/building/")
-    public Object getBuilding(@RequestParam(value = "name",required = false){
+    public Object getBuilding(@RequestParam(value = "name")	{
     	return null;
     }
     @GetMapping(value = "/api/building/")
