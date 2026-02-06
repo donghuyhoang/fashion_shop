@@ -1,4 +1,4 @@
-package Beans;
+package model;
 
 public class BuildingDTO {
 	private String name;
