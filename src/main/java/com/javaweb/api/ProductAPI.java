@@ -9,10 +9,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.javaweb.builder.ProductSearchBuilder;
 import com.javaweb.service.ProductService;
 
 import model.*;
@@ -21,12 +23,15 @@ import model.*;
 public class ProductAPI {
 	@Autowired
 	private ProductService productService;
-	
-    @GetMapping(value = "/api/products/")
-    public List<productDTO> getProduct(@RequestParam(name = "name") String name) {
-    	List<productDTO> result = productService.findAll(name);
+	@GetMapping(value = "")
+    public List<productDTO> getAllProduct(){
+		List<productDTO> result = productService.findAll();
+		return result;
+	}
+	@GetMapping(value = "/api/products/")
+    public List<productDTO> getProduct(@ModelAttribute ProductSearchBuilder params) {
+    	List<productDTO> result = productService.findProduct(params);
     	return result;
 	}
-    
 
 }
