@@ -33,5 +33,4 @@ public class ProductAPI {
     	List<productDTO> result = productService.findProduct(params);
     	return result;
 	}
-
 }

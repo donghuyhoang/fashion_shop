@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.javaweb.builder.ProductSearchBuilder;
+import com.javaweb.converter.ProductDTOConverter;
 import com.javaweb.repository.ProductRepository;
 import com.javaweb.repository.entity.ProductEntity;
 import com.javaweb.service.ProductService;
@@ -17,6 +18,8 @@ import model.productDTO;
 public class ProductServiceImpl implements ProductService{
 	@Autowired
 	private ProductRepository productReponsitory;
+	@Autowired
+	private ProductDTOConverter productDTOConverter;
 	@Override
 	public List<productDTO> findProduct(ProductSearchBuilder params) {
 		
@@ -36,11 +39,7 @@ public class ProductServiceImpl implements ProductService{
 		List<ProductEntity> productEntities = productReponsitory.findAll();
 		List<productDTO> result = new ArrayList<productDTO>();
 		for (ProductEntity item : productEntities) {
-			productDTO product = new productDTO();
-			product.setName(item.getName());
-			product.setPrice(item.getPrice());
-			product.setDescription(item.getDescription());
-			result.add(product);
+			result.add(ProductDTOConverter.toProductDTO(item));
 		}
 		return result;
 	}
