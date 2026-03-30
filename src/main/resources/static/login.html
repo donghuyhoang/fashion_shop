@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập hệ thống - Fashion Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .login-card { width: 100%; max-width: 400px; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background: white; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h3 class="text-center mb-4">Quản Trị Viên</h3>
+        <form id="loginForm">
+            <div class="mb-3">
+                <label>Email / Số điện thoại</label>
+                <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="mb-3">
+                <label>Mật khẩu</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-dark w-100">Đăng Nhập</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#loginForm").submit(function(e) {
+                e.preventDefault();
+                // Giả lập gọi API đăng nhập. Backend sẽ kiểm tra trong bảng `users` + `roles`.
+                // Nếu đúng role Admin/Staff, trả về Token.
+                alert("Giả lập đăng nhập thành công!");
+                localStorage.setItem("admin_token", "fake-jwt-token-123");
+                window.location.href = "index.html"; // Chuyển hướng vào trang Admin
+            });
+        });
+    </script>
+</body>
+</html>
