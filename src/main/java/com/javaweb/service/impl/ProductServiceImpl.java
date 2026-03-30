@@ -43,5 +43,19 @@ public class ProductServiceImpl implements ProductService{
 		}
 		return result;
 	}
+	@Override
+	public void save(model.productDTO dto) {
+		productReponsitory.save(dto);
+	}
+
+	@Override
+	public void update(model.productDTO dto) {
+		productReponsitory.update(dto);
+	}
+
+	@Override
+	public void delete(Integer id) {
+		productReponsitory.delete(id);
+	}
 
 }
