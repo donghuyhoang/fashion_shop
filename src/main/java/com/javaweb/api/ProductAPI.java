@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.javaweb.builder.ProductSearchBuilder;
+import com.javaweb.service.BrandService;
 import com.javaweb.service.ProductService;
 import com.javaweb.utils.ConnectionJDBCUtil;
 
@@ -29,6 +30,8 @@ import model.*;
 public class ProductAPI {
 	@Autowired
 	private ProductService productService;
+	@Autowired
+    private BrandService brandService;
 	@GetMapping(value = "")
     public List<productDTO> getAllProduct(){
 		List<productDTO> result = productService.findAll();
@@ -37,6 +40,15 @@ public class ProductAPI {
 	@GetMapping(value = "/api/products/")
     public List<productDTO> getProduct(@ModelAttribute ProductSearchBuilder params) {
     	List<productDTO> result = productService.findProduct(params);
+    	return result;
+	}
+    @GetMapping(value = "/api/brands/")
+    public List<ItemDTO> getBrands() {
+    	return brandService.findAll();
+	}
+    @GetMapping(value = "/api/categories")
+    public List<productDTO> getCategories() {
+    	List<productDTO> result = productService.findAll();
     	return result;
 	}
     @PostMapping(value = "/api/products/")
@@ -56,38 +68,5 @@ public class ProductAPI {
 	public void deleteProduct(@PathVariable Integer id) {
 		productService.delete(id);
 		System.out.println("Đã xóa sản phẩm ID: " + id);
-	}
-	@GetMapping(value = "/api/brands")
-	public List<ItemDTO> getBrands() {
-		List<ItemDTO> list = new ArrayList<>();
-		String sql = "SELECT brand_id, name FROM brands";
-		try (Connection conn = ConnectionJDBCUtil.getConnection();
-			 Statement stmt = conn.createStatement();
-			 ResultSet rs = stmt.executeQuery(sql)) {
-			while(rs.next()) {
-				ItemDTO item = new ItemDTO();
-				item.setId(rs.getInt("brand_id"));
-				item.setName(rs.getString("name"));
-				list.add(item);
-			}
-		} catch (Exception e) { e.printStackTrace(); }
-		return list;
-	}
-
-	@GetMapping(value = "/api/categories")
-	public List<ItemDTO> getCategories() {
-		List<ItemDTO> list = new ArrayList<>();
-		String sql = "SELECT category_id, name FROM categories";
-		try (Connection conn = ConnectionJDBCUtil.getConnection();
-			 Statement stmt = conn.createStatement();
-			 ResultSet rs = stmt.executeQuery(sql)) {
-			while(rs.next()) {
-				ItemDTO item = new ItemDTO();
-				item.setId(rs.getInt("category_id"));
-				item.setName(rs.getString("name"));
-				list.add(item);
-			}
-		} catch (Exception e) { e.printStackTrace(); }
-		return list;
 	}
 }

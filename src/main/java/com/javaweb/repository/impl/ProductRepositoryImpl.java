@@ -25,40 +25,53 @@ public class ProductRepositoryImpl implements ProductRepository{
 	    sql.append("LEFT JOIN product_details pd ON p.product_id = pd.product_id ");
 	    sql.append("LEFT JOIN brands b ON p.brand_id = b.brand_id WHERE 1=1 ");
 
-	    // Các điều kiện tìm kiếm mở rộng
+	    List<Object> queryParams = new ArrayList<>();
+
 	    if(params.getName() != null && !params.getName().trim().isEmpty() && !params.getName().equals("null")) {
-	        sql.append(" AND p.name LIKE '%" + params.getName() + "%' ");
+	        sql.append(" AND p.name LIKE ? ");
+	        queryParams.add("%" + params.getName() + "%");
 	    }
 	    if(params.getBrandId() != null) {
-	        sql.append(" AND p.brand_id = " + params.getBrandId());
+	        sql.append(" AND p.brand_id = ? ");
+	        queryParams.add(params.getBrandId());
 	    }
 	    if(params.getCategoryId() != null) {
-	        sql.append(" AND p.category_id = " + params.getCategoryId());
+	        sql.append(" AND p.category_id = ? ");
+	        queryParams.add(params.getCategoryId());
 	    }
 	    if(params.getMinPrice() != null) {
-	        sql.append(" AND p.price >= " + params.getMinPrice());
+	        sql.append(" AND p.price >= ? ");
+	        queryParams.add(params.getMinPrice());
 	    }
 	    if(params.getMaxPrice() != null) {
-	        sql.append(" AND p.price <= " + params.getMaxPrice());
+	        sql.append(" AND p.price <= ? ");
+	        queryParams.add(params.getMaxPrice());
 	    }
 
-	    // Gộp nhóm để tránh lỗi lặp nhiều dòng
 	    sql.append(" GROUP BY p.product_id, p.name, p.price, p.description, b.name");
 
 	    List<ProductEntity> result = new ArrayList<>();
-	    try(Connection conn = ConnectionJDBCUtil.getConnection();
-	        Statement stmt = conn.createStatement();
-	        ResultSet rs = stmt.executeQuery(sql.toString());) {
-	        while(rs.next()) {
-	            ProductEntity product = new ProductEntity();
-	            product.setProduct_id(rs.getInt("product_id"));
-	            product.setName(rs.getString("name"));
-	            product.setPrice(rs.getInt("price"));
-	            product.setDescription(rs.getString("description"));
-	            product.setBrandName(rs.getString("brand_name"));
-	            product.setStockQuantity(rs.getInt("stock_quantity"));
-	            product.setThumbnailUrl(rs.getString("thumbnail_img_url"));
-	            result.add(product);
+	    
+	    try (Connection conn = ConnectionJDBCUtil.getConnection();
+	         PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+	         
+	        // Set các tham số vào dấu ?
+	        for (int i = 0; i < queryParams.size(); i++) {
+	            pstmt.setObject(i + 1, queryParams.get(i));
+	        }
+
+	        try (ResultSet rs = pstmt.executeQuery()) {
+	            while(rs.next()) {
+	                ProductEntity product = new ProductEntity();
+	                product.setProduct_id(rs.getInt("product_id"));
+	                product.setName(rs.getString("name"));
+	                product.setPrice(rs.getInt("price"));
+	                product.setDescription(rs.getString("description"));
+	                product.setBrandName(rs.getString("brand_name"));
+	                product.setStockQuantity(rs.getInt("stock_quantity"));
+	                product.setThumbnailUrl(rs.getString("thumbnail_img_url"));
+	                result.add(product);
+	            }
 	        }
 	    } catch(SQLException e) {
 	        e.printStackTrace();
@@ -94,7 +107,6 @@ public class ProductRepositoryImpl implements ProductRepository{
 		String sqlDetail = "INSERT INTO product_details (product_id, size_id, color_id, stock_quantity, price, thumbnail_img_url) VALUES (?, ?, ?, ?, ?, ?)";
 		
 		try (Connection conn = ConnectionJDBCUtil.getConnection()) {
-			// Tắt auto commit để quản lý transaction (đảm bảo cả 2 bảng đều thêm thành công)
 			conn.setAutoCommit(false); 
 			
 			try (PreparedStatement pstmt = conn.prepareStatement(sqlProduct, Statement.RETURN_GENERATED_KEYS)) {
@@ -121,9 +133,9 @@ public class ProductRepositoryImpl implements ProductRepository{
 						pstmtDetail.executeUpdate();
 					}
 				}
-				conn.commit(); // Lưu thay đổi vào DB
+				conn.commit(); 
 			} catch (SQLException e) {
-				conn.rollback(); // Nếu lỗi thì hoàn tác
+				conn.rollback(); 
 				e.printStackTrace();
 			}
 		} catch (SQLException e) {

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.javaweb.builder.ProductSearchBuilder;
 
+import model.ItemDTO;
 import model.productDTO;
 
 public interface ProductService {

@@ -11,6 +11,8 @@ import com.javaweb.converter.ProductDTOConverter;
 import com.javaweb.repository.ProductRepository;
 import com.javaweb.repository.entity.ProductEntity;
 import com.javaweb.service.ProductService;
+
+import model.ItemDTO;
 import model.productDTO;
 
 
