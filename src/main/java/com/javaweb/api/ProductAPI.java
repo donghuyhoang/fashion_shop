@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,8 +66,8 @@ public class ProductAPI {
 	}
 
 	@DeleteMapping(value = "/api/products/{id}")
-	public void deleteProduct(@PathVariable Integer id) {
-		productService.delete(id);
-		System.out.println("Đã xóa sản phẩm ID: " + id);
+	public ResponseEntity<String> deleteProduct(@PathVariable Integer id) {
+	    productService.delete(id);
+	    return ResponseEntity.ok("Đã xóa thành công sản phẩm ID: " + id);
 	}
 }

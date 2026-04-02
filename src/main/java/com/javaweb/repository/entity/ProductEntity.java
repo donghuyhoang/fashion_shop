@@ -10,7 +10,7 @@ public class ProductEntity {
 	private String brandName;
 	private Integer stockQuantity;
 	private String thumbnailUrl;
-    
+	
 	// Getter setter
 	public Integer getProduct_id() { return product_id; }
 	public void setProduct_id(Integer product_id) { this.product_id = product_id; }

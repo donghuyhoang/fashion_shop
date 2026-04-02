@@ -28,11 +28,7 @@ public class ProductServiceImpl implements ProductService{
 		List<ProductEntity> productEntities = productReponsitory.findProduct(params);
 		List<productDTO> result = new ArrayList<productDTO>();
 		for (ProductEntity item : productEntities) {
-			productDTO product = new productDTO();
-			product.setName(item.getName());
-			product.setPrice(item.getPrice());
-			product.setDescription(item.getDescription());
-			result.add(product);
+			result.add(ProductDTOConverter.toProductDTO(item));
 		}
 		return result;
 	}

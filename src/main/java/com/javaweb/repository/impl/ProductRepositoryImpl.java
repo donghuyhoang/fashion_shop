@@ -177,14 +177,30 @@ public class ProductRepositoryImpl implements ProductRepository{
 
 	@Override
 	public void delete(Integer id) {
-		String sql = "DELETE FROM products WHERE product_id = ?";
-		try (Connection conn = ConnectionJDBCUtil.getConnection();
-			 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setInt(1, id);
-			pstmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	    // Câu lệnh xóa chi tiết trước (do có khóa ngoại)
+	    String sqlDetail = "DELETE FROM product_details WHERE product_id = ?";
+	    // Câu lệnh xóa sản phẩm sau
+	    String sqlProduct = "DELETE FROM products WHERE product_id = ?";
+
+	    try (Connection conn = ConnectionJDBCUtil.getConnection()) {
+	        conn.setAutoCommit(false); // Bắt đầu Transaction
+
+	        // 1. Xóa ở bảng product_details
+	        try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail)) {
+	            pstmtDetail.setInt(1, id);
+	            pstmtDetail.executeUpdate();
+	        }
+
+	        // 2. Xóa ở bảng products
+	        try (PreparedStatement pstmtProduct = conn.prepareStatement(sqlProduct)) {
+	            pstmtProduct.setInt(1, id);
+	            pstmtProduct.executeUpdate();
+	        }
+
+	        conn.commit(); // Nếu cả 2 đều thành công thì lưu thay đổi
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
 	}
 	
 }
