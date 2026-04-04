@@ -3,4 +3,7 @@ import com.javaweb.repository.entity.UserEntity;
 
 public interface UserRepository {
     UserEntity findByEmailAndPassword(String email, String password_hash);
+
+    boolean checkEmailExists(String email);
+    boolean register(UserEntity user);
 }

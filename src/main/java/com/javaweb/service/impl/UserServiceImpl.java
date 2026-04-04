@@ -24,4 +24,20 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
+
+    @Override
+    public boolean register(UserDTO userDTO) 
+    {
+        if(userRepository.checkEmailExists(userDTO.getEmail())) {
+            return false; // Email đã tồn tại
+        }
+
+        UserEntity entity = new UserEntity();
+        entity.setFullname(userDTO.getFullName());
+        entity.setEmail(userDTO.getEmail());
+        entity.setPhone(userDTO.getPhoneNumber());
+        entity.setPassword_hash(userDTO.getPassword());
+        entity.setRole_id(2); // Gán role_id mặc định cho người dùng mới (ví dụ: 2 là khách hàng)
+        return userRepository.register(entity);
+    }
 }

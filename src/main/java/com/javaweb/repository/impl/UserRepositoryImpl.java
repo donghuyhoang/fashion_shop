@@ -38,4 +38,54 @@ public class UserRepositoryImpl implements UserRepository {
                 }
                 return user;
     }
+
+    @Override
+    public boolean checkEmailExists(String email) 
+    {
+        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        try(Connection conn = ConnectionJDBCUtil.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql))
+            {
+                pstmt.setString(1, email);
+                try(ResultSet rs = pstmt.executeQuery())
+                {
+                    if(rs.next() && rs.getInt(1) > 0)
+                    {
+                        return true;
+                    }
+                }
+            } catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            return false;
+    }
+    
+    @Override
+    public boolean register(UserEntity user) {
+        String sql = "INSERT INTO users (full_name, email, phone, password_hash, role_id, is_active, created_at) VALUES (?, ?, ?, ?, ?, 1, NOW())";
+        try (Connection conn = ConnectionJDBCUtil.getConnection()) {
+            // Tắt auto commit để quản lý transaction
+            conn.setAutoCommit(false); 
+            
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, user.getFullname());
+                pstmt.setString(2, user.getEmail());
+                pstmt.setString(3, user.getPhone());
+                pstmt.setString(4, user.getPassword_hash());
+                pstmt.setInt(5, user.getRole_id());
+                
+                int rowsAffected = pstmt.executeUpdate();
+                conn.commit(); // CHỐT DỮ LIỆU VÀO DB
+                
+                return rowsAffected > 0; // Trả về true nếu insert thành công
+            } catch (Exception e) {
+                conn.rollback(); // Nếu có lỗi thì hoàn tác
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false; // Trả về false nếu thất bại
+    }
 }

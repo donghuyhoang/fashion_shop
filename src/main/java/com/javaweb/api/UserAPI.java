@@ -28,4 +28,14 @@ public class UserAPI {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email hoặc mật khẩu không đúng");
         }
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
+        boolean success = userService.register(userDTO);
+        if (success) {
+            return ResponseEntity.ok("Đăng ký thành công");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã tồn tại");
+        }
+    }
 }
