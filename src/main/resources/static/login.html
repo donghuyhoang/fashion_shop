@@ -31,11 +31,52 @@
         $(document).ready(function() {
             $("#loginForm").submit(function(e) {
                 e.preventDefault();
-                // Giả lập gọi API đăng nhập. Backend sẽ kiểm tra trong bảng `users` + `roles`.
-                // Nếu đúng role Admin/Staff, trả về Token.
-                alert("Giả lập đăng nhập thành công!");
-                localStorage.setItem("admin_token", "fake-jwt-token-123");
-                window.location.href = "index.html"; // Chuyển hướng vào trang Admin
+                
+                const payload = {
+                    email: $("#username").val(),
+                    password: $("#password").val()
+                };
+
+                const $btn = $(this).find('button[type="submit"]');
+                $btn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Đang xử lý...');
+
+                $.ajax({
+                    url: "http://localhost:8081/api/users/login",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(payload),
+                    success: function(response) {
+                        alert("Đăng nhập thành công! Xin chào, " + response.fullName);
+                        
+                        // XỬ LÝ ĐIỀU HƯỚNG THEO ROLE ID
+                        if (response.roleId === 1) {
+                            // 1. Dành cho ADMIN
+                            localStorage.setItem("admin_token", "admin-token-" + response.userId);
+                            window.location.href = "index.html"; 
+                            
+                        } else if (response.roleId === 3) {
+                            // 2. Dành cho STAFF (Nhân viên)
+                            // Lưu token với tên khác để sau này dễ phân quyền ẩn/hiện nút xóa ở index.html nếu cần
+                            localStorage.setItem("staff_token", "staff-token-" + response.userId);
+                            window.location.href = "index.html"; 
+                            
+                        } else if (response.roleId === 2) {
+                            // 3. Dành cho USER (Khách hàng)
+                            localStorage.setItem("user_token", "user-token-" + response.userId);
+                            window.location.href = "home.html"; // Chuyển ra trang mua sắm
+                            
+                        } else {
+                            alert("Tài khoản của bạn chưa được cấp quyền truy cập!");
+                        }
+                    },
+                    error: function(xhr) {
+                        // Bắt lỗi 401 Unauthorized từ Backend
+                        alert(xhr.responseText || "Email hoặc mật khẩu không đúng. Vui lòng thử lại!");
+                    },
+                    complete: function() {
+                        $btn.prop("disabled", false).text("Đăng Nhập");
+                    }
+                });
             });
         });
     </script>

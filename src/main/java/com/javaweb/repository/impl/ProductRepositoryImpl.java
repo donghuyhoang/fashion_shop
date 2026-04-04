@@ -73,7 +73,8 @@ public class ProductRepositoryImpl implements ProductRepository{
 	                result.add(product);
 	            }
 	        }
-	    } catch(SQLException e) {
+	    }
+		 catch(SQLException e) {
 	        e.printStackTrace();
 	    }
 	    return result;
@@ -177,14 +178,33 @@ public class ProductRepositoryImpl implements ProductRepository{
 
 	@Override
 	public void delete(Integer id) {
-		String sql = "DELETE FROM products WHERE product_id = ?";
-		try (Connection conn = ConnectionJDBCUtil.getConnection();
-			 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setInt(1, id);
-			pstmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+    	// 1. Xóa dữ liệu liên quan ở bảng con product_details trước
+    	String sqlDeleteDetails = "DELETE FROM product_details WHERE product_id = ?";
+    	// 2. Sau đó mới xóa ở bảng cha products
+    	String sqlDeleteProduct = "DELETE FROM products WHERE product_id = ?";
+    
+    try (Connection conn = ConnectionJDBCUtil.getConnection()) {
+        conn.setAutoCommit(false); // Bật transaction để đảm bảo an toàn dữ liệu
+        
+        try (PreparedStatement pstmtDetails = conn.prepareStatement(sqlDeleteDetails);
+             PreparedStatement pstmtProduct = conn.prepareStatement(sqlDeleteProduct)) {
+             
+            // Xóa ở product_details
+            pstmtDetails.setInt(1, id);
+            pstmtDetails.executeUpdate();
+            
+            // Xóa ở products
+            pstmtProduct.setInt(1, id);
+            pstmtProduct.executeUpdate();
+            
+            conn.commit(); // Hoàn tất giao dịch
+        } catch (SQLException e) {
+            conn.rollback(); // Rollback nếu có lỗi
+            e.printStackTrace();
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
 	
 }
