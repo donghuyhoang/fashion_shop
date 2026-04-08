@@ -1,84 +1,314 @@
+<!-- Chosen Palette: Amber Obsidian (Deep Obsidian #000, Amber Orange #FF6B00, Glassmorphism) -->
+<!-- Application Structure Plan: Full-screen immersive layout. The dynamic slideshow acts as the foundation (background layer). A centered, semi-transparent "Vault Card" holds the login form, utilizing backdrop-blur for a high-end aesthetic. This design prioritizes the visual impact of the sneakers while keeping the user focus strictly on the central authentication task. -->
+<!-- Visualization & Content Choices: Background -> Dynamic Slideshow (Full Screen) -> Immersive. Card -> Backdrop Blur + Dark Translucency -> High-end Fashion vibe. Notifications -> Custom themed top-down toast. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập hệ thống - Fashion Shop</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Amber Obsidian - Login to Vault</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+
     <style>
-        body { 
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
-            display: flex; align-items: center; justify-content: center; height: 100vh; 
+        :root {
+            --color-obsidian: #0D0D0D;
+            --color-amber: #FF6B00;
         }
-        .login-card { 
-            width: 100%; max-width: 420px; padding: 40px 30px; 
-            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            background: white; border: none;
+
+        body {
+            font-family: 'Plus+Jakarta+Sans', sans-serif;
+            background-color: var(--color-obsidian);
+            color: #ffffff;
+            margin: 0;
+            overflow: hidden;
         }
-        .login-card .logo-icon {
-            font-size: 3rem; color: #212529; text-align: center; margin-bottom: 15px;
+
+        .font-header {
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
         }
-        .form-control:focus {
-            border-color: #212529; box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.25);
+
+        /* Full Screen Slideshow */
+        .slideshow-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
         }
-        .divider {
-            display: flex; align-items: center; text-align: center; margin: 20px 0; color: #6c757d;
+        .slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            filter: brightness(0.5);
         }
-        .divider::before, .divider::after {
-            content: ''; flex: 1; border-bottom: 1px solid #dee2e6;
+        .slide.active {
+            opacity: 1;
         }
-        .divider:not(:empty)::before { margin-right: .25em; }
-        .divider:not(:empty)::after { margin-left: .25em; }
+        .overlay-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.8) 100%);
+            z-index: 1;
+        }
+
+        /* Centered Glass Card */
+        .vault-card {
+            background: rgba(13, 13, 13, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Custom Inputs */
+        .auth-input {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        .auth-input:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--color-amber);
+            outline: none;
+        }
+
+        /* Watermark Background */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: 15vw;
+            color: rgba(255, 107, 0, 0.03);
+            white-space: nowrap;
+            z-index: 0;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        /* Toast UI */
+        #notification-box {
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateY(-130%);
+            opacity: 0;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+        }
+        #notification-box.show {
+            transform: translateY(24px);
+            opacity: 1;
+        }
     </style>
 </head>
-<body>
-    <div class="login-card">
-        <div class="logo-icon"><i class="fas fa-shoe-prints"></i></div>
-        <h3 class="text-center fw-bold mb-4">Fashion Shop</h3>
+<body class="h-screen w-full flex items-center justify-center">
+
+    <!-- Top Notification -->
+    <div id="notification-box" class="fixed top-0 left-1/2 -translate-x-1/2 z-[100] min-w-[320px] max-w-[90%] rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
+        <div id="notif-icon-bg" class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-[#FF6B00]">
+            <i id="notif-icon" class="fas fa-info text-white"></i>
+        </div>
+        <div class="flex-grow">
+            <h4 id="notif-title" class="font-black text-white text-[10px] uppercase tracking-widest">Hệ thống</h4>
+            <p id="notif-message" class="text-gray-400 text-xs mt-0.5"></p>
+        </div>
+        <button onclick="hideNotification()" class="text-gray-600 hover:text-white">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Background Layer -->
+    <div class="slideshow-bg" id="slideshow">
+        <div class="overlay-vignette"></div>
+        <!-- Slides injected via JS -->
+    </div>
+    
+    <div class="watermark">AMBER<br>OBSIDIAN</div>
+
+    <!-- Centered Login Vault -->
+    <div class="vault-card w-full max-w-[440px] p-8 md:p-12 rounded-[2.5rem] relative z-10 mx-4">
         
-        <form id="loginForm">
-            <div class="mb-3">
-                <label class="form-label text-muted small fw-bold">Email đăng nhập</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-envelope"></i></span>
-                    <input type="text" class="form-control" id="username" placeholder="Nhập email của bạn" required>
+        <!-- Logo -->
+        <div class="flex justify-center mb-10">
+            <div class="flex items-center gap-3">
+                <div class="bg-[#FF6B00] p-2 rounded-lg">
+                    <i class="fas fa-shoe-prints text-white text-lg"></i>
+                </div>
+                <span class="text-white font-black text-lg tracking-[0.2em] font-header italic">Amber Obsidian.</span>
+            </div>
+        </div>
+
+        <div class="text-center mb-10">
+            <h2 class="text-4xl font-black text-white leading-none mb-4 font-header tracking-tighter italic">Welcome Back</h2>
+            <p class="text-gray-400 text-xs font-medium tracking-wide">Access the Obsidian Vault & Midnight Drops.</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+            <div class="space-y-2">
+                <label class="block text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Email Thành Viên</label>
+                <input type="email" id="email" 
+                       class="auth-input w-full rounded-xl px-5 py-4 text-sm placeholder-gray-700" 
+                       placeholder="name@exclusive.com" required>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex justify-between items-center ml-1">
+                    <label class="block text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Mật Khẩu</label>
+                    <a href="#" class="text-[9px] font-black text-[#FF6B00] uppercase tracking-[0.1em] hover:opacity-70">Quên mật khẩu?</a>
+                </div>
+                <div class="relative">
+                    <input type="password" id="password" 
+                           class="auth-input w-full rounded-xl px-5 py-4 text-sm placeholder-gray-700" 
+                           placeholder="••••••••" required>
+                    <button type="button" id="togglePassword" class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white">
+                        <i class="far fa-eye" id="eyeIcon"></i>
+                    </button>
                 </div>
             </div>
-            
-            <div class="mb-4">
-                <label class="form-label text-muted small fw-bold">Mật khẩu</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
-                    <input type="password" class="form-control" id="password" placeholder="••••••••" required>
-                </div>
-            </div>
-            
-            <button type="submit" class="btn btn-dark w-100 py-2 fw-bold shadow-sm">ĐĂNG NHẬP</button>
+
+            <button type="submit" id="submitBtn" class="w-full bg-[#FF6B00] text-white rounded-xl py-4.5 py-4 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-[#E65A00] transition-all active:scale-[0.98] shadow-xl shadow-[#FF6B00]/20 flex items-center justify-center gap-3 group">
+                Đăng nhập ngay
+                <i class="fas fa-arrow-right text-[9px] group-hover:translate-x-1 transition-transform"></i>
+            </button>
         </form>
 
-        <div class="divider">Hoặc</div>
-
-        <div class="text-center">
-            <span class="text-muted">Bạn chưa có tài khoản?</span>
-            <br>
-            <a href="register.html" class="btn btn-outline-dark mt-2 w-100 py-2 fw-bold">ĐĂNG KÝ NGAY</a>
+        <div class="mt-12 pt-8 border-t border-white/5 flex flex-col items-center gap-6">
+            <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                Chưa có tài khoản? 
+                <a href="register.html" class="text-[#FF6B00] hover:underline underline-offset-4">Tạo Member ID</a>
+            </p>
+            
+            <div class="flex gap-6">
+                <a href="#" class="text-[9px] font-bold text-gray-600 hover:text-gray-400 uppercase tracking-[0.2em]">Store</a>
+                <a href="#" class="text-[9px] font-bold text-gray-600 hover:text-gray-400 uppercase tracking-[0.2em]">Privacy</a>
+                <a href="#" class="text-[9px] font-bold text-gray-600 hover:text-gray-400 uppercase tracking-[0.2em]">Support</a>
+            </div>
         </div>
     </div>
 
+    <!-- Edition Caption (Bottom Left) -->
+    <div class="fixed bottom-10 left-10 z-20 hidden md:block">
+        <p class="text-[10px] font-black text-[#FF6B00] uppercase tracking-[0.5em] italic opacity-80" id="slide-caption">
+            Midnight Run Edition 001
+        </p>
+    </div>
+
+    <!-- Core Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        // --- 1. Background Slideshow Logic ---
+        const gallery = [
+            {
+                url: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=2000&auto=format&fit=crop',
+                caption: 'Midnight Run Edition 001'
+            },
+            {
+                url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop',
+                caption: 'Obsidian Shadow Edition 002'
+            },
+            {
+                url: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=2000&auto=format&fit=crop',
+                caption: 'Amber Glow Limited 003'
+            },
+            {
+                url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2000&auto=format&fit=crop',
+                caption: 'Vintage Elite Edition 004'
+            }
+        ];
+
+        let currentSlide = 0;
+
+        function initSlideshow() {
+            const container = $('#slideshow');
+            gallery.forEach((item, index) => {
+                const slide = $('<div></div>')
+                    .addClass('slide')
+                    .css('background-image', `url(${item.url})`);
+                if (index === 0) slide.addClass('active');
+                container.append(slide);
+            });
+            setInterval(nextSlide, 5000);
+        }
+
+        function nextSlide() {
+            const slides = $('.slide');
+            slides.eq(currentSlide).removeClass('active');
+            currentSlide = (currentSlide + 1) % gallery.length;
+            slides.eq(currentSlide).addClass('active');
+            
+            $('#slide-caption').fadeOut(400, function() {
+                $(this).text(gallery[currentSlide].caption).fadeIn(400);
+            });
+        }
+
+        // --- 2. Notification System ---
+        function showNotification(title, message, type = 'error') {
+            const box = $('#notification-box');
+            const iconBg = $('#notif-icon-bg');
+            
+            $('#notif-title').text(title);
+            $('#notif-message').text(message);
+            
+            if(type === 'success') {
+                iconBg.css('background-color', '#10b981');
+            } else {
+                iconBg.css('background-color', '#FF6B00');
+            }
+            
+            box.addClass('show');
+            setTimeout(hideNotification, 5000);
+        }
+
+        function hideNotification() {
+            $('#notification-box').removeClass('show');
+        }
+
+        // --- 3. Auth Logic ---
         $(document).ready(function() {
+            initSlideshow();
+
+            $('#togglePassword').on('click', function() {
+                const input = $('#password');
+                const icon = $('#eyeIcon');
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
             $("#loginForm").submit(function(e) {
                 e.preventDefault();
                 
                 const payload = {
-                    email: $("#username").val(),
+                    email: $("#email").val(),
                     password: $("#password").val()
                 };
 
-                const $btn = $(this).find('button[type="submit"]');
-                $btn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Đang xử lý...');
+                const $btn = $('#submitBtn');
+                const originalText = $btn.text();
+                
+                $btn.prop("disabled", true).text("Đang xác thực...");
 
                 $.ajax({
                     url: "http://localhost:8081/api/users/login",
@@ -86,25 +316,28 @@
                     contentType: "application/json",
                     data: JSON.stringify(payload),
                     success: function(response) {
-                        // Phân luồng theo Role ID
-                        if (response.roleId === 1) { // ADMIN
-                            localStorage.setItem("admin_token", "admin-token-" + response.userId);
-                            window.location.href = "index.html"; 
-                        } else if (response.roleId === 3) { // STAFF
-                            localStorage.setItem("staff_token", "staff-token-" + response.userId);
-                            window.location.href = "index.html"; 
-                        } else if (response.roleId === 2) { // USER
-                            localStorage.setItem("user_token", "user-token-" + response.userId);
-                            window.location.href = "home.html"; 
-                        } else {
-                            alert("Tài khoản của bạn chưa được cấp quyền truy cập!");
-                        }
+                        showNotification("Thành công", "Chào mừng trở lại Amber Obsidian.", "success");
+                        
+                        setTimeout(() => {
+                            if (response.roleId === 1) { // ADMIN
+                                localStorage.setItem("admin_token", "admin-token-" + response.userId);
+                                window.location.href = "index.html"; 
+                            } else if (response.roleId === 3) { // STAFF
+                                localStorage.setItem("staff_token", "staff-token-" + response.userId);
+                                window.location.href = "index.html"; 
+                            } else if (response.roleId === 2) { // USER
+                                localStorage.setItem("user_token", "user-token-" + response.userId);
+                                window.location.href = "home.html"; 
+                            } else {
+                                showNotification("Lỗi quyền", "Tài khoản không đủ quyền truy cập.");
+                                $btn.prop("disabled", false).text(originalText);
+                            }
+                        }, 1000);
                     },
                     error: function(xhr) {
-                        alert(xhr.responseText || "Email hoặc mật khẩu không đúng. Vui lòng thử lại!");
-                    },
-                    complete: function() {
-                        $btn.prop("disabled", false).text("ĐĂNG NHẬP");
+                        const errorMsg = xhr.responseText || "Thông tin không chính xác.";
+                        showNotification("Lỗi đăng nhập", errorMsg);
+                        $btn.prop("disabled", false).text(originalText);
                     }
                 });
             });
