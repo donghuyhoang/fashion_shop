@@ -43,7 +43,7 @@ public class ProductAPI {
     	List<productDTO> result = productService.findProduct(params);
     	return result;
 	}
-    @GetMapping(value = "/api/brands/")
+    @GetMapping(value = "/api/brands")
     public List<ItemDTO> getBrands() {
     	return brandService.findAll();
 	}
@@ -52,7 +52,7 @@ public class ProductAPI {
     	List<productDTO> result = productService.findAll();
     	return result;
 	}
-    @PostMapping(value = "/api/products/")
+    @PostMapping(value = "/api/products")
 	public void addProduct(@RequestBody productDTO dto) {
 		productService.save(dto);
 		System.out.println("Đã thêm sản phẩm thành công vào DB!");

@@ -86,19 +86,22 @@
                     contentType: "application/json",
                     data: JSON.stringify(payload),
                     success: function(response) {
-                        // Phân luồng theo Role ID
-                        if (response.roleId === 1) { // ADMIN
-                            localStorage.setItem("admin_token", "admin-token-" + response.userId);
-                            window.location.href = "index.html"; 
-                        } else if (response.roleId === 3) { // STAFF
-                            localStorage.setItem("staff_token", "staff-token-" + response.userId);
-                            window.location.href = "index.html"; 
-                        } else if (response.roleId === 2) { // USER
-                            localStorage.setItem("user_token", "user-token-" + response.userId);
-                            window.location.href = "home.html"; 
-                        } else {
-                            alert("Tài khoản của bạn chưa được cấp quyền truy cập!");
-                        }
+                        showNotification("Thành công", "Chào mừng trở lại Amber Obsidian.", "success");
+                        
+                        setTimeout(() => {
+                            if (response.roleId === 1) { 
+                                // ROLE 1: NHÂN VIÊN -> Vào trang Quản trị
+                                localStorage.setItem("staff_token", "staff-token-" + response.userId);
+                                window.location.href = "adminpage.html"; 
+                            } else if (response.roleId === 2) { 
+                                // ROLE 2: KHÁCH HÀNG -> Trở lại trang chủ mua sắm
+                                localStorage.setItem("user_token", "user-token-" + response.userId);
+                                window.location.href = "index.html"; 
+                            } else {
+                                showNotification("Lỗi quyền", "Tài khoản không hợp lệ.");
+                                $btn.prop("disabled", false).text(originalText);
+                            }
+                        }, 1000);
                     },
                     error: function(xhr) {
                         alert(xhr.responseText || "Email hoặc mật khẩu không đúng. Vui lòng thử lại!");

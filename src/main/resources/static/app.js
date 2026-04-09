@@ -5,6 +5,7 @@ $(document).ready(function () {
     // 1. KHỞI TẠO DỮ LIỆU CHO CÁC DROPDOWN CHỌN
     loadSelectData();
 
+    searchProducts();
     // 2. TÌM KIẾM SẢN PHẨM
     // Xử lý khi nhấn nút "Tìm kiếm"
     $("#btnSearch").click(function () {
@@ -33,46 +34,72 @@ $(document).ready(function () {
         if (searchMinPrice) queryParams += "minPrice=" + searchMinPrice + "&";
         if (searchMaxPrice) queryParams += "maxPrice=" + searchMaxPrice + "&";
 
-        $("#productTable tbody").html('<tr><td colspan="6" class="text-center"><div class="spinner-border text-primary" role="status"></div> Đang tìm kiếm...</td></tr>');
+        // ĐÃ SỬA: Hiện loading vào đúng khu vực lưới Card (#productGrid)
+        $("#productGrid").html('<div class="col-12 text-center my-5"><div class="spinner-border text-warning" role="status"></div><p>Đang tải dữ liệu...</p></div>');
 
         $.ajax({
             url: API_URL + "products/" + queryParams,
             type: "GET",
             dataType: "json",
             success: function (data) {
-                renderTable(data);
+                // ĐÃ SỬA: Gọi đúng tên hàm renderCards thay vì renderTable
+                renderCards(data);
             },
             error: function (xhr, status, error) {
                 console.error("Lỗi:", error);
-                $("#productTable tbody").html('<tr><td colspan="6" class="text-center text-danger">Lỗi kết nối Backend.</td></tr>');
+                // ĐÃ SỬA: Hiện lỗi vào khu vực lưới Card
+                $("#productGrid").html('<div class="col-12 text-center text-danger my-5">Lỗi kết nối Backend. Hãy chắc chắn Spring Boot đang chạy!</div>');
             }
         });
     }
     // HÀM IN DỮ LIỆU RA BẢNG
-    function renderTable(products) {
+    // Thay đổi tên hàm gọi ở bên trong success của ajax từ renderTable thành renderCards
+    function renderCards(products) {
+        const $grid = $("#productGrid");
+        
         if (!products || products.length === 0) {
-            $("#productTable tbody").html('<tr><td colspan="6" class="text-center text-muted">Không tìm thấy sản phẩm nào phù hợp.</td></tr>');
+            $grid.html('<div class="col-12 text-center text-muted my-5"><h5>Không tìm thấy sản phẩm nào phù hợp.</h5></div>');
             return;
         }
 
         let html = "";
         $.each(products, function (index, product) {
+            // Ảnh placeholder nếu không có link ảnh
+            const imgSrc = product.thumb || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=500&auto=format&fit=crop';
+            
             html += `
-                <tr>
-                    <td><img src="${product.thumb || 'https://via.placeholder.com/50'}" width="50" height="50" class="rounded object-fit-cover" alt="Ảnh"></td>
-                    <td class="fw-bold">${product.name}</td>
-                    <td><span class="badge bg-secondary">${product.brandName || 'Chưa cập nhật'}</span></td>
-                    <td class="text-danger fw-bold">${product.price ? product.price.toLocaleString('vi-VN') : 0} đ</td>
-                    <td>${product.stock || 0}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning btn-edit" data-product='${JSON.stringify(product)}' title="Sửa thông tin"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-danger btn-delete" data-id="${product.id}" data-name="${product.name}" title="Xóa sản phẩm"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100 product-card border-0 shadow-sm">
+                        <img src="${imgSrc}" class="card-img-top product-img" alt="${product.name}">
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title text-truncate" title="${product.name}">${product.name}</h6>
+                            <p class="text-muted small mb-2">${product.brandName || 'Chưa phân loại'}</p>
+                            <h5 class="text-danger fw-bold mt-auto">${product.price ? product.price.toLocaleString('vi-VN') : 0} ₫</h5>
+                            
+                            <button class="btn btn-dark w-100 mt-3 btn-buy" data-id="${product.id}">
+                                <i class="fas fa-shopping-cart"></i> Mua Ngay
+                            </button>
+                        </div>
+                    </div>
+                </div>
             `;
         });
-        $("#productTable tbody").html(html);
+        $grid.html(html);
     }
+
+    // Thêm sự kiện khi bấm nút Mua Ngay
+    $(document).on('click', '.btn-buy', function() {
+        const token = localStorage.getItem("user_token");
+        if (!token) {
+            // Chưa đăng nhập -> Đá về trang đăng nhập
+            window.location.href = "login.html";
+        } else {
+            // Đã đăng nhập -> Xử lý thêm vào giỏ hàng
+            const productId = $(this).data("id");
+            alert("Sản phẩm ID " + productId + " đã được thêm vào giỏ!");
+            // Viết code gọi API AddToCart ở đây sau này
+        }
+    });
 
     // 4. MỞ MODAL ĐỂ "THÊM MỚI"
     $("#btnAddNew").click(function () {
