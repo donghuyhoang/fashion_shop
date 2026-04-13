@@ -86,20 +86,21 @@
                     contentType: "application/json",
                     data: JSON.stringify(payload),
                     success: function(response) {
-                        showNotification("Thành công", "Chào mừng trở lại Amber Obsidian.", "success");
+                        alert("Đăng nhập thành công!"); 
                         
+                        // LƯU THÊM THÔNG TIN VÀO LOCALSTORAGE
+                        localStorage.setItem("user_name", response.fullName || "Người dùng");
+                        localStorage.setItem("user_email", response.email);
+
                         setTimeout(() => {
                             if (response.roleId === 1) { 
-                                // ROLE 1: NHÂN VIÊN -> Vào trang Quản trị
                                 localStorage.setItem("staff_token", "staff-token-" + response.userId);
                                 window.location.href = "adminpage.html"; 
                             } else if (response.roleId === 2) { 
-                                // ROLE 2: KHÁCH HÀNG -> Trở lại trang chủ mua sắm
                                 localStorage.setItem("user_token", "user-token-" + response.userId);
                                 window.location.href = "index.html"; 
                             } else {
-                                showNotification("Lỗi quyền", "Tài khoản không hợp lệ.");
-                                $btn.prop("disabled", false).text(originalText);
+                                alert("Tài khoản không hợp lệ."); 
                             }
                         }, 1000);
                     },

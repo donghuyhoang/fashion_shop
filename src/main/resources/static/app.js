@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    
     // Cấu hình URL gọi tới Spring Boot Backend
     const API_URL = "http://localhost:8081/api/";
 
@@ -241,4 +242,45 @@ $(document).ready(function () {
         localStorage.removeItem("staff_token"); 
         window.location.href = "login.html"; // Trả về trang login
     });
+    $(document).ready(function () {
+    // Gọi hàm kiểm tra trạng thái ngay khi trang load
+    checkLoginState();
+
+    function checkLoginState() {
+        const userToken = localStorage.getItem("user_token");
+        const staffToken = localStorage.getItem("staff_token");
+        const userName = localStorage.getItem("user_name");
+
+        // Nếu tồn tại một trong hai loại token
+        if (userToken || staffToken) {
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&color=fff`;
+            const profilePath = staffToken ? "adminpage.html" : "profile.html";
+
+            // Thay đổi nội dung nút Đăng nhập thành Avatar Dropdown
+            $("#userArea").html(`
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="${avatarUrl}" alt="mdo" width="32" height="32" class="rounded-circle me-2 border border-warning">
+                        <span class="small fw-bold">${userName}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow" aria-labelledby="dropdownUser">
+                        <li><a class="dropdown-item" href="${profilePath}"><i class="fas fa-user-circle me-2"></i>Hồ sơ cá nhân</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>Lịch sử mua hàng</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="btnLogoutGlobal"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </div>
+            `);
+        }
+    }
+
+    // Xử lý sự kiện đăng xuất
+    $(document).on("click", "#btnLogoutGlobal", function(e) {
+        e.preventDefault();
+        if(confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+    });
+});
 });
