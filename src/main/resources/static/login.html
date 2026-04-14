@@ -316,20 +316,28 @@
                     contentType: "application/json",
                     data: JSON.stringify(payload),
                     success: function(response) {
+                        // 1. Hiển thị thông báo giao diện Amber Obsidian xịn xò
                         showNotification("Thành công", "Chào mừng trở lại Amber Obsidian.", "success");
                         
+                        // 2. Lưu thông tin người dùng vào LocalStorage
+                        localStorage.setItem("user_name", response.fullName || "Người dùng");
+                        localStorage.setItem("user_email", response.email);
+
+                        // 3. Phân luồng 2 Quyền
                         setTimeout(() => {
-                            if (response.roleId === 1) { // ADMIN
+                            if (response.roleId === 1) { 
+                                // QUYỀN 1: QUẢN TRỊ VIÊN (ADMIN/STAFF)
                                 localStorage.setItem("admin_token", "admin-token-" + response.userId);
-                                window.location.href = "index.html"; 
-                            } else if (response.roleId === 3) { // STAFF
-                                localStorage.setItem("staff_token", "staff-token-" + response.userId);
-                                window.location.href = "index.html"; 
-                            } else if (response.roleId === 2) { // USER
+                                window.location.href = "adminpage.html"; // Trỏ về trang Quản trị
+                                
+                            } else if (response.roleId === 2) { 
+                                // QUYỀN 2: KHÁCH HÀNG (USER)
                                 localStorage.setItem("user_token", "user-token-" + response.userId);
-                                window.location.href = "home.html"; 
+                                window.location.href = "index.html"; // Trỏ về trang mua sắm
+                                
                             } else {
-                                showNotification("Lỗi quyền", "Tài khoản không đủ quyền truy cập.");
+                                // NẾU LỖI QUYỀN
+                                showNotification("Lỗi quyền", "Tài khoản không hợp lệ.");
                                 $btn.prop("disabled", false).text(originalText);
                             }
                         }, 1000);

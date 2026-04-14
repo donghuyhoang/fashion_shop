@@ -1,7 +1,9 @@
 package com.javaweb.repository;
 import java.util.List;
-import model.ItemDTO;
+
+import com.javaweb.repository.entity.BrandEntity;
+
 
 public interface BrandRepository {
-    List<ItemDTO> findAll();
+    List<BrandEntity> findAll();
 }
