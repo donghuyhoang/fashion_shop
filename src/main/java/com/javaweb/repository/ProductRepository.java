@@ -8,7 +8,7 @@ import com.javaweb.repository.entity.ProductEntity;
 public interface ProductRepository {
 	List<ProductEntity> findProduct(ProductSearchBuilder paramss);
 	List<ProductEntity> findAll();
-	void save(model.productDTO dto);
-    void update(model.productDTO dto);
+	void save(model.ProductDTO dto);
+    void update(model.ProductDTO dto);
     void delete(Integer id);
 }

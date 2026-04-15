@@ -230,17 +230,24 @@
                 if (searchCategory) queryParams += "categoryId=" + searchCategory + "&";
                 if (searchMinPrice) queryParams += "minPrice=" + searchMinPrice + "&";
                 if (searchMaxPrice) queryParams += "maxPrice=" + searchMaxPrice + "&";
+                
+                let finalUrl = API_URL + "products";
+                if (queryParams !== "?") {
+                    // Cắt bỏ ký tự '&' bị thừa ở cuối cùng
+                    queryParams = queryParams.slice(0, -1); 
+                    finalUrl = API_URL + "products/search" + queryParams;
+                }
 
                 $("#productTable tbody").html('<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></td></tr>');
 
                 $.ajax({
-                    url: API_URL + "products/" + queryParams,
+                    url: finalUrl, // Sử dụng URL đã được xử lý chuẩn
                     type: "GET",
                     success: function (data) {
                         renderTable(data);
                     },
                     error: function (xhr) {
-                        $("#productTable tbody").html('<tr><td colspan="6" class="text-center text-danger py-4">Lỗi kết nối Backend!</td></tr>');
+                        $("#productTable tbody").html('<tr><td colspan="6" class="text-center text-danger py-4">Lỗi kết nối Backend! Hãy kiểm tra lại Server.</td></tr>');
                     }
                 });
             }

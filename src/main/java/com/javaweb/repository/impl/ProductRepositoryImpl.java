@@ -102,7 +102,7 @@ public class ProductRepositoryImpl implements ProductRepository{
 		return result;
 	}
 	@Override
-	public void save(model.productDTO dto) {
+	public void save(model.ProductDTO dto) {
 		String sqlProduct = "INSERT INTO products (name, description, price, category_id, brand_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
 		String sqlDetail = "INSERT INTO product_details (product_id, size_id, color_id, stock_quantity, price, thumbnail_img_url) VALUES (?, ?, ?, ?, ?, ?)";
 		
@@ -144,7 +144,7 @@ public class ProductRepositoryImpl implements ProductRepository{
 	}
 
 	@Override
-	public void update(model.productDTO dto) {
+	public void update(model.ProductDTO dto) {
 		String sqlProduct = "UPDATE products SET name=?, description=?, price=?, category_id=?, brand_id=? WHERE product_id=?";
 		String sqlDetail = "UPDATE product_details SET size_id=?, color_id=?, stock_quantity=?, price=?, thumbnail_img_url=? WHERE product_id=?";
 		
@@ -175,16 +175,35 @@ public class ProductRepositoryImpl implements ProductRepository{
 		}
 	}
 
+	// Xóa sản phẩm sẽ phải xóa cả chi tiết, nên cần dùng Transaction để đảm bảo tính toàn vẹn dữ liệu
 	@Override
-	public void delete(Integer id) {
-		String sql = "DELETE FROM products WHERE product_id = ?";
-		try (Connection conn = ConnectionJDBCUtil.getConnection();
-			 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setInt(1, id);
-			pstmt.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-	
+    public void delete(Integer id) {
+        // Xóa thằng con trước
+        String sqlDetail = "DELETE FROM product_details WHERE product_id = ?";
+        // Xóa thằng bố sau
+        String sqlProduct = "DELETE FROM products WHERE product_id = ?";
+        
+        try (Connection conn = ConnectionJDBCUtil.getConnection()) {
+            conn.setAutoCommit(false); // Bật khiên bảo vệ Transaction
+            
+            try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail);
+                 PreparedStatement pstmtProduct = conn.prepareStatement(sqlProduct)) {
+                 
+                // Xóa chi tiết
+                pstmtDetail.setInt(1, id);
+                pstmtDetail.executeUpdate();
+                
+                // Xóa sản phẩm
+                pstmtProduct.setInt(1, id);
+                pstmtProduct.executeUpdate();
+                
+                conn.commit(); // Thành công thì lưu cả 2
+            } catch (SQLException e) {
+                conn.rollback(); // Lỗi thì hoàn tác
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
