@@ -12,7 +12,6 @@ import com.javaweb.repository.ProductRepository;
 import com.javaweb.repository.entity.ProductEntity;
 import com.javaweb.service.ProductService;
 
-import model.ItemDTO;
 import model.productDTO;
 
 
@@ -20,8 +19,6 @@ import model.productDTO;
 public class ProductServiceImpl implements ProductService{
 	@Autowired
 	private ProductRepository productReponsitory;
-	@Autowired
-	private ProductDTOConverter productDTOConverter;
 	@Override
 	public List<productDTO> findProduct(ProductSearchBuilder params) {
 		
