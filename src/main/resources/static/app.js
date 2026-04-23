@@ -1,85 +1,108 @@
 $(document).ready(function () {
+    const API_URL = "/api/";
+
+    // ==========================================
+    // 0. CACHE DỮ LIỆU SIZE VÀ MÀU SẮC TỪ API 
+    // ==========================================
+    let sizesCache = [];
+    let colorsCache = [];
     
-    // Cấu hình URL gọi tới Spring Boot Backend
-    const API_URL = "http://localhost:8081/api/";
+    // Tải ngầm danh sách Size và Màu khi vừa mở trang (Bắt lỗi an toàn nếu API chưa có)
+    $.get(API_URL + "sizes").done(function(data) { 
+        if(data) sizesCache = data; 
+    }).fail(function() { console.warn("Chưa có API /api/sizes hoặc lỗi kết nối"); });
+    
+    $.get(API_URL + "colors").done(function(data) { 
+        if(data) colorsCache = data; 
+    }).fail(function() { console.warn("Chưa có API /api/colors hoặc lỗi kết nối"); });
 
-    // 1. KHỞI TẠO DỮ LIỆU CHO CÁC DROPDOWN CHỌN
-    loadSelectData();
+    // ==========================================
+    // 1. KHỞI CHẠY KHI MỞ TRANG
+    // ==========================================
+    loadStorytellingCollections();
+    updateHeaderAfterLogin();
+    updateCartBadge(); // Cập nhật số lượng giỏ hàng ngay khi mở trang
 
-    searchProducts();
-    // 2. TÌM KIẾM SẢN PHẨM
-    // Xử lý khi nhấn nút "Tìm kiếm"
-    $("#btnSearch").click(function () {
-        searchProducts();
-    });
-
-    // Mẹo UX: Nhấn nút Enter ở ô nhập Tên cũng tự kích hoạt tìm kiếm
-    $("#searchName").keypress(function(e) {
-        if(e.which == 13) {
-            e.preventDefault();
-            searchProducts();
-        }
-    });
-
-    function searchProducts() {
-        const searchName = $("#searchName").val();
-        const searchBrand = $("#searchBrand").val();
-        const searchCategory = $("#searchCategory").val();
-        const searchMinPrice = $("#searchMinPrice").val();
-        const searchMaxPrice = $("#searchMaxPrice").val();
-
-        let queryParams = "?";
-        if (searchName) queryParams += "name=" + encodeURIComponent(searchName) + "&";
-        if (searchBrand) queryParams += "brandId=" + searchBrand + "&";
-        if (searchCategory) queryParams += "categoryId=" + searchCategory + "&";
-        if (searchMinPrice) queryParams += "minPrice=" + searchMinPrice + "&";
-        if (searchMaxPrice) queryParams += "maxPrice=" + searchMaxPrice + "&";
-
-        // ĐÃ SỬA: Hiện loading vào đúng khu vực lưới Card (#productGrid)
-        $("#productGrid").html('<div class="col-12 text-center my-5"><div class="spinner-border text-warning" role="status"></div><p>Đang tải dữ liệu...</p></div>');
-
+    // ==========================================
+    // 2. HÀM LẤY DATA VÀ HIỂN THỊ 24 ĐÔI GIÀY
+    // ==========================================
+    function loadStorytellingCollections() {
         $.ajax({
-            url: API_URL + "products/" + queryParams,
+            url: API_URL + "products",
             type: "GET",
-            dataType: "json",
-            success: function (data) {
-                // ĐÃ SỬA: Gọi đúng tên hàm renderCards thay vì renderTable
-                renderCards(data);
+            success: function (allProducts) {
+                let productsForStorytelling = [...allProducts];
+                const extraImages = [
+                    "images/air-jordan-1-high-chicago.jpg", "images/nike-air-force-1-low-white.jpg",
+                    "images/nike-air-max-90-infrared.jpg", "images/nike-dunk-low-panda.jpg",
+                    "images/nike-zoom-tempo-next-pink.jpg", "images/nike-air-max-97-silver-bullet.jpg",
+                    "images/nike-blazer-mid-77-white-black.jpg", "images/nike-cortez-forrest-gump.jpg",
+                    "images/nike-react-vision-gravity-purple.jpg", "images/nike-sb-dunk-low-blue-lobster.jpg",
+                    "images/nike-x-sacai-ldwaffle-green-orange.jpg", "images/nike-metcon-black-gum.jpg",
+                    "images/nike-air-max-1-university-red.jpg", "images/nike-air-presto-triple-black.jpg",
+                    "images/nike-air-huarache-scream-green.jpg", "images/nike-air-max-90-black-orange.jpg"
+                ];
+
+                let i = 0;
+                while (productsForStorytelling.length < 24) {
+                    productsForStorytelling.push({
+                        id: 9990 + i, 
+                        name: "IMPECCABLE Sneaker #" + (i + 1), 
+                        brandName: "Sneaker Peak",
+                        price: 3500000 + (i * 150000), 
+                        thumb: extraImages[i % extraImages.length] 
+                    });
+                    i++;
+                }
+
+                renderCardsToSpecificGrid(productsForStorytelling.slice(0, 4), "#newArrivalsGrid");
+                renderCardsToSpecificGrid(productsForStorytelling.slice(4, 8), "#runningGrid");
+                renderCardsToSpecificGrid(productsForStorytelling.slice(8, 12), "#basketballGrid");
+                renderCardsToSpecificGrid(productsForStorytelling.slice(12, 16), "#luxuryGrid");
+                renderCardsToSpecificGrid(productsForStorytelling.slice(16, 20), "#collabGrid");
+                renderCardsToSpecificGrid(productsForStorytelling.slice(20, 24), "#ecoGrid");
             },
-            error: function (xhr, status, error) {
-                console.error("Lỗi:", error);
-                // ĐÃ SỬA: Hiện lỗi vào khu vực lưới Card
-                $("#productGrid").html('<div class="col-12 text-center text-danger my-5">Lỗi kết nối Backend. Hãy chắc chắn Spring Boot đang chạy!</div>');
+            error: function () {
+                console.error("Lỗi kết nối Backend. Không lấy được sản phẩm!");
             }
         });
     }
-    // HÀM IN DỮ LIỆU RA BẢNG
-    // Thay đổi tên hàm gọi ở bên trong success của ajax từ renderTable thành renderCards
-    function renderCards(products) {
-        const $grid = $("#productGrid");
-        
+
+    function renderCardsToSpecificGrid(products, gridId) {
+        const $grid = $(gridId);
         if (!products || products.length === 0) {
-            $grid.html('<div class="col-12 text-center text-muted my-5"><h5>Không tìm thấy sản phẩm nào phù hợp.</h5></div>');
+            $grid.html('<div class="col-12 text-center text-muted py-4">Không có sản phẩm nào.</div>');
             return;
         }
 
+        const localImages = [
+            "images/nike-air-max-90-infrared.jpg", 
+            "images/nike-air-force-1-low-white.jpg",
+            "images/air-jordan-1-high-chicago.jpg", 
+            "images/nike-zoom-tempo-next-pink.jpg"
+        ];
+
         let html = "";
         $.each(products, function (index, product) {
-            // Ảnh placeholder nếu không có link ảnh
-            const imgSrc = product.thumb || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=500&auto=format&fit=crop';
-            
+            const imgSrc = product.thumb ? product.thumb : localImages[index % localImages.length];
+
             html += `
                 <div class="col-md-4 col-lg-3 mb-4">
-                    <div class="card h-100 product-card border-0 shadow-sm">
-                        <img src="${imgSrc}" class="card-img-top product-img" alt="${product.name}">
+                    <div class="card h-100 product-card border-0 shadow-sm dark-card">
+                        <a href="product-detail.html?id=${product.id}" class="product-img text-decoration-none d-block">
+                            <img src="${imgSrc}" alt="${product.name}">
+                        </a>
                         <div class="card-body d-flex flex-column">
-                            <h6 class="card-title text-truncate" title="${product.name}">${product.name}</h6>
-                            <p class="text-muted small mb-2">${product.brandName || 'Chưa phân loại'}</p>
-                            <h5 class="text-danger fw-bold mt-auto">${product.price ? product.price.toLocaleString('vi-VN') : 0} ₫</h5>
-                            
-                            <button class="btn btn-dark w-100 mt-3 btn-buy" data-id="${product.id}">
-                                <i class="fas fa-shopping-cart"></i> Mua Ngay
-                            </button>
+                            <a href="product-detail.html?id=${product.id}" class="text-decoration-none text-light">
+                                <h6 class="product-name text-truncate" title="${product.name}">${product.name}</h6>
+                            </a>
+                            <p class="product-category">${product.brandName || 'Sneaker'}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <h5 class="product-price mb-0">${product.price ? product.price.toLocaleString('vi-VN') : 0} ₫</h5>
+                                <button class="btn-buy" data-id="${product.id}" title="Thêm vào giỏ">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -88,199 +111,295 @@ $(document).ready(function () {
         $grid.html(html);
     }
 
-    // Thêm sự kiện khi bấm nút Mua Ngay
-    $(document).on('click', '.btn-buy', function() {
-        const token = localStorage.getItem("user_token");
-        if (!token) {
-            // Chưa đăng nhập -> Đá về trang đăng nhập
-            window.location.href = "login.html";
-        } else {
-            // Đã đăng nhập -> Xử lý thêm vào giỏ hàng
-            const productId = $(this).data("id");
-            alert("Sản phẩm ID " + productId + " đã được thêm vào giỏ!");
-            // Viết code gọi API AddToCart ở đây sau này
+    // ==========================================
+    // 3. XỬ LÝ SỰ KIỆN CLICK CATEGORY PILLS (CUỘN TRANG)
+    // ==========================================
+    $(".pill-btn").click(function() {
+        $(".pill-btn").removeClass("active");
+        $(this).addClass("active");
+        const targetId = $(this).attr("data-target");
+
+        if (targetId && $(targetId).length) {
+            const headerHeight = $('.main-navbar').outerHeight();
+            $('html, body').animate({
+                scrollTop: $(targetId).offset().top - headerHeight - 15 
+            }, 600); 
         }
     });
 
-    // 4. MỞ MODAL ĐỂ "THÊM MỚI"
-    $("#btnAddNew").click(function () {
-        $("#modalTitle").text("Thêm sản phẩm mới");
-        $("#productForm")[0].reset(); // Xóa sạch dữ liệu cũ trong form
-        $("#productId").val(''); // Reset ID về rỗng (báo hiệu đây là tạo mới)
-    });
+    // ==========================================
+    // 4. XỬ LÝ GIAO DIỆN ĐĂNG NHẬP (HEADER)
+    // ==========================================
+    function updateHeaderAfterLogin() {
+        const userName = localStorage.getItem("user_name"); 
 
-    // 5. MỞ MODAL ĐỂ "SỬA" (CẬP NHẬT)
-    $(document).on("click", ".btn-edit", function () {
-        const product = $(this).data("product");
-        
-        $("#modalTitle").text("Cập nhật sản phẩm: " + product.name);
-        $("#productForm")[0].reset(); 
-
-        // Đổ dữ liệu hiện tại vào các ô input
-        $("#productId").val(product.id);
-        $("#name").val(product.name);
-        $("#price").val(product.price);
-        $("#description").val(product.description);
-        $("#thumbnailUrl").val(product.thumb);
-        $("#stockQuantity").val(product.stock);
-        
-        // (Lưu ý: Nếu API của bạn có trả về brand_id, category_id... thì điền vào đây)
-        // Ví dụ: $("#brandId").val(product.brandId); 
-        
-        $("#productModal").modal('show');
-    });
-
-    // 6. XỬ LÝ NÚT "LƯU HỆ THỐNG" (CREATE & UPDATE)
-    $("#btnSave").click(function () {
-        // Thu thập dữ liệu từ Form
-        const payload = {
-            id: $("#productId").val() || null,
-            name: $("#name").val(),
-            price: parseInt($("#price").val()),
-            description: $("#description").val(),
-            brandId: $("#brandId").val() ? parseInt($("#brandId").val()) : null,
-            categoryId: $("#categoryId").val() ? parseInt($("#categoryId").val()) : null,
-            sizeId: $("#sizeId").val() ? parseInt($("#sizeId").val()) : null,
-            colorId: $("#colorId").val() ? parseInt($("#colorId").val()) : null,
-            stock: parseInt($("#stockQuantity").val()),
-            thumb: $("#thumbnailUrl").val()
-        };
-
-        // Validate cơ bản bắt buộc nhập tên và giá
-        if (!payload.name || isNaN(payload.price)) {
-            alert("Vui lòng nhập Tên giày và Giá niêm yết hợp lệ!");
-            return;
-        }
-
-        // Nếu có ID thì là Cập nhật (PUT), nếu ID rỗng thì là Thêm mới (POST)
-        const isUpdate = payload.id !== null;
-        const method = isUpdate ? "PUT" : "POST";
-        const url = isUpdate ? API_URL + "products/" + payload.id : API_URL + "products/";
-
-        // Đổi trạng thái nút thành "Đang lưu..." để chống click đúp
-        const $btn = $(this);
-        const originalText = $btn.text();
-        $btn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Đang xử lý...');
-
-        $.ajax({
-            url: url,
-            type: method,
-            contentType: "application/json",
-            data: JSON.stringify(payload),
-            success: function (response) {
-                alert(isUpdate ? "Cập nhật thành công!" : "Thêm sản phẩm thành công!");
-                $("#productModal").modal('hide');
-                searchProducts(); // Load lại kết quả mới nhất
-            },
-            error: function (xhr, status, error) {
-                console.error("Lỗi khi lưu:", error);
-                alert("Bạn chưa viết hàm xử lý " + method + " bên trong ProductAPI.java. Hãy bổ sung nhé!");
-            },
-            complete: function () {
-                $btn.prop("disabled", false).text(originalText); // Khôi phục lại nút
-            }
-        });
-    });
-
-    // 7. XÓA SẢN PHẨM
-    $(document).on("click", ".btn-delete", function () {
-        const id = $(this).data("id");
-        const name = $(this).data("name");
-
-        if (confirm(`Bạn có chắc chắn muốn xóa giày "${name}" không?\nHành động này sẽ xóa dữ liệu trên hệ thống!`)) {
-            $.ajax({
-                url: API_URL + "products/" + id,
-                type: "DELETE",
-                success: function () {
-                    alert("Đã xóa sản phẩm thành công!");
-                    searchProducts(); // Load lại kết quả mới nhất
-                },
-                error: function (xhr, status, error) {
-                    console.error("Lỗi khi xóa:", error);
-                    alert("Bạn chưa viết hàm xử lý DELETE bên trong ProductAPI.java.");
-                }
-            });
-        }
-    });
-
-    // 8. HÀM GIẢ LẬP DỮ LIỆU ĐỔ VÀO CÁC DROPDOWN
-    function loadSelectData() {
-        // Xóa sạch các option cũ (chỉ giữ lại option Mặc định)
-        $("#searchBrand").html('<option value="">Tất cả</option>');
-        $("#brandId").html('<option value="">-- Chọn thương hiệu --</option>');
-        
-        $("#searchCategory").html('<option value="">Tất cả</option>');
-        $("#categoryId").html('<option value="">-- Chọn danh mục --</option>');
-
-        // Lấy Brands từ DB
-        $.get(API_URL + "brands", function (data) {
-            data.forEach(b => {
-                $("#brandId").append(`<option value="${b.id}">${b.name}</option>`);
-                $("#searchBrand").append(`<option value="${b.id}">${b.name}</option>`);
-            });
-        });
-
-        // Lấy Categories từ DB
-        $.get(API_URL + "categories", function (data) {
-            data.forEach(c => {
-                $("#categoryId").append(`<option value="${c.id}">${c.name}</option>`);
-                $("#searchCategory").append(`<option value="${c.id}">${c.name}</option>`);
-            });
-        });
-
-        // Tạm thời Hardcode Size và Color (Sau này bạn có thể viết thêm API getSizes, getColors tương tự)
-        const sizes = [{ id: 1, value: "39" }, { id: 2, value: "40" }, { id: 3, value: "41" }, { id: 4, value: "42" }];
-        sizes.forEach(s => $("#sizeId").append(`<option value="${s.id}">Size ${s.value}</option>`));
-
-        const colors = [{ id: 1, name: "Trắng" }, { id: 2, name: "Đen" }, { id: 3, name: "Đỏ" }];
-        colors.forEach(c => $("#colorId").append(`<option value="${c.id}">${c.name}</option>`));
-    }
-    // 9. NÚT ĐĂNG XUẤT CHO NHÂN VIÊN
-    $("#btnLogout").click(function (e) {
-        e.preventDefault();
-        // Xóa thông tin đã đăng nhập
-        localStorage.removeItem("staff_token"); 
-        window.location.href = "login.html"; // Trả về trang login
-    });
-    $(document).ready(function () {
-    // Gọi hàm kiểm tra trạng thái ngay khi trang load
-    checkLoginState();
-
-    function checkLoginState() {
-        const userToken = localStorage.getItem("user_token");
-        const staffToken = localStorage.getItem("staff_token");
-        const userName = localStorage.getItem("user_name");
-
-        // Nếu tồn tại một trong hai loại token
-        if (userToken || staffToken) {
-            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&color=fff`;
-            const profilePath = staffToken ? "adminpage.html" : "profile.html";
-
-            // Thay đổi nội dung nút Đăng nhập thành Avatar Dropdown
+        if (userName) {
             $("#userArea").html(`
                 <div class="dropdown">
-                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="${avatarUrl}" alt="mdo" width="32" height="32" class="rounded-circle me-2 border border-warning">
-                        <span class="small fw-bold">${userName}</span>
+                    <a href="#" class="dropdown-toggle text-white text-decoration-none" data-bs-toggle="dropdown" style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-user-circle text-success" style="font-size: 1.2rem;"></i> 
+                        ${userName}
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow" aria-labelledby="dropdownUser">
-                        <li><a class="dropdown-item" href="${profilePath}"><i class="fas fa-user-circle me-2"></i>Hồ sơ cá nhân</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>Lịch sử mua hàng</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" id="btnLogoutGlobal"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end mt-3" style="background-color: #1e2129; border: 1px solid #3a3f4a; border-radius: 12px;">
+                        <li><a class="dropdown-item text-light" href="#">Hồ sơ của tôi</a></li>
+                        <li><a class="dropdown-item text-light" href="#">Đơn mua</a></li>
+                        <li><hr class="dropdown-divider" style="border-color: #3a3f4a;"></li>
+                        <li><a class="dropdown-item text-danger fw-bold" href="#" id="btnLogout"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
                     </ul>
                 </div>
             `);
         }
     }
 
-    // Xử lý sự kiện đăng xuất
-    $(document).on("click", "#btnLogoutGlobal", function(e) {
+    // ==========================================
+    // XỬ LÝ NÚT ĐĂNG XUẤT (Đã fix lỗi bóng ma)
+    // ==========================================
+    $(document).on("click", "#btnLogout", function(e) {
         e.preventDefault();
-        if(confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-            localStorage.clear();
-            window.location.href = "index.html";
-        }
+        
+        // Xóa sạch mọi dấu vết của user trong két sắt
+        localStorage.removeItem("user_name"); 
+        localStorage.removeItem("user_email"); 
+        localStorage.removeItem("user_token"); 
+        localStorage.removeItem("staff_token"); 
+        
+        // 🔥 ĐÂY CHÍNH LÀ DÒNG QUAN TRỌNG NHẤT ĐỂ SỬA LỖI 🔥
+        localStorage.removeItem("user_id"); 
+        
+        // (Tùy chọn) Xóa luôn giỏ hàng tạm nếu bạn còn dùng
+        localStorage.removeItem("user_cart"); 
+
+        // Load lại trang
+        window.location.reload(); 
     });
-});
-});
+
+    // ==========================================
+    // 5. XỬ LÝ THÊM VÀO GIỎ HÀNG (LƯU VÀO MYSQL)
+    // ==========================================
+    $(document).on('click', '.btn-buy', function(e) {
+        e.preventDefault();
+
+        // 1. Lấy ID user từ két sắt
+        const userId = localStorage.getItem("user_id");
+        
+        if (!userId || userId === "undefined") {
+            alert("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
+            window.location.href = "login.html"; 
+            return;
+        }
+
+        // 2. Lấy ID của đôi giày
+        const productId = $(this).data('id');
+        const productName = $(this).closest('.dark-card').find('.product-name').text();
+
+        // =========================================================
+        // LUỒNG MỚI: HIỂN THỊ POPUP QUICK ADD THAY VÌ ADD TRỰC TIẾP
+        // =========================================================
+        
+        // 1. Cập nhật tên sản phẩm lên Modal
+        $('#quickAddTitle').text(productName);
+        
+        // 2. Khóa nút Xác nhận và dọn dẹp data cũ
+        $('#btnConfirmQuickAdd').prop('disabled', true).removeData('detail-id');
+        $('#quickAddOptions').html('<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Đang tải thông tin phân loại...</p>');
+        
+        // 3. Bật Modal hiển thị
+        $('#quickAddModal').modal('show');
+        
+        // CHẶN GỌI API NẾU LÀ SẢN PHẨM DEMO (ID >= 9990)
+        if (productId >= 9990) {
+            $('#quickAddOptions').html('<div class="text-warning text-center mt-3"><i class="fas fa-exclamation-triangle mb-2 fa-2x"></i><p>Đây là sản phẩm Demo dùng để trang trí giao diện.<br>Bạn hãy đăng nhập Admin và thêm sản phẩm thật để trải nghiệm mua hàng nhé!</p></div>');
+            return;
+        }
+
+        // 4. Kéo dữ liệu của các phiên bản (Size/Color) từ Backend
+        $.ajax({
+            url: API_URL + "product-details/product/" + productId,
+            type: "GET",
+            success: function(details) {
+                if (!details || details.length === 0) {
+                    $('#quickAddOptions').html('<p class="text-danger">Sản phẩm này hiện đang hết hàng.</p>');
+                    return;
+                }
+                
+                let html = '<div class="d-flex flex-wrap gap-2">';
+                details.forEach(detail => {
+                    // Xử lý đọc tên trường phòng trường hợp API trả về camelCase (sizeId) hoặc snake_case (size_id)
+                    const sId = detail.sizeId !== undefined ? detail.sizeId : detail.size_id;
+                    const cId = detail.colorId !== undefined ? detail.colorId : detail.color_id;
+                    const dId = detail.id !== undefined ? detail.id : (detail.productDetailId !== undefined ? detail.productDetailId : detail.product_detail_id);
+                    const stock = detail.stockQuantity !== undefined ? detail.stockQuantity : detail.stock_quantity;
+                    
+                    // Mapping ID ra Tên gọi hiển thị
+                    const sizeObj = sizesCache.find(s => s.id === sId);
+                    const colorObj = colorsCache.find(c => c.id === cId);
+                    
+                    const sName = sizeObj ? sizeObj.name : sId;
+                    const cName = colorObj ? colorObj.name : cId;
+                    
+                    // Xử lý giao diện cho nút nếu hết hàng
+                    const disabledState = stock <= 0 ? 'disabled' : '';
+                    const stockBadge = stock <= 0 ? '<small class="text-danger">(Hết)</small>' : `<small class="text-muted">(Còn ${stock})</small>`;
+                    
+                    html += `
+                        <button type="button" class="btn btn-outline-custom variant-btn ${disabledState}" data-detail-id="${dId}" ${disabledState}>
+                            Size ${sName} - ${cName} ${stockBadge}
+                        </button>
+                    `;
+                });
+                html += '</div>';
+                $('#quickAddOptions').html(html);
+            },
+            error: function() {
+                $('#quickAddOptions').html('<p class="text-danger">Không thể kết nối đến máy chủ. Vui lòng thử lại sau.</p>');
+            }
+        });
+    });
+
+    // ==========================================
+    // BẮT SỰ KIỆN KHI ẤN CHỌN PHIÊN BẢN
+    // ==========================================
+    $(document).on('click', '.variant-btn:not(.disabled)', function() {
+        $('.variant-btn').removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
+        $(this).removeClass('btn-outline-custom').addClass('btn-primary-custom text-white');
+        
+        // Nạp ID của phiên bản vào bụng của Nút "Thêm vào giỏ"
+        const detailId = $(this).data('detail-id');
+        $('#btnConfirmQuickAdd').data('detail-id', detailId).prop('disabled', false);
+    });
+
+    // ==========================================
+    // XÁC NHẬN THÊM VÀO GIỎ TỪ BÊN TRONG MODAL
+    // ==========================================
+    $(document).on('click', '#btnConfirmQuickAdd', function() {
+        const detailId = $(this).data('detail-id');
+        const userId = localStorage.getItem("user_id");
+        const productName = $('#quickAddTitle').text();
+
+        if (!detailId) return;
+
+        const cartRequest = {
+            userId: parseInt(userId),
+            productDetailId: parseInt(detailId),
+            quantity: 1
+        };
+
+        $.ajax({
+            url: API_URL + "cart/add", 
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(cartRequest),
+            success: function () {
+                $('#quickAddModal').modal('hide'); // Tắt Modal đi
+                updateCartBadge();
+                showToastSuccess(productName);
+            },
+            error: function (xhr) {
+                console.error("Lỗi khi thêm vào giỏ:", xhr.responseText);
+                alert("Hệ thống gặp sự cố khi thêm dữ liệu. Vui lòng thử lại!");
+            }
+        });
+    });
+
+    // ==========================================
+    // HÀM LẤY TỔNG SỐ LƯỢNG TỪ MYSQL ĐỂ HIỂN THỊ
+    // ==========================================
+    function updateCartBadge() {
+        const userId = localStorage.getItem("user_id");
+        
+        if (!userId || userId === "undefined") {
+            $('#cartBadge').hide();
+            return;
+        }
+
+        // Đổi API đếm số lượng: truyền userId thay vì email
+        $.ajax({
+            url: API_URL + "cart/count/" + userId, 
+            type: "GET",
+            success: function (totalItems) {
+                const $cartIconLink = $('.nav-actions .fa-shopping-cart').closest('a');
+
+                if ($('#cartBadge').length === 0) {
+                    $cartIconLink.addClass('position-relative');
+                    $cartIconLink.append(`
+                        <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                              style="font-size: 0.65rem; padding: 0.35em 0.5em;">
+                            ${totalItems}
+                        </span>
+                    `);
+                } else {
+                    $('#cartBadge').text(totalItems);
+                }
+
+                if (totalItems > 0) {
+                    $('#cartBadge').show();
+                } else {
+                    $('#cartBadge').hide();
+                }
+            },
+            error: function(xhr) {
+                console.error("Lỗi đếm giỏ hàng từ MySQL:", xhr.responseText);
+            }
+        });
+    }
+
+    // ==========================================
+    // HÀM BẬT THÔNG BÁO GÓC MÀN HÌNH (Giữ nguyên)
+    // ==========================================
+    function showToastSuccess(productName) {
+        if ($('#toastContainer').length === 0) {
+            $('body').append('<div id="toastContainer" class="toast-container-custom"></div>');
+        }
+
+        const toastHtml = `
+            <div class="toast-msg show">
+                <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.5rem;"></i>
+                <div>
+                    <h6 class="mb-0 fw-bold text-white">Đã thêm vào giỏ MySQL!</h6>
+                    <small style="color: #9ca3af;">${productName}</small>
+                </div>
+            </div>
+        `;
+
+        const $toast = $(toastHtml);
+        $('#toastContainer').append($toast);
+
+        setTimeout(() => {
+            $toast.css('transform', 'translateX(120%)');
+            setTimeout(() => $toast.remove(), 400); 
+        }, 3000);
+    }
+
+    // ==========================================
+    // 6. XỬ LÝ TÌM KIẾM SẢN PHẨM (ENTER & CLICK KÍNH LÚP)
+    // ==========================================
+    
+    // Tự động điền lại từ khóa cũ vào ô tìm kiếm nếu đang ở trang search
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentKeyword = urlParams.get('keyword');
+    if (currentKeyword) {
+        $('#searchInput').val(currentKeyword);
+    }
+
+    // Hàm xử lý logic chuyển trang tìm kiếm
+    function performSearch() {
+        const keyword = $('#searchInput').val().trim();
+        if (keyword !== "") {
+            window.location.href = `search.html?keyword=${encodeURIComponent(keyword)}`;
+        }
+    }
+
+    // Bắt sự kiện ấn phím Enter trong ô input
+    $(document).on('keypress', '#searchInput', function (e) {
+        if (e.which === 13) { 
+            e.preventDefault(); 
+        }
+            performSearch();
+    });
+
+    // Bắt sự kiện click vào icon kính lúp
+    $(document).on('click', '.nav-search i', function () {
+        performSearch();
+    });
+
+}); // <-- Đóng hàm an toàn

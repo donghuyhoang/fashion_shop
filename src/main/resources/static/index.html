@@ -3,69 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ - Fashion Shop</title>
+    <title>SNEAK PEAK - Premium Sneaker Store</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     
-    <style>
-        body { background-color: #f8f9fa; }
-        .product-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .product-img { height: 250px; object-fit: cover; }
-    </style>
+    <link rel="stylesheet" href="css/style.css"> 
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html"><i class="fas fa-shoe-prints text-warning"></i> THT - SHOP </a>
-            
-            <div class="ms-auto" id="userArea">
-                <a href="login.html" class="btn btn-outline-light btn-sm"><i class="fas fa-user"></i> Đăng Nhập / Đăng Ký</a>
+
+    <div class="toast-container-custom" id="toastBox"></div>
+
+    <header class="main-navbar fixed-top">
+        <div class="logo">
+            <a href="index.html">SNEAK<span>PEAK</span></a>
+        </div>
+        <nav class="nav-links d-none d-lg-flex">
+            <a href="index.html" class="active">HOME</a>
+            <a href="men.html">MEN</a>
+            <a href="women.html">WOMEN</a>
+            <a href="collection.html">COLLECTION</a>
+        </nav>
+        
+        <div class="nav-search d-none d-md-flex">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search shoes...">
+        </div>
+
+        <div class="nav-actions">
+            <a href="cart.html" class="icon-link position-relative">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none; font-size: 0.6rem;">0</span>
+            </a>
+            <div id="userArea">
+                <a href="login.html" class="login-btn"><i class="fas fa-user"></i> LOGIN</a>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <div class="container">
-        
-        <div class="row mb-5 justify-content-center">
-            <div class="col-md-10">
-                <div class="card shadow-sm border-0 bg-white rounded-3">
-                    <div class="card-body p-3">
-                        <form id="searchForm" class="row g-2 align-items-end">
-                            <div class="col-md-4">
-                                <label class="form-label text-muted small fw-bold mb-1"><i class="fas fa-font"></i> Tên giày</label>
-                                <input type="text" class="form-control form-control-sm" id="searchName" placeholder="Ví dụ: Air Force, Jordan...">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold mb-1"><i class="fas fa-tag"></i> Thương hiệu</label>
-                                <select class="form-select form-select-sm" id="searchBrand">
-                                    <option value="">Tất cả thương hiệu</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-muted small fw-bold mb-1"><i class="fas fa-list"></i> Danh mục</label>
-                                <select class="form-select form-select-sm" id="searchCategory">
-                                    <option value="">Tất cả danh mục</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-warning btn-sm w-100 fw-bold" id="btnSearch">
-                                    <i class="fas fa-search"></i> Lọc
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+    <section class="hero-section">
+        <div class="hero-bg" style="background-image: url('images/nike-air-max-basketball-concept.jpg');"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="badge-custom">LATEST COLLECTION | 2026</span>
+            <h1 class="hero-title">ELEVATE<br>YOUR STEP</h1>
+            <p class="hero-desc">Experience the intersection of luxury craftsmanship and athletic performance. Our Spring 2026 collection defines the new era of street-luxe footwear.</p>
+            <div class="hero-buttons">
+                <a href="#newArrivals" class="btn-custom btn-primary-custom">SHOP NOW</a>
+                <a href="#" class="btn-custom btn-outline-custom">VIEW GALLERY</a>
+            </div>
+        </div>
+        <div class="watermark">PREMIUM</div>
+    </section>
+
+    <section class="category-pills-section container my-4">
+        <div class="d-flex justify-content-center flex-wrap gap-3">
+            <button class="pill-btn active" data-target="#newArrivals">All Sneakers</button>
+            <button class="pill-btn" data-target="#runningSection">Performance Running</button>
+            <button class="pill-btn" data-target="#basketballSection">Basketball Heritage</button>
+            <button class="pill-btn" data-target="#luxurySection">Luxury Lifestyle</button>
+            <button class="pill-btn" data-target="#collabSection">Collaborations</button>
+            <button class="pill-btn" data-target="#ecoSection">Eco-Conscious</button>
+        </div>
+    </section>
+
+    <div id="storytellingSections">
+
+        <section id="newArrivals" class="collection-block container mb-5 pb-4 pt-4">
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <h2 class="section-title m-0">NEW ARRIVALS <span class="fs-6 text-muted fw-normal d-block">Khám phá những đôi giày mới cập bến.</span></h2>
+                <a href="#" class="view-all-link">View All <i class="fas fa-chevron-right fs-6"></i></a>
+            </div>
+            <div class="row g-4" id="newArrivalsGrid">
+            </div>
+        </section>
+
+        <section id="runningSection" class="collection-block mb-5">
+            <div class="story-banner" style="background-image: url('images/performance-running.jpg');">
+                <div class="banner-overlay"></div>
+                <div class="banner-content text-center">
+                    <span class="banner-subtitle">TRAIN HARDER</span>
+                    <h2 class="banner-title display-4 fw-black">PERFORMANCE RUNNING</h2>
                 </div>
             </div>
-        </div>
-        
-        <div class="row" id="productGrid"></div>
+            <div class="container mt-5">
+                <div class="row g-4" id="runningGrid">
+                </div>
+            </div>
+        </section>
+
+        <section id="basketballSection" class="collection-block mb-5">
+            <div class="story-banner" style="background-image: url('images/basketball-heritage.jpg');">
+                <div class="banner-overlay"></div>
+                <div class="banner-content text-center">
+                    <h2 class="banner-title display-4 fw-black">BASKETBALL HERITAGE</h2>
+                    <p class="banner-desc">Court-ready performance meets street-approved style. Discover the silhouettes that defined generations of basketball culture.</p>
+                </div>
+            </div>
+            <div class="container mt-5">
+                <div class="row g-4" id="basketballGrid">
+                </div>
+            </div>
+        </section>
+
+        <section id="luxurySection" class="collection-block mb-5">
+            <div class="story-banner" style="background-image: url('images/nike-x-sacai-ldwaffle-green-orange.jpg');">
+                <div class="banner-overlay"></div>
+                <div class="banner-content text-start w-100 px-5">
+                    <h2 class="banner-title display-4 fw-black text-warning">LUXURY<br>LIFESTYLE</h2>
+                    <p class="banner-desc w-50">Premium materials. Stunning details. The pinnacle of modern design.</p>
+                </div>
+            </div>
+            <div class="container mt-5">
+                <div class="row g-4" id="luxuryGrid">
+                </div>
+            </div>
+        </section>
+
+        <section id="collabSection" class="collection-block mb-5">
+            <div class="story-banner" style="background-image: url('images/nike-dunk-low-panda.jpg');">
+                <div class="banner-overlay light-overlay"></div>
+                <div class="banner-content text-center">
+                    <h2 class="banner-title display-3 fw-black" style="color: #12151c; text-shadow: 2px 2px 0px #fff;">COLLABORATIONS</h2>
+                </div>
+            </div>
+            <div class="container mt-5">
+                <div class="row g-4 justify-content-center" id="collabGrid">
+                </div>
+            </div>
+        </section>
+
+        <section id="ecoSection" class="collection-block mb-5">
+            <div class="story-banner" style="background-image: url('images/nike-air-max-90-premium-brown.jpg');">
+                <div class="banner-overlay green-overlay"></div>
+                <div class="banner-content text-center">
+                    <h2 class="banner-title display-4 fw-black text-white">ECO-CONSCIOUS</h2>
+                    <p class="banner-desc">Built with sustainability in mind. Maximum style, minimum footprint.</p>
+                </div>
+            </div>
+            <div class="container mt-5">
+                <div class="row g-4" id="ecoGrid">
+                </div>
+            </div>
+        </section>
+
     </div>
 
+    <footer class="text-center py-4 mt-5" style="border-top: 1px solid #2a2d34;">
+        <p class="text-muted small mb-0">&copy; 2026 SNEAK PEAK. All rights reserved.</p>
+    </footer>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script src="app.js"></script>
+
+    <!-- Modal Giao diện Quick Add -->
+    <div class="modal fade dark-theme-modal" id="quickAddModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #1e2129; border: 1px solid #3a3f4a;">
+          <div class="modal-header border-bottom-0">
+            <h5 class="modal-title text-light fw-bold" id="quickAddTitle">Tùy chọn giày</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body pt-0">
+            <div id="quickAddOptions">
+              <!-- Các nút Size và Màu sẽ được Javascript vẽ tự động vào đây -->
+            </div>
+          </div>
+          <div class="modal-footer border-top-0">
+            <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary-custom" id="btnConfirmQuickAdd" disabled>Thêm vào giỏ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
 </body>
 </html>
