@@ -81,17 +81,24 @@ public class ProductRepositoryImpl implements ProductRepository{
 
 	@Override
 	public List<ProductEntity> findAll() {
-		String sql = "select * from products";
+		String sql = "SELECT p.product_id, p.name, p.price, p.description, b.name as brand_name, SUM(pd.stock_quantity) as stock_quantity, MAX(pd.thumbnail_img_url) as thumbnail_img_url " +
+                     "FROM products p " +
+                     "LEFT JOIN product_details pd ON p.product_id = pd.product_id " +
+                     "LEFT JOIN brands b ON p.brand_id = b.brand_id " +
+                     "GROUP BY p.product_id, p.name, p.price, p.description, b.name";
 		List<ProductEntity> result = new ArrayList<>();
 		try(Connection conn = ConnectionJDBCUtil.getConnection();
 				Statement stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery(sql);){
 			while(rs.next()) {
 				ProductEntity product = new ProductEntity();
+				product.setProduct_id(rs.getInt("product_id"));
 				product.setName(rs.getString("name"));
     			product.setPrice(rs.getInt("price"));
-    			product.setProduct_id(rs.getInt("product_id"));
     			product.setDescription(rs.getString("description"));
+				product.setBrandName(rs.getString("brand_name"));
+				product.setStockQuantity(rs.getInt("stock_quantity"));
+				product.setThumbnailUrl(rs.getString("thumbnail_img_url"));
     			result.add(product);
 			}
 			
@@ -137,7 +144,9 @@ public class ProductRepositoryImpl implements ProductRepository{
 			} catch (SQLException e) {
 				conn.rollback(); 
 				e.printStackTrace();
-			}
+			} finally {
+                conn.setAutoCommit(true); // Trả lại trạng thái mặc định cho Connection Pool
+            }
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -148,28 +157,36 @@ public class ProductRepositoryImpl implements ProductRepository{
 		String sqlProduct = "UPDATE products SET name=?, description=?, price=?, category_id=?, brand_id=? WHERE product_id=?";
 		String sqlDetail = "UPDATE product_details SET size_id=?, color_id=?, stock_quantity=?, price=?, thumbnail_img_url=? WHERE product_id=?";
 		
-		try (Connection conn = ConnectionJDBCUtil.getConnection();
-			 PreparedStatement pstmt = conn.prepareStatement(sqlProduct);
-			 PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail)) {
-			
-			// Update bảng products
-			pstmt.setString(1, dto.getName());
-			pstmt.setString(2, dto.getDescription());
-			pstmt.setObject(3, dto.getPrice());
-			pstmt.setObject(4, dto.getCategoryId());
-			pstmt.setObject(5, dto.getBrandId());
-			pstmt.setInt(6, dto.getId());
-			pstmt.executeUpdate();
-			
-			// Update bảng product_details
-			pstmtDetail.setObject(1, dto.getSizeId());
-			pstmtDetail.setObject(2, dto.getColorId());
-			pstmtDetail.setObject(3, dto.getStock() != null ? dto.getStock() : 0);
-			pstmtDetail.setObject(4, dto.getPrice());
-			pstmtDetail.setString(5, dto.getThumb());
-			pstmtDetail.setInt(6, dto.getId());
-			pstmtDetail.executeUpdate();
-			
+		try (Connection conn = ConnectionJDBCUtil.getConnection()) {
+			conn.setAutoCommit(false);
+			try (PreparedStatement pstmt = conn.prepareStatement(sqlProduct);
+				 PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail)) {
+				
+				// Update bảng products
+				pstmt.setString(1, dto.getName());
+				pstmt.setString(2, dto.getDescription());
+				pstmt.setObject(3, dto.getPrice());
+				pstmt.setObject(4, dto.getCategoryId());
+				pstmt.setObject(5, dto.getBrandId());
+				pstmt.setInt(6, dto.getId());
+				pstmt.executeUpdate();
+				
+				// Update bảng product_details
+				pstmtDetail.setObject(1, dto.getSizeId());
+				pstmtDetail.setObject(2, dto.getColorId());
+				pstmtDetail.setObject(3, dto.getStock() != null ? dto.getStock() : 0);
+				pstmtDetail.setObject(4, dto.getPrice());
+				pstmtDetail.setString(5, dto.getThumb());
+				pstmtDetail.setInt(6, dto.getId());
+				pstmtDetail.executeUpdate();
+				
+				conn.commit();
+			} catch (SQLException e) {
+				conn.rollback();
+				e.printStackTrace();
+			} finally {
+				conn.setAutoCommit(true);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -201,6 +218,8 @@ public class ProductRepositoryImpl implements ProductRepository{
             } catch (SQLException e) {
                 conn.rollback(); // Lỗi thì hoàn tác
                 e.printStackTrace();
+            } finally {
+                conn.setAutoCommit(true); // Trả lại trạng thái mặc định cho Connection Pool
             }
         } catch (SQLException e) {
             e.printStackTrace();
