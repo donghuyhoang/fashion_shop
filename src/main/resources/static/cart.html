@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Vault - SNEAK PEAK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        /* CSS CHUYÊN BIỆT CHO TRANG GIỎ HÀNG VAULT */
+        body { background-color: #121212; color: #ffffff; font-family: 'Montserrat', sans-serif; }
+        
+        .page-title { font-weight: 900; font-size: 3rem; letter-spacing: -1px; text-transform: uppercase; margin-bottom: 0; }
+        .page-subtitle { color: #a1a1aa; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+
+        /* Card Sản phẩm trong giỏ */
+        .cart-item-card { background-color: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 20px; margin-bottom: 20px; display: flex; gap: 25px; transition: 0.3s; }
+        .cart-item-card:hover { border-color: #3f3f46; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .cart-img-box { background-color: #e5e7eb; border-radius: 8px; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; padding: 10px; flex-shrink: 0;}
+        .cart-img-box img { width: 100%; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); }
+        
+        .item-title { font-weight: 900; font-size: 1.5rem; text-transform: uppercase; line-height: 1.1; margin-bottom: 5px;}
+        .item-color { color: #a1a1aa; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .item-price { font-weight: 900; font-size: 1.5rem; }
+        
+        .attr-label { color: #71717a; font-size: 0.65rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .attr-value { font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 15px;}
+        
+        .qty-btn { background: transparent; border: none; color: #fff; cursor: pointer; transition: 0.2s; }
+        .qty-btn:hover { color: #818cf8; }
+        
+        .btn-remove { background: transparent; border: none; color: #f87171; font-size: 0.75rem; font-weight: 800; letter-spacing: 1px; transition: 0.2s; }
+        .btn-remove:hover { color: #dc2626; }
+
+        /* Order Summary Box */
+        .summary-card { background-color: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 30px; position: sticky; top: 100px; }
+        .summary-title { font-weight: 900; font-size: 1.2rem; margin-bottom: 25px; letter-spacing: 1px; }
+        
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 0.85rem; font-weight: 600; color: #a1a1aa; }
+        .summary-row.total { border-top: 1px solid #27272a; padding-top: 20px; font-size: 1.2rem; font-weight: 900; color: #fff; margin-bottom: 30px; }
+        .summary-row.total .total-price { font-size: 2rem; color: #818cf8; letter-spacing: -1px; }
+        
+        /* Buttons */
+        .btn-checkout { background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%); color: white; width: 100%; border: none; padding: 18px; border-radius: 8px; font-weight: 900; letter-spacing: 1px; transition: 0.3s; margin-bottom: 15px; }
+        .btn-checkout:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
+        
+        .btn-continue { background: #27272a; color: white; width: 100%; border: none; padding: 18px; border-radius: 8px; font-weight: 800; letter-spacing: 1px; transition: 0.3s; }
+        .btn-continue:hover { background: #3f3f46; }
+
+        /* Guarantee Badge */
+        .guarantee-box { border: 1px solid #27272a; background: #121214; border-radius: 8px; padding: 15px; margin-top: 25px; display: flex; gap: 15px; align-items: flex-start; }
+        .guarantee-box i { color: #818cf8; font-size: 1.2rem; margin-top: 2px; }
+        .guarantee-title { font-size: 0.75rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; }
+        .guarantee-desc { font-size: 0.7rem; color: #71717a; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <header class="main-navbar fixed-top" style="background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #27272a;">
+        <div class="logo">
+            <a href="index.html">SNEAK<span>VAULT</span></a>
+        </div>
+        <div class="nav-actions ms-auto">
+            <a href="cart.html" class="icon-link"><i class="fa-solid fa-cart-shopping" style="color: #818cf8;"></i></a>
+            <div id="userArea"><a href="login.html" class="login-btn"><i class="fas fa-user"></i> LOGIN</a></div>
+        </div>
+    </header>
+
+    <div class="container" style="margin-top: 130px; margin-bottom: 100px;">
+        
+        <div class="mb-5">
+            <h1 class="page-title">YOUR VAULT</h1>
+            <p class="page-subtitle"><span id="totalItemsCount">0</span> ITEMS SECURED FOR CHECKOUT</p>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 pe-lg-5" id="cartItemsContainer">
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
+                    <p>Đang tải dữ liệu từ Vault...</p>
+                </div>
+                </div>
+
+            <div class="col-lg-4 mt-5 mt-lg-0">
+                <div class="summary-card shadow-lg">
+                    <h3 class="summary-title">ORDER SUMMARY</h3>
+                    
+                    <div class="summary-row">
+                        <span>SUBTOTAL</span>
+                        <span id="subtotalPrice" class="text-white">0₫</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>ESTIMATED SHIPPING</span>
+                        <span class="text-white">35.000₫</span>
+                    </div>
+                    <div class="summary-row" style="color: #818cf8;">
+                        <span>VAULT DISCOUNT</span>
+                        <span>-0₫</span>
+                    </div>
+                    
+                    <div class="summary-row total">
+                        <span>TOTAL</span>
+                        <span id="finalTotalPrice" class="total-price">0₫</span>
+                    </div>
+
+                    <button class="btn-checkout">CHECKOUT NOW</button>
+                    <a href="index.html"><button class="btn-continue">CONTINUE SHOPPING</button></a>
+
+                    <div class="guarantee-box">
+                        <i class="fas fa-check-decagram"></i>
+                        <div>
+                            <div class="guarantee-title">AUTHENTICITY GUARANTEED</div>
+                            <div class="guarantee-desc">Every item in the Vault is verified by our expert team of authenticators before shipping.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Checkout Information -->
+    <div class="modal fade dark-theme-modal" id="checkoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #1e2129; border: 1px solid #3a3f4a; color: white;">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">THÔNG TIN GIAO HÀNG</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-0">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Người nhận</label>
+                        <input type="text" class="form-control" id="receiverName" placeholder="Tên người nhận (Bắt buộc)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Số điện thoại</label>
+                        <input type="text" class="form-control" id="receiverPhone" placeholder="Số điện thoại (Bắt buộc)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Địa chỉ giao hàng</label>
+                        <textarea class="form-control" id="shippingAddress" rows="2" placeholder="Số nhà, Đường, Xã/Phường, Quận/Huyện..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Phương thức thanh toán</label>
+                        <select class="form-select" id="paymentMethod">
+                            <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                            <option value="VNPAY">Thanh toán qua cổng VNPay</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary-custom" id="btnConfirmCheckout">Xác nhận Đặt Hàng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            const API_URL = "/api/";
+            const userId = localStorage.getItem("user_id");
+
+            // Kiểm tra đăng nhập
+            if (!userId) {
+                $('#cartItemsContainer').html(`
+                    <div class="text-center py-5">
+                        <i class="fas fa-lock fa-4x text-muted mb-4"></i>
+                        <h3 class="fw-bold mb-3">VAULT IS LOCKED</h3>
+                        <p class="text-muted mb-4">Vui lòng đăng nhập để xem giỏ hàng của bạn.</p>
+                        <a href="login.html" class="btn btn-outline-light px-5 py-2">ĐĂNG NHẬP NGAY</a>
+                    </div>
+                `);
+                return;
+            }
+
+            // Gọi API lấy danh sách Giỏ hàng (Bạn cần chắc chắn Backend có API GET /api/cart/{userId})
+            loadCartItems();
+
+            function loadCartItems() {
+                $.ajax({
+                    url: API_URL + "cart/" + userId,
+                    type: "GET",
+                    success: function(cartItems) {
+                        if (!cartItems || cartItems.length === 0) {
+                            $('#cartItemsContainer').html(`
+                                <div class="text-center py-5 border border-secondary rounded-4" style="border-style: dashed !important;">
+                                    <h3 class="fw-bold text-muted mb-3">YOUR VAULT IS EMPTY</h3>
+                                    <a href="index.html" class="text-decoration-underline" style="color: #818cf8;">Go hunt some sneakers</a>
+                                </div>
+                            `);
+                            $('#totalItemsCount').text(0);
+                            // BỔ SUNG: Reset lại giá tiền khi giỏ hàng rỗng
+                            $('#subtotalPrice').text('0₫');
+                            $('#finalTotalPrice').text('0₫');
+                            return;
+                        }
+
+                        let html = "";
+                        let subtotal = 0;
+                        let totalQuantity = 0;
+
+                        cartItems.forEach(item => {
+                            // Cập nhật lại logic ảnh chuẩn theo backend của bạn
+                            const imgSrc = item.thumbnail || item.thumb || item.thumbnailImgUrl || "images/nike-air-force-1-low-white.jpg";
+                            const itemPrice = item.price || 0;
+                            const itemTotal = itemPrice * item.quantity;
+                            
+                            subtotal += itemTotal;
+                            totalQuantity += item.quantity;
+
+                            html += `
+                                <div class="cart-item-card">
+                                    <div class="cart-img-box">
+                                        <img src="${imgSrc}" alt="${item.productName}">
+                                    </div>
+                                    <div class="flex-grow-1 d-flex flex-column justify-content-between">
+                                        
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h2 class="item-title">${item.productName}</h2>
+                                                <div class="item-color">${item.colorName || 'Standard Edition'}</div>
+                                            </div>
+                                            <div class="item-price">${itemPrice.toLocaleString('vi-VN')}₫</div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-end mt-4">
+                                            <div class="d-flex gap-5">
+                                                <div>
+                                                    <span class="attr-label">SIZE</span>
+                                                    <span class="attr-value">EU ${item.sizeName || '40'}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="attr-label">QUANTITY</span>
+                                                    <div class="attr-value">
+                                                        <button class="qty-btn" onclick="updateQty(${item.productDetailId}, -1, ${item.quantity})"><i class="fas fa-minus"></i></button>
+                                                        <span style="min-width: 25px; text-align: center;">${item.quantity < 10 ? '0'+item.quantity : item.quantity}</span>
+                                                        <button class="qty-btn" onclick="updateQty(${item.productDetailId}, 1, ${item.quantity})"><i class="fas fa-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <button class="btn-remove" onclick="removeCartItem(${item.productDetailId})">
+                                                <i class="fas fa-trash-alt me-1"></i> REMOVE SKU
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        // Đổ HTML ra màn hình
+                        $('#cartItemsContainer').html(html);
+                        $('#totalItemsCount').text(cartItems.length); 
+
+                        // Cập nhật giá tiền bên tay phải
+                        $('#subtotalPrice').text(subtotal.toLocaleString('vi-VN') + '₫');
+                        const finalTotal = subtotal + 35000; // Cộng phí ship 35k
+                        $('#finalTotalPrice').text(finalTotal.toLocaleString('vi-VN') + '₫');
+                    },
+                    error: function() {
+                        $('#cartItemsContainer').html('<div class="text-danger">Lỗi kết nối đến máy chủ! Không thể tải giỏ hàng.</div>');
+                    }
+                });
+            }
+
+            // HÀM XÓA SẢN PHẨM KHỎI GIỎ HÀNG (AJAX)
+            window.removeCartItem = function(productDetailId) {
+                if(confirm("Bạn có chắc chắn muốn bỏ sản phẩm này khỏi Vault?")) {
+                    $.ajax({
+                        // Yêu cầu Backend bổ sung API DELETE này sau
+                        url: API_URL + "cart/remove?userId=" + userId + "&productDetailId=" + productDetailId, 
+                        type: "DELETE",
+                        success: function() {
+                            loadCartItems(); // Tải lại giỏ hàng sau khi xóa
+                            if (typeof updateCartBadge === "function") updateCartBadge(); // Cập nhật lại số đỏ trên Header
+                        },
+                        error: function() {
+                            alert("Tính năng đang chờ Backend hoàn thiện API (DELETE /api/cart/remove)!");
+                        }
+                    });
+                }
+            }
+
+            // HÀM CẬP NHẬT SỐ LƯỢNG + / -
+            window.updateQty = function(productDetailId, change, currentQty) {
+                // Nếu số lượng hiện tại là 1 và người dùng bấm trừ (-1), chuyển sang hỏi xóa sản phẩm
+                if (currentQty <= 1 && change === -1) {
+                    removeCartItem(productDetailId);
+                    return;
+                }
+
+                // Tận dụng API /add sẵn có của bạn vì Backend đang chạy SQL: quantity = quantity + ?
+                const payload = {
+                    userId: parseInt(userId),
+                    productDetailId: parseInt(productDetailId),
+                    quantity: change
+                };
+
+                $.ajax({
+                    url: API_URL + "cart/add", 
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(payload),
+                    success: function() {
+                        loadCartItems(); // Reload lại màn hình
+                        if (typeof updateCartBadge === "function") updateCartBadge(); // Cập nhật Header
+                    },
+                    error: function() {
+                        alert("Có lỗi xảy ra khi cập nhật số lượng!");
+                    }
+                });
+            }
+
+            // SỰ KIỆN NÚT CHECKOUT NOW -> Hiển thị Modal nhập thông tin
+            $(document).on('click', '.btn-checkout', function() {
+                $('#checkoutModal').modal('show');
+            });
+
+            // SỰ KIỆN XÁC NHẬN BÊN TRONG MODAL
+            $(document).on('click', '#btnConfirmCheckout', function() {
+                const name = $('#receiverName').val().trim();
+                const phone = $('#receiverPhone').val().trim();
+                const address = $('#shippingAddress').val().trim();
+                const paymentMethod = $('#paymentMethod').val();
+
+                if(!name || !phone || !address) {
+                    alert("Vui lòng điền đầy đủ thông tin nhận hàng!");
+                    return;
+                }
+
+                const $btn = $(this);
+                const originalHtml = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> PROCESSING...');
+
+                const payload = {
+                    userId: parseInt(userId),
+                    receiverName: name,
+                    receiverPhone: phone,
+                    shippingAddress: address,
+                    paymentMethod: paymentMethod
+                };
+
+                $.ajax({
+                    url: API_URL + "orders/checkout",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(payload),
+                    success: function(orderId) {
+                        if (paymentMethod === "VNPAY") {
+                            window.location.href = "success.html?orderId=" + orderId + "&method=vnpay";
+                        } else {
+                            window.location.href = "success.html?orderId=" + orderId + "&method=cod";
+                        }
+                    },
+                    error: function(xhr) {
+                        // Hiển thị lỗi cụ thể từ Backend (VD: Hết hàng)
+                        alert("Lỗi đặt hàng: " + xhr.responseText);
+                        $btn.prop('disabled', false).html(originalHtml);
+                    }
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>
