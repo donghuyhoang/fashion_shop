@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.javaweb.service.OrderService;
 import model.OrderDTO;
+import model.OrderRequestDTO;
 
 @CrossOrigin
 @RestController
@@ -21,6 +22,14 @@ public class OrderAPI {
         if (orders.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(orders);
+        return ResponseEntity.ok(orders);	
+    }
+    @PostMapping("/place")
+    public ResponseEntity<?> placeOrder(@RequestBody OrderRequestDTO orderRequest) {
+        boolean isSuccess = orderService.placeOrder(orderRequest);
+        if (isSuccess) {
+            return ResponseEntity.ok("success");
+        }
+        return ResponseEntity.badRequest().body("fail");
     }
 }

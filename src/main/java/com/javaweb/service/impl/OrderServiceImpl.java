@@ -8,6 +8,7 @@ import com.javaweb.repository.OrderRepository;
 import com.javaweb.repository.entity.OrderEntity;
 import com.javaweb.service.OrderService;
 import model.OrderDTO;
+import model.OrderRequestDTO;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -37,5 +38,10 @@ public class OrderServiceImpl implements OrderService {
             dtos.add(dto);
         }
         return dtos;
+    }
+
+    @Override
+    public boolean placeOrder(OrderRequestDTO orderRequest) {
+        return orderRepository.createOrder(orderRequest);
     }
 }
