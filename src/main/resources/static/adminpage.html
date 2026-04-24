@@ -185,7 +185,7 @@
                 return;
             }
 
-            const API_URL = "http://localhost:8081/api/";
+            const API_URL = "/api/";
 
             // Khởi tạo dữ liệu
             loadSelectData();
@@ -261,7 +261,7 @@
 
                 let html = "";
                 products.forEach(p => {
-                    const imgSrc = p.thumb || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=150&auto=format&fit=crop';
+                    const imgSrc = p.thumb || 'images/nike-air-force-1-low-white.jpg';
                     // Mã hóa object để nhét vào thuộc tính data HTML an toàn
                     const pJson = encodeURIComponent(JSON.stringify(p));
 

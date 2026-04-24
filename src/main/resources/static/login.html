@@ -322,12 +322,13 @@
                         // 2. Lưu thông tin người dùng vào LocalStorage
                         localStorage.setItem("user_name", response.fullName || "Người dùng");
                         localStorage.setItem("user_email", response.email);
+                        localStorage.setItem("user_id", response.userId || response.id);
 
                         // 3. Phân luồng 2 Quyền
                         setTimeout(() => {
                             if (response.roleId === 1) { 
                                 // QUYỀN 1: QUẢN TRỊ VIÊN (ADMIN/STAFF)
-                                localStorage.setItem("admin_token", "admin-token-" + response.userId);
+                                localStorage.setItem("staff_token", "staff-token-" + response.userId);
                                 window.location.href = "adminpage.html"; // Trỏ về trang Quản trị
                                 
                             } else if (response.roleId === 2) { 

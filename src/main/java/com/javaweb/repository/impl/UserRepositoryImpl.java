@@ -82,6 +82,8 @@ public class UserRepositoryImpl implements UserRepository {
             } catch (Exception e) {
                 conn.rollback(); // Nếu có lỗi thì hoàn tác
                 e.printStackTrace();
+            }finally {
+                conn.setAutoCommit(true); // Trả lại trạng thái mặc định cho Connection Pool
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -41,7 +41,7 @@ public class ProductAPI {
 		System.out.println("Đã thêm sản phẩm thành công vào DB!");
 	}
 
-	@PutMapping
+	@PutMapping(value = "/{id}")
 	public void updateProduct(@PathVariable Integer id, @RequestBody ProductDTO dto) {
 		dto.setId(id);
 		productService.update(dto);
@@ -49,7 +49,7 @@ public class ProductAPI {
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<String> deleteProduct(@PathVariable Integer id) {
+	public ResponseEntity<String> deleteProduct(@PathVariable("id") Integer id) {
 	    productService.delete(id);
 	    return ResponseEntity.ok("Đã xóa thành công sản phẩm ID: " + id);
 	}
