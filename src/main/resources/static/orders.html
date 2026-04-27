@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn mua của tôi - SNEAK PEAK</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        body { background-color: #12151c; color: #fafbfc; }
+        .orders-container { max-width: 900px; margin: 120px auto 60px; min-height: 60vh; }
+        
+        /* Tabs Styling */
+        .nav-tabs { border-bottom: 1px solid #3a3f4a; margin-bottom: 2rem; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
+        .nav-tabs::-webkit-scrollbar { height: 4px; }
+        .nav-tabs::-webkit-scrollbar-thumb { background: #3a3f4a; border-radius: 4px; }
+        .nav-tabs .nav-link { color: #9ca3af; border: none; font-weight: 600; padding: 1rem 1.5rem; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; transition: 0.3s; cursor: pointer; }
+        .nav-tabs .nav-link:hover { color: #fafbfc; }
+        .nav-tabs .nav-link.active { color: #2b5cff; background: transparent; border-bottom: 3px solid #2b5cff; }
+        
+        /* Order Card Styling */
+        .order-card { background: linear-gradient(145deg, #1e2129 0%, #242933 100%); border: 1px solid #3a3f4a; border-radius: 16px; margin-bottom: 1.5rem; padding: 1.5rem; transition: transform 0.2s ease; }
+        .order-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-color: #4a5260; }
+        
+        .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #3a3f4a; padding-bottom: 1rem; margin-bottom: 1rem; }
+        .order-id { font-weight: 800; font-size: 1.1rem; }
+        .order-date { color: #6b7280; font-size: 0.85rem; font-weight: 500; }
+        
+        .order-status { font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; padding: 6px 12px; border-radius: 50px; }
+        .status-PENDING { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-SHIPPING { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .status-COMPLETED { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-CANCELLED { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        
+        .order-body { display: flex; justify-content: space-between; align-items: center; }
+        .order-summary { font-size: 0.95rem; color: #d1d5db; }
+        .order-total { font-size: 1.25rem; font-weight: 900; color: #10b981; }
+    </style>
+</head>
+<body>
+
+    <header class="main-navbar fixed-top">
+        <div class="logo">
+            <a href="index.html">SNEAK<span>PEAK</span></a>
+        </div>
+        <div class="nav-actions ms-auto">
+            <a href="index.html" class="btn btn-outline-custom btn-sm"><i class="fas fa-arrow-left"></i> Về trang chủ</a>
+        </div>
+    </header>
+
+    <div class="container orders-container">
+        <h2 class="section-title mb-1">ĐƠN MUA CỦA TÔI</h2>
+        <p class="text-muted mb-4">Quản lý và theo dõi trạng thái các đơn hàng bạn đã đặt.</p>
+
+        <!-- Tabs Phân Loại -->
+        <ul class="nav nav-tabs d-flex" id="orderTabs">
+            <li class="nav-item"><a class="nav-link active" data-status="ALL">Tất cả</a></li>
+            <li class="nav-item"><a class="nav-link" data-status="PENDING">Chờ xác nhận</a></li>
+            <li class="nav-item"><a class="nav-link" data-status="SHIPPING">Đang vận chuyển</a></li>
+            <li class="nav-item"><a class="nav-link" data-status="COMPLETED">Đã giao</a></li>
+            <li class="nav-item"><a class="nav-link" data-status="CANCELLED">Đã hủy</a></li>
+        </ul>
+
+        <!-- Khung Chứa Danh Sách Đơn Hàng -->
+        <div id="ordersList">
+            <div class="text-center py-5">
+                <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
+                <p class="text-muted">Đang tải dữ liệu đơn hàng...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            const API_URL = "/api/orders/user/";
+            const userId = localStorage.getItem("user_id");
+
+            if (!userId || userId === "undefined") {
+                alert("Vui lòng đăng nhập để xem đơn hàng!");
+                window.location.href = "login.html";
+                return;
+            }
+
+            // Tải dữ liệu lần đầu tiên
+            loadOrders("ALL");
+
+            // Xử lý sự kiện khi bấm chuyển Tab
+            $('.nav-link').click(function() {
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+                
+                const status = $(this).data('status');
+                loadOrders(status);
+            });
+
+            function loadOrders(statusFilter) {
+                $('#ordersList').html('<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i><p>Đang tải...</p></div>');
+
+                $.ajax({
+                    url: API_URL + userId,
+                    type: "GET",
+                    success: function(orders) {
+                        renderOrders(orders, statusFilter);
+                    },
+                    error: function() {
+                        // DỮ LIỆU MẪU (MOCK DATA) NẾU API CHƯA SẴN SÀNG
+                        console.warn("API Lấy đơn hàng chưa hoạt động, sử dụng dữ liệu mẫu.");
+                        const mockOrders = [
+                            { id: 1004, date: "24/10/2026", status: "PENDING", itemsCount: 2, total: 4500000, methodName: "Thanh toán VNPay" },
+                            { id: 1003, date: "20/10/2026", status: "SHIPPING", itemsCount: 1, total: 3200000, methodName: "Thanh toán COD" },
+                            { id: 1002, date: "15/10/2026", status: "COMPLETED", itemsCount: 3, total: 8500000, methodName: "Thanh toán VNPay" },
+                            { id: 1001, date: "10/10/2026", status: "CANCELLED", itemsCount: 1, total: 2100000, methodName: "Thanh toán COD" }
+                        ];
+                        renderOrders(mockOrders, statusFilter);
+                    }
+                });
+            }
+
+            function renderOrders(orders, statusFilter) {
+                // Lọc đơn hàng theo Tab
+                let filteredOrders = orders;
+                if (statusFilter !== "ALL") {
+                    filteredOrders = orders.filter(o => o.status === statusFilter);
+                }
+
+                // Nếu mảng rỗng
+                if (!filteredOrders || filteredOrders.length === 0) {
+                    $('#ordersList').html(`
+                        <div class="text-center py-5 mt-4" style="background: #1a1d24; border-radius: 16px; border: 1px dashed #3a3f4a;">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <h5 class="fw-bold text-light">Chưa có đơn hàng nào</h5>
+                            <p class="text-muted">Bạn chưa có đơn hàng nào trong trạng thái này.</p>
+                            <a href="index.html" class="btn btn-primary-custom mt-2 px-4">Mua sắm ngay</a>
+                        </div>
+                    `);
+                    return;
+                }
+
+                // Vẽ giao diện cho từng đơn
+                let html = "";
+                filteredOrders.forEach(order => {
+                    let statusText = "Không xác định";
+                    let icon = "fa-circle";
+                    
+                    if (order.status === "PENDING") { statusText = "Chờ xác nhận"; icon = "fa-clock"; }
+                    else if (order.status === "SHIPPING") { statusText = "Đang vận chuyển"; icon = "fa-truck-fast"; }
+                    else if (order.status === "COMPLETED") { statusText = "Đã giao"; icon = "fa-check-circle"; }
+                    else if (order.status === "CANCELLED") { statusText = "Đã hủy"; icon = "fa-times-circle"; }
+
+                    html += `
+                        <div class="order-card shadow-sm">
+                            <div class="order-header">
+                                <div>
+                                    <span class="order-id text-light">#SP-${order.id}</span>
+                                    <span class="order-date ms-3"><i class="far fa-calendar-alt me-1"></i> Ngày đặt: ${order.date}</span>
+                                </div>
+                                <div class="order-status status-${order.status}">
+                                    <i class="fas ${icon} me-1"></i> ${statusText}
+                                </div>
+                            </div>
+                            <div class="order-body flex-column flex-md-row gap-3">
+                                <div class="order-summary">
+                                    <p class="mb-1"><i class="fas fa-shopping-bag me-2 text-secondary"></i> Số lượng sản phẩm: <strong class="text-light">${order.itemsCount}</strong></p>
+                                    <p class="mb-0"><i class="fas fa-credit-card me-2 text-secondary"></i> Phương thức: <strong class="text-light">${order.methodName || 'COD'}</strong></p>
+                                </div>
+                                <div class="text-md-end text-start mt-3 mt-md-0 d-flex flex-row flex-md-column justify-content-between align-items-center align-items-md-end w-100 w-md-auto">
+                                    <div>
+                                        <span class="text-muted small d-block mb-1">Tổng tiền:</span>
+                                        <span class="order-total">${order.total.toLocaleString('vi-VN')} ₫</span>
+                                    </div>
+                                    <button class="btn btn-outline-custom btn-sm mt-md-2" onclick="alert('Tính năng xem chi tiết đơn hàng đang phát triển!')">
+                                        Xem chi tiết
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                $('#ordersList').html(html);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -90,4 +90,71 @@ public class UserRepositoryImpl implements UserRepository {
         }
         return false; // Trả về false nếu thất bại
     }
+
+    public UserEntity findById(Integer userId) {
+        String sql = "SELECT * FROM users WHERE user_id = ?";
+        UserEntity user = null;
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    user = new UserEntity();
+                    user.setUser_id(rs.getInt("user_id"));
+                    user.setFullname(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setPhone(rs.getString("phone"));
+                    user.setRole_id(rs.getInt("role_id"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    public boolean updateUser(UserEntity user) {
+        String sql = "UPDATE users SET full_name = ?, phone = ?, email = ? WHERE user_id = ?";
+
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, user.getFullname());
+            pstmt.setString(2, user.getPhone());
+            pstmt.setString(3, user.getEmail());
+            pstmt.setInt(4, user.getUser_id());
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean changePassword(Integer userId, String oldPassword, String newPassword) {
+        String checkSql = "SELECT password_hash FROM users WHERE user_id = ? AND password_hash = ?";
+        String updateSql = "UPDATE users SET password_hash = ? WHERE user_id = ?";
+        
+        try (Connection conn = ConnectionJDBCUtil.getConnection()) {
+            // Kiểm tra mật khẩu cũ
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setInt(1, userId);
+                checkStmt.setString(2, oldPassword);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (!rs.next()) return false; // Không khớp mật khẩu cũ
+                }
+            }
+            // Cập nhật mật khẩu mới
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                updateStmt.setString(1, newPassword);
+                updateStmt.setInt(2, userId);
+                return updateStmt.executeUpdate() > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

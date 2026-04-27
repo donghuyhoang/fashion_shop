@@ -3,78 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ Sơ Cá Nhân - Fashion Shop</title>
+    <title>Hồ sơ của tôi - SNEAK PEAK</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        body { background-color: #f4f7f6; }
-        .card-profile { border: none; border-radius: 15px; overflow: hidden; }
-        .profile-header { background: #212529; height: 100px; }
-        .avatar-container { margin-top: -50px; }
-        .avatar-main { width: 100px; height: 100px; border-radius: 50%; border: 5px solid white; background: white; }
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .profile-card {
+            background: linear-gradient(145deg, #1e2129 0%, #242933 100%);
+            border: 1px solid #3a3f4a;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+        .form-control-custom {
+            background: #1a1d24;
+            border: 1px solid #3a3f4a;
+            color: #fafbfc;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control-custom:focus {
+            background: #1e2129;
+            border-color: #2b5cff;
+            box-shadow: 0 0 0 3px rgba(43, 92, 255, 0.2);
+            color: #fafbfc;
+            outline: none;
+        }
+        .form-control-custom:disabled {
+            background: #15181f;
+            color: #6b7280;
+        }
+        .form-label {
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-dark mb-5">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html"><i class="fas fa-shoe-prints text-warning"></i> THT - SHOP</a>
-            <a href="index.html" class="btn btn-outline-light btn-sm">Quay lại trang chủ</a>
+
+    <nav class="main-navbar">
+        <div class="logo">
+            <a href="index.html">SNEAK<span>PEAK</span></a>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card card-profile shadow-lg">
-                    <div class="profile-header"></div>
-                    <div class="card-body text-center p-4">
-                        <div class="avatar-container mb-3">
-                            <img id="displayAvatar" src="" class="avatar-main shadow">
-                        </div>
-                        <h3 id="displayName" class="fw-bold mb-1">...</h3>
-                        <p id="displayEmail" class="text-muted mb-4">...</p>
-                        
-                        <div class="text-start border-top pt-4">
-                            <h6 class="fw-bold text-uppercase small text-primary mb-3">Thông tin liên hệ</h6>
-                            <div class="mb-3">
-                                <label class="small text-muted d-block">Địa chỉ giao hàng</label>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-map-marker-alt text-danger me-2"></i>
-                                    <span id="displayAddress">Chưa cập nhật địa chỉ</span>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <label class="small text-muted d-block">Số điện thoại</label>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-phone text-success me-2"></i>
-                                    <span id="displayPhone">Chưa cập nhật số điện thoại</span>
-                                </div>
-                            </div>
-                            <button class="btn btn-dark w-100 fw-bold py-2">Chỉnh sửa hồ sơ</button>
-                        </div>
+    <div class="container profile-container mt-5">
+        <div class="profile-card">
+            <h2 class="section-title text-center mb-4">Hồ sơ của tôi</h2>
+            <div id="alertMessage" class="alert d-none" role="alert"></div>
+            
+            <form id="profileForm">
+                <div class="mb-4">
+                    <label for="fullName" class="form-label">Họ và Tên</label>
+                    <input type="text" class="form-control-custom w-100" id="fullName" name="fullName" required>
+                </div>
+                <div class="mb-4">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control-custom w-100" id="email" name="email" required>
+                </div>
+                <div class="mb-4">
+                    <label for="phone" class="form-label">Số điện thoại</label>
+                    <input type="tel" class="form-control-custom w-100" id="phone" name="phone" required>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-5">
+                    <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <i class="fas fa-key me-2"></i> Đổi mật khẩu
+                    </button>
+                    
+                    <div class="d-flex gap-3">
+                        <a href="index.html" class="btn btn-outline-custom">Quay lại</a>
+                        <button type="submit" class="btn btn-primary-custom px-4" id="btnUpdateProfile">
+                            <i class="fas fa-save me-2"></i> Lưu Thay Đổi
+                        </button>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
+    <!-- Modal Đổi Mật Khẩu -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #1e2129; border: 1px solid #3a3f4a;">
+          <div class="modal-header border-0">
+            <h5 class="modal-title text-light">Đổi Mật Khẩu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="modalAlertMessage" class="alert d-none" role="alert"></div>
+            <form id="changePasswordForm">
+                <div class="mb-3">
+                    <label class="form-label text-light">Mật khẩu hiện tại</label>
+                    <input type="password" class="form-control-custom w-100" id="oldPassword" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-light">Mật khẩu mới</label>
+                    <input type="password" class="form-control-custom w-100" id="newPassword" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-light">Xác nhận mật khẩu mới</label>
+                    <input type="password" class="form-control-custom w-100" id="confirmPassword" required>
+                </div>
+                <div class="text-end mt-4">
+                    <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary-custom" id="btnSubmitPassword">Xác nhận đổi</button>
+                </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Lấy dữ liệu từ localStorage
-            const name = localStorage.getItem("user_name");
-            const email = localStorage.getItem("user_email");
-
-            if (!name) {
-                window.location.href = "login.html";
-                return;
-            }
-
-            // Hiển thị lên giao diện
-            $("#displayName").text(name);
-            $("#displayEmail").text(email);
-            $("#displayAvatar").attr("src", `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=200`);
-        });
-    </script>
+    <script src="profile.js"></script>
 </body>
 </html>

@@ -96,7 +96,7 @@ $(document).ready(function () {
                             <a href="product-detail.html?id=${product.id}" class="text-decoration-none text-light">
                                 <h6 class="product-name text-truncate" title="${product.name}">${product.name}</h6>
                             </a>
-                            <p class="product-category">${product.brandName || 'Sneaker'}</p>
+                            <p class="product-category text-truncate" title="${product.brandName || 'Sneaker'}">${product.brandName || 'Sneaker'}</p>
                             <div class="d-flex justify-content-between align-items-center mt-auto">
                                 <h5 class="product-price mb-0">${product.price ? product.price.toLocaleString('vi-VN') : 0} ₫</h5>
                                 <button class="btn-buy" data-id="${product.id}" title="Thêm vào giỏ">
@@ -135,21 +135,66 @@ $(document).ready(function () {
 
         if (userName) {
             $("#userArea").html(`
-                <div class="dropdown">
-                    <a href="#" class="dropdown-toggle text-white text-decoration-none" data-bs-toggle="dropdown" style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <div class="user-menu-container" style="position: relative;">
+                    <div class="user-profile-toggle" style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; color: white;">
                         <i class="fas fa-user-circle text-success" style="font-size: 1.2rem;"></i> 
-                        ${userName}
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end mt-3" style="background-color: #1e2129; border: 1px solid #3a3f4a; border-radius: 12px;">
-                        <li><a class="dropdown-item text-light" href="#">Hồ sơ của tôi</a></li>
-                        <li><a class="dropdown-item text-light" href="#">Đơn mua</a></li>
-                        <li><hr class="dropdown-divider" style="border-color: #3a3f4a;"></li>
-                        <li><a class="dropdown-item text-danger fw-bold" href="#" id="btnLogout"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
-                    </ul>
+                        <span class="text-truncate" style="max-width: 120px;">${userName}</span>
+                        <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #9ca3af;"></i>
+                    </div>
+                    
+                    <div class="user-message-box">
+                        
+                        <a href="#" id="btnProfile" class="dropdown-custom-item">
+                            <i class="fas fa-id-badge fa-fw me-3 text-primary"></i> Hồ sơ của tôi
+                        </a>
+                        
+                        <a href="orders.html" class="dropdown-custom-item">
+                            <i class="fas fa-box-open fa-fw me-3 text-warning"></i> Đơn mua
+                        </a>
+                        
+                        <div style="height: 1px; background-color: #3a3f4a; margin: 8px 0;"></div>
+                        
+                        <a href="#" id="btnLogout" class="dropdown-custom-item text-danger fw-bold">
+                            <i class="fas fa-sign-out-alt fa-fw me-3"></i> Đăng xuất
+                        </a>
+                    </div>
                 </div>
             `);
         }
     }
+
+    // ==========================================
+    // JS XỬ LÝ SỰ KIỆN CHO MENU (Đóng/Mở & Click)
+    // ==========================================
+
+    // 1. Hiệu ứng Bấm vào tên để xổ Menu xuống
+    $(document).on("click", ".user-profile-toggle", function(e) {
+        e.stopPropagation(); // Ngăn sự kiện click lan ra ngoài
+        $(".user-message-box").fadeToggle(200); // Mở/đóng menu với hiệu ứng mờ
+    });
+
+    // 2. Bấm ra ngoài khoảng trống thì tự động đóng Menu lại
+    $(document).on("click", function(e) {
+        if (!$(e.target).closest(".user-menu-container").length) {
+            $(".user-message-box").fadeOut(200);
+        }
+    });
+
+    // Ngăn việc click vào chính Message Box làm nó bị đóng
+    $(document).on("click", ".user-message-box", function(e) {
+        e.stopPropagation();
+    });
+
+    // 3. Xử lý sự kiện bấm nút Hồ Sơ (Không bị hiện dấu #)
+    $(document).on("click", "#btnProfile", function(e) {
+        e.preventDefault(); // <-- Đây chính là "Thần chú" chặn dấu # trên URL
+        
+        // Bạn có thể viết code kiểm tra/xử lý gì đó ở đây trước khi chuyển trang
+        console.log("Đang mở trang hồ sơ...");
+        
+        // Chuyển sang trang profile
+        window.location.href = "profile.html"; 
+    });
 
     // ==========================================
     // XỬ LÝ NÚT ĐĂNG XUẤT (Đã fix lỗi bóng ma)
@@ -401,5 +446,6 @@ $(document).ready(function () {
     $(document).on('click', '.nav-search i', function () {
         performSearch();
     });
+
 
 }); // <-- Đóng hàm an toàn
