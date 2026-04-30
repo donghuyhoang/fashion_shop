@@ -12,7 +12,8 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public UserEntity findByEmailAndPassword(String email, String password_hash)
     {
-        String sql = "SELECT * FROM users WHERE email = ? AND password_hash = ?";
+        // Khôi phục điều kiện is_active = 1
+        String sql = "SELECT * FROM users WHERE email = ? AND password_hash = ? AND is_active = 1";
         // Implementation for finding user by email and password
         UserEntity user = null;
 
@@ -61,6 +62,27 @@ public class UserRepositoryImpl implements UserRepository {
             return false;
     }
     
+    public boolean checkPhoneExists(String phone) 
+    {
+        String sql = "SELECT COUNT(*) FROM users WHERE phone = ?";
+        try(Connection conn = ConnectionJDBCUtil.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql))
+            {
+                pstmt.setString(1, phone);
+                try(ResultSet rs = pstmt.executeQuery())
+                {
+                    if(rs.next() && rs.getInt(1) > 0)
+                    {
+                        return true;
+                    }
+                }
+            } catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            return false;
+    }
+
     @Override
     public boolean register(UserEntity user) {
         String sql = "INSERT INTO users (full_name, email, phone, password_hash, role_id, is_active, created_at) VALUES (?, ?, ?, ?, ?, 1, NOW())";

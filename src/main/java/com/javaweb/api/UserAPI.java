@@ -45,6 +45,15 @@ public class UserAPI {
             return ResponseEntity.badRequest().body("Email đã tồn tại!");
         }
         
+        if (userRepository.checkPhoneExists(userDTO.getPhoneNumber())) {
+            return ResponseEntity.badRequest().body("Số điện thoại này đã được đăng ký!");
+        }
+        
+        String password = userDTO.getPassword();
+        if (password == null || !password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$")) {
+            return ResponseEntity.badRequest().body("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
+        }
+
         UserEntity newUser = new UserEntity();
         newUser.setFullname(userDTO.getFullName());
         newUser.setEmail(userDTO.getEmail());
