@@ -36,7 +36,7 @@
 
             <div class="d-flex gap-3 justify-content-center mt-2">
                 <a href="index.html" class="btn btn-outline-light px-4 py-2 fw-bold rounded-pill">Tiếp tục mua sắm</a>
-                <a href="#" class="btn btn-primary px-4 py-2 fw-bold rounded-pill" style="background: #2b5cff; border: none;">Xem lịch sử đơn</a>
+                <a href="orders.html" class="btn btn-primary px-4 py-2 fw-bold rounded-pill" style="background: #2b5cff; border: none;">Xem lịch sử đơn</a>
             </div>
         </div>
     </div>
@@ -52,10 +52,15 @@
                 $('#displayOrderId').text('#SP-' + orderId);
             }
             
-            if (method === 'vnpay') {
+            if (method === 'VNPAY' || method === 'vnpay') {
                 $('#displayMethod').text('Thanh toán qua VNPay');
                 $('#vnpayMessage').removeClass('d-none');
-            } else {
+            } else if (method === 'MOMO') {
+                $('#displayMethod').text('Thanh toán qua ví MoMo');
+                $('#vnpayMessage').html('<i class="fas fa-info-circle me-2"></i> <strong>Cổng thanh toán MoMo:</strong> Hệ thống đang chuyển hướng bạn sang ứng dụng MoMo để quét mã...').removeClass('d-none');
+            } else if (method === 'BANKING') {
+                $('#displayMethod').text('Chuyển khoản ngân hàng');
+            } else { // Mặc định là COD
                 $('#displayMethod').text('Thanh toán khi nhận hàng (COD)');
             }
         });

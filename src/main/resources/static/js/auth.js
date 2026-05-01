@@ -54,8 +54,8 @@ $(document).ready(function() {
                 $('#loginAlert').removeClass('d-none alert-danger').addClass('alert-success').text('Đăng nhập thành công! Đang chuyển hướng...');
                 
                 setTimeout(function() {
-                    // Nếu có phân quyền, chuyển hướng tới Admin hoặc Trang chủ tùy thuộc Role ID
-                    window.location.href = response.roleId === 1 ? 'admin.html' : 'index.html';
+                    // Điều hướng chính xác vào adminpage.html nếu role = 1
+                    window.location.href = response.roleId === 1 ? 'adminpage.html' : 'index.html';
                 }, 1000);
             },
             error: function(xhr) {

@@ -32,27 +32,14 @@ $(document).ready(function () {
             type: "GET",
             success: function (allProducts) {
                 let productsForStorytelling = [...allProducts];
-                const extraImages = [
-                    "images/air-jordan-1-high-chicago.jpg", "images/nike-air-force-1-low-white.jpg",
-                    "images/nike-air-max-90-infrared.jpg", "images/nike-dunk-low-panda.jpg",
-                    "images/nike-zoom-tempo-next-pink.jpg", "images/nike-air-max-97-silver-bullet.jpg",
-                    "images/nike-blazer-mid-77-white-black.jpg", "images/nike-cortez-forrest-gump.jpg",
-                    "images/nike-react-vision-gravity-purple.jpg", "images/nike-sb-dunk-low-blue-lobster.jpg",
-                    "images/nike-x-sacai-ldwaffle-green-orange.jpg", "images/nike-metcon-black-gum.jpg",
-                    "images/nike-air-max-1-university-red.jpg", "images/nike-air-presto-triple-black.jpg",
-                    "images/nike-air-huarache-scream-green.jpg", "images/nike-air-max-90-black-orange.jpg"
-                ];
 
-                let i = 0;
-                while (productsForStorytelling.length < 24) {
-                    productsForStorytelling.push({
-                        id: 9990 + i, 
-                        name: "IMPECCABLE Sneaker #" + (i + 1), 
-                        brandName: "Sneaker Peak",
-                        price: 3500000 + (i * 150000), 
-                        thumb: extraImages[i % extraImages.length] 
-                    });
-                    i++;
+                // Nhân bản sản phẩm thật để lấp đầy 24 ô giao diện nếu số lượng không đủ
+                if (allProducts && allProducts.length > 0) {
+                    let i = 0;
+                    while (productsForStorytelling.length < 24) {
+                        productsForStorytelling.push(allProducts[i % allProducts.length]);
+                        i++;
+                    }
                 }
 
                 renderCardsToSpecificGrid(productsForStorytelling.slice(0, 4), "#newArrivalsGrid");
@@ -85,12 +72,13 @@ $(document).ready(function () {
         let html = "";
         $.each(products, function (index, product) {
             const imgSrc = product.thumb ? product.thumb : localImages[index % localImages.length];
+            const fallbackImg = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20fill%3D%22%23eee%22%20width%3D%22200%22%20height%3D%22200%22%2F%3E%3Ctext%20fill%3D%22%23999%22%20font-family%3D%22sans-serif%22%20font-size%3D%2216%22%20dy%3D%2210.5%22%20font-weight%3D%22bold%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E";
 
             html += `
                 <div class="col-md-4 col-lg-3 mb-4">
                     <div class="card h-100 product-card border-0 shadow-sm dark-card">
                         <a href="product-detail.html?id=${product.id}" class="product-img text-decoration-none d-block">
-                            <img src="${imgSrc}" alt="${product.name}">
+                            <img src="${imgSrc}" alt="${product.name}" onerror="this.onerror=null; this.src='${fallbackImg}';">
                         </a>
                         <div class="card-body d-flex flex-column">
                             <a href="product-detail.html?id=${product.id}" class="text-decoration-none text-light">
@@ -236,90 +224,186 @@ $(document).ready(function () {
         // 2. Lấy ID của đôi giày
         const productId = $(this).data('id');
         const productName = $(this).closest('.dark-card').find('.product-name').text();
+        const productPrice = $(this).closest('.dark-card').find('.product-price').text();
+        const productImage = $(this).closest('.dark-card').find('img').attr('src');
 
         // =========================================================
         // LUỒNG MỚI: HIỂN THỊ POPUP QUICK ADD THAY VÌ ADD TRỰC TIẾP
         // =========================================================
         
-        // 1. Cập nhật tên sản phẩm lên Modal
-        $('#quickAddTitle').text(productName);
+        // 1. Cập nhật Tiêu đề Modal
+        $('#quickAddTitle').text("Tùy chọn sản phẩm");
         
-        // 2. Khóa nút Xác nhận và dọn dẹp data cũ
-        $('#btnConfirmQuickAdd').prop('disabled', true).removeData('detail-id');
-        $('#quickAddOptions').html('<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Đang tải thông tin phân loại...</p>');
+        // 2. Khóa nút Xác nhận, lưu lại tên gốc và dọn dẹp data cũ
+        $('#btnConfirmQuickAdd').prop('disabled', true).removeData('detail-id').data('product-name', productName);
+        
+        // 2.5 Tạo Layout động hiển thị Hình ảnh và Giá ngay trong Modal
+        $('#quickAddOptions').html(`
+            <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary">
+                <img id="quickAddVariantImage" src="${productImage}" alt="${productName}" class="img-thumbnail bg-dark border-secondary" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
+                <div>
+                    <h6 class="mb-1 text-light" style="line-height: 1.4;">${productName}</h6>
+                    <span id="quickAddVariantPrice" class="text-warning fw-bold fs-5">${productPrice}</span>
+                </div>
+            </div>
+            <div id="quickAddSelectors">
+                <p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Đang tải thông tin phân loại...</p>
+            </div>
+        `);
         
         // 3. Bật Modal hiển thị
         $('#quickAddModal').modal('show');
         
-        // CHẶN GỌI API NẾU LÀ SẢN PHẨM DEMO (ID >= 9990)
-        if (productId >= 9990) {
-            $('#quickAddOptions').html('<div class="text-warning text-center mt-3"><i class="fas fa-exclamation-triangle mb-2 fa-2x"></i><p>Đây là sản phẩm Demo dùng để trang trí giao diện.<br>Bạn hãy đăng nhập Admin và thêm sản phẩm thật để trải nghiệm mua hàng nhé!</p></div>');
-            return;
-        }
-
         // 4. Kéo dữ liệu của các phiên bản (Size/Color) từ Backend
         $.ajax({
             url: API_URL + "product-details/product/" + productId,
             type: "GET",
             success: function(details) {
                 if (!details || details.length === 0) {
-                    $('#quickAddOptions').html('<p class="text-danger">Sản phẩm này hiện đang hết hàng.</p>');
+                    $('#quickAddSelectors').html('<p class="text-danger">Sản phẩm này hiện đang hết hàng.</p>');
                     return;
                 }
                 
-                let html = '<div class="d-flex flex-wrap gap-2">';
+                // Lưu mảng details vào modal để dùng lại khi check
+                $('#quickAddModal').data('product-details', details);
+
+                const colorMap = new Map();
+                const sizeMap = new Map();
+                
                 details.forEach(detail => {
                     // Xử lý đọc tên trường phòng trường hợp API trả về camelCase (sizeId) hoặc snake_case (size_id)
                     const sId = detail.sizeId !== undefined ? detail.sizeId : detail.size_id;
                     const cId = detail.colorId !== undefined ? detail.colorId : detail.color_id;
-                    const dId = detail.id !== undefined ? detail.id : (detail.productDetailId !== undefined ? detail.productDetailId : detail.product_detail_id);
-                    const stock = detail.stockQuantity !== undefined ? detail.stockQuantity : detail.stock_quantity;
                     
                     // Mapping ID ra Tên gọi hiển thị
-                    const sizeObj = sizesCache.find(s => s.id === sId);
-                    const colorObj = colorsCache.find(c => c.id === cId);
+                    const sizeObj = sizesCache.find(s => s.id === sId) || { id: sId, name: sId };
+                    const colorObj = colorsCache.find(c => c.id === cId) || { id: cId, name: cId };
                     
-                    const sName = sizeObj ? sizeObj.name : sId;
-                    const cName = colorObj ? colorObj.name : cId;
-                    
-                    // Xử lý giao diện cho nút nếu hết hàng
-                    const disabledState = stock <= 0 ? 'disabled' : '';
-                    const stockBadge = stock <= 0 ? '<small class="text-danger">(Hết)</small>' : `<small class="text-muted">(Còn ${stock})</small>`;
-                    
-                    html += `
-                        <button type="button" class="btn btn-outline-custom variant-btn ${disabledState}" data-detail-id="${dId}" ${disabledState}>
-                            Size ${sName} - ${cName} ${stockBadge}
-                        </button>
-                    `;
+                    if (!colorMap.has(cId)) colorMap.set(cId, colorObj);
+                    if (!sizeMap.has(sId)) sizeMap.set(sId, sizeObj);
                 });
-                html += '</div>';
-                $('#quickAddOptions').html(html);
+                
+                let html = `
+                    <div class="mb-3">
+                        <label class="fw-bold mb-2">Màu sắc:</label>
+                        <div class="d-flex flex-wrap gap-2" id="colorOptions">
+                `;
+                colorMap.forEach(color => {
+                    html += `<button type="button" class="btn btn-outline-custom color-btn" data-id="${color.id}">${color.name}</button>`;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold mb-2">Kích cỡ (Size):</label>
+                        <div class="d-flex flex-wrap gap-2" id="sizeOptions">
+                `;
+                sizeMap.forEach(size => {
+                    html += `<button type="button" class="btn btn-outline-custom size-btn" data-id="${size.id}">${size.name}</button>`;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                    <div id="stockStatus" class="mt-2 text-muted" style="font-size: 0.95rem;">
+                        <i class="fas fa-info-circle me-1"></i> Vui lòng chọn Màu sắc và Kích cỡ.
+                    </div>
+                `;
+                $('#quickAddSelectors').html(html);
             },
             error: function() {
-                $('#quickAddOptions').html('<p class="text-danger">Không thể kết nối đến máy chủ. Vui lòng thử lại sau.</p>');
+                $('#quickAddSelectors').html('<p class="text-danger">Không thể kết nối đến máy chủ. Vui lòng thử lại sau.</p>');
             }
         });
     });
 
     // ==========================================
-    // BẮT SỰ KIỆN KHI ẤN CHỌN PHIÊN BẢN
+    // BẮT SỰ KIỆN KHI ẤN CHỌN MÀU / SIZE
     // ==========================================
-    $(document).on('click', '.variant-btn:not(.disabled)', function() {
-        $('.variant-btn').removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
-        $(this).removeClass('btn-outline-custom').addClass('btn-primary-custom text-white');
-        
-        // Nạp ID của phiên bản vào bụng của Nút "Thêm vào giỏ"
-        const detailId = $(this).data('detail-id');
-        $('#btnConfirmQuickAdd').data('detail-id', detailId).prop('disabled', false);
+    $(document).on('click', '.color-btn', function() {
+        if ($(this).hasClass('btn-primary-custom')) {
+            // Nếu nút đã được chọn trước đó -> Hủy chọn
+            $(this).removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
+        } else {
+            // Nếu chưa chọn -> Xóa màu các nút khác và bôi màu nút này
+            $('.color-btn').removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
+            $(this).removeClass('btn-outline-custom').addClass('btn-primary-custom text-white');
+        }
+        checkSelectedVariant();
     });
+
+    $(document).on('click', '.size-btn', function() {
+        if ($(this).hasClass('btn-primary-custom')) {
+            // Nếu nút đã được chọn trước đó -> Hủy chọn
+            $(this).removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
+        } else {
+            $('.size-btn').removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
+            $(this).removeClass('btn-outline-custom').addClass('btn-primary-custom text-white');
+        }
+        checkSelectedVariant();
+    });
+        
+    function checkSelectedVariant() {
+        const details = $('#quickAddModal').data('product-details');
+        const btnConfirm = $('#btnConfirmQuickAdd');
+        
+        const selectedColorBtn = $('.color-btn.btn-primary-custom');
+        const selectedSizeBtn = $('.size-btn.btn-primary-custom');
+        
+        if (selectedColorBtn.length > 0 && selectedSizeBtn.length > 0) {
+            const selectedColorId = selectedColorBtn.data('id');
+            const selectedSizeId = selectedSizeBtn.data('id');
+            
+            // Tìm chi tiết sản phẩm phù hợp với cả 2 tiêu chí
+            const detail = details.find(d => 
+                (d.colorId === selectedColorId || d.color_id === selectedColorId) && 
+                (d.sizeId === selectedSizeId || d.size_id === selectedSizeId)
+            );
+            
+            if (detail) {
+                const stock = detail.stockQuantity !== undefined ? detail.stockQuantity : detail.stock_quantity;
+                const dId = detail.id !== undefined ? detail.id : (detail.productDetailId !== undefined ? detail.productDetailId : detail.product_detail_id);
+                const price = detail.price !== undefined ? detail.price : null;
+                
+                // Lấy ảnh của biến thể (nếu Database trả về)
+                const thumb = detail.thumbnailImgUrl || detail.thumbnail_img_url || detail.thumb;
+                
+                // THAY ĐỔI GIÁ & HÌNH ẢNH NGAY LẬP TỨC TRÊN GIAO DIỆN
+                if (price) $('#quickAddVariantPrice').text(price.toLocaleString('vi-VN') + ' ₫');
+                if (thumb) $('#quickAddVariantImage').attr('src', thumb);
+
+                if (stock > 0) {
+                    $('#stockStatus').html(`<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i> Còn ${stock} sản phẩm trong kho</span>`);
+                    
+                    const colorName = selectedColorBtn.text();
+                    const sizeName = selectedSizeBtn.text();
+                    const variantName = `${colorName} (Size ${sizeName})`;
+                    
+                    btnConfirm.data('detail-id', dId).data('variant-name', variantName).prop('disabled', false);
+                } else {
+                    $('#stockStatus').html(`<span class="text-danger fw-bold"><i class="fas fa-times-circle me-1"></i> Hết hàng cho phân loại này</span>`);
+                    btnConfirm.prop('disabled', true).removeData('detail-id');
+                }
+            } else {
+                $('#stockStatus').html(`<span class="text-warning fw-bold"><i class="fas fa-exclamation-triangle me-1"></i> Phân loại này không tồn tại</span>`);
+                btnConfirm.prop('disabled', true).removeData('detail-id');
+            }
+        } else {
+            $('#stockStatus').html('<span class="text-muted"><i class="fas fa-info-circle me-1"></i> Vui lòng chọn cả Màu sắc và Kích cỡ.</span>');
+            btnConfirm.prop('disabled', true).removeData('detail-id');
+        }
+    }
 
     // ==========================================
     // XÁC NHẬN THÊM VÀO GIỎ TỪ BÊN TRONG MODAL
     // ==========================================
     $(document).on('click', '#btnConfirmQuickAdd', function() {
         const detailId = $(this).data('detail-id');
+        const variantName = $(this).data('variant-name') || '';
         const userId = localStorage.getItem("user_id");
-        const productName = $('#quickAddTitle').text();
+        const baseProductName = $(this).data('product-name') || 'Sản phẩm';
+        const productName = variantName ? `${baseProductName} - ${variantName}` : baseProductName;
 
         if (!detailId) return;
 

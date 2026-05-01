@@ -53,8 +53,8 @@ $(document).ready(function() {
                 localStorage.setItem("user_name", updatedData.fullName); // Cập nhật lại tên trên Navbar
                 $(".user-profile-toggle span").text(updatedData.fullName); // Cập nhật tên ngay lập tức ngoài màn hình
             },
-            error: function() {
-                showAlert("Có lỗi xảy ra khi cập nhật hồ sơ.", "danger");
+            error: function(xhr) {
+                showAlert(xhr.responseText || "Có lỗi xảy ra khi cập nhật hồ sơ.", "danger");
             },
             complete: function() {
                 btnSubmit.prop("disabled", false).html('<i class="fas fa-save me-2"></i> Lưu Thay Đổi');

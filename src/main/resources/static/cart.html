@@ -147,6 +147,8 @@
                         <select class="form-select" id="paymentMethod">
                             <option value="COD">Thanh toán khi nhận hàng (COD)</option>
                             <option value="VNPAY">Thanh toán qua cổng VNPay</option>
+                            <option value="MOMO">Thanh toán qua ví MoMo</option>
+                            <option value="BANKING">Chuyển khoản ngân hàng</option>
                         </select>
                     </div>
                 </div>
@@ -354,11 +356,8 @@
                     contentType: "application/json",
                     data: JSON.stringify(payload),
                     success: function(orderId) {
-                        if (paymentMethod === "VNPAY") {
-                            window.location.href = "success.html?orderId=" + orderId + "&method=vnpay";
-                        } else {
-                            window.location.href = "success.html?orderId=" + orderId + "&method=cod";
-                        }
+                        // Tự động truyền thẳng method (COD, VNPAY, MOMO...) sang trang success
+                        window.location.href = "success.html?orderId=" + orderId + "&method=" + paymentMethod;
                     },
                     error: function(xhr) {
                         // Hiển thị lỗi cụ thể từ Backend (VD: Hết hàng)

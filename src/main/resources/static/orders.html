@@ -77,6 +77,24 @@
         </div>
     </div>
 
+    <!-- Modal Chi tiết đơn hàng -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="background-color: #1e2129; border: 1px solid #3a3f4a; border-radius: 16px;">
+                <div class="modal-header border-bottom" style="border-color: #3a3f4a !important;">
+                    <h5 class="modal-title fw-bold text-light" id="orderDetailsModalLabel">Chi tiết đơn hàng</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="orderDetailsContent">
+                    <!-- Nội dung chi tiết đơn hàng sẽ được load bằng Ajax -->
+                </div>
+                <div class="modal-footer border-top" style="border-color: #3a3f4a !important;">
+                    <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
@@ -178,7 +196,7 @@
                                         <span class="text-muted small d-block mb-1">Tổng tiền:</span>
                                         <span class="order-total">${order.total.toLocaleString('vi-VN')} ₫</span>
                                     </div>
-                                    <button class="btn btn-outline-custom btn-sm mt-md-2" onclick="alert('Tính năng xem chi tiết đơn hàng đang phát triển!')">
+                                    <button class="btn btn-outline-custom btn-sm mt-md-2 btn-view-details" data-id="${order.id}">
                                         Xem chi tiết
                                     </button>
                                 </div>
@@ -189,6 +207,83 @@
 
                 $('#ordersList').html(html);
             }
+
+            // Xử lý sự kiện bấm nút "Xem chi tiết" để hiển thị Modal Lịch sử / Chi tiết đơn hàng
+            $(document).on('click', '.btn-view-details', function() {
+                const orderId = $(this).data('id');
+                $('#orderDetailsModal').modal('show');
+                $('#orderDetailsContent').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i><p class="text-muted">Đang tải thông tin chi tiết...</p></div>');
+
+                // Gọi API lấy chi tiết đơn hàng từ Backend
+                $.ajax({
+                    url: "/api/orders/" + orderId + "/details",
+                    type: "GET",
+                    success: function(details) {
+                        if (!details || details.length === 0) {
+                            $('#orderDetailsContent').html('<div class="text-center py-4 text-warning">Không tìm thấy thông tin chi tiết cho đơn hàng này.</div>');
+                            return;
+                        }
+
+                        let itemsHtml = "";
+                        let totalAmount = 0;
+
+                        details.forEach(item => {
+                            const price = item.price || item.unitPrice || 0;
+                            const qty = item.quantity || 1;
+                            const itemTotal = price * qty;
+                            totalAmount += itemTotal;
+                            const imgSrc = item.thumbnail || item.thumb || item.thumbnailImgUrl || "images/nike-air-force-1-low-white.jpg";
+
+                            itemsHtml += `
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-secondary rounded me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                                <img src="${imgSrc}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='images/nike-air-force-1-low-white.jpg';">
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-light">${item.productName || 'Sản phẩm'}</div>
+                                                <div class="small text-muted">Size: ${item.sizeName || 'N/A'} | Màu: ${item.colorName || 'N/A'}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center text-light fw-bold">${qty}</td>
+                                    <td class="text-end text-success fw-bold">${itemTotal.toLocaleString('vi-VN')} ₫</td>
+                                </tr>
+                            `;
+                        });
+
+                        $('#orderDetailsContent').html(`
+                            <div class="mb-3">
+                                <h6 class="text-light fw-bold mb-3"><i class="fas fa-hashtag text-primary me-2"></i>Mã đơn hàng: SP-${orderId}</h6>
+                            </div>
+                            <div class="table-responsive mt-4">
+                                <table class="table table-dark table-hover align-middle mb-0" style="--bs-table-bg: transparent;">
+                                    <thead>
+                                        <tr style="border-bottom: 2px solid #3a3f4a;">
+                                            <th class="text-muted small text-uppercase">Sản phẩm</th>
+                                            <th class="text-muted small text-uppercase text-center">Số lượng</th>
+                                            <th class="text-muted small text-uppercase text-end">Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${itemsHtml}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="border-top: 2px solid #3a3f4a;">
+                                            <td colspan="2" class="text-end text-muted fw-bold">Tổng cộng:</td>
+                                            <td class="text-end text-warning fw-bold fs-5">${totalAmount.toLocaleString('vi-VN')} ₫</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        `);
+                    },
+                    error: function() {
+                        $('#orderDetailsContent').html('<div class="text-center py-4 text-danger"><i class="fas fa-exclamation-circle fa-2x mb-3 d-block"></i> Lỗi tải dữ liệu. Vui lòng kiểm tra lại kết nối hoặc API.</div>');
+                    }
+                });
+            });
         });
     </script>
 </body>

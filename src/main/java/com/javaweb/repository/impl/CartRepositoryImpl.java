@@ -121,11 +121,25 @@ public class CartRepositoryImpl implements CartRepository {
                 while (rs.next()) {
                     CartItemResponseDTO dto = new CartItemResponseDTO();
                     dto.setProductDetailId(rs.getInt("product_detail_id"));
-                    dto.setProductName(rs.getString("product_name")); 
+                    
+                    String pName = rs.getString("product_name");
+                    String sizeName = rs.getString("size_name");
+                    String colorName = rs.getString("color_name");
+                    
+                    String fullName = pName;
+                    if (colorName != null && sizeName != null) {
+                        fullName += " - " + colorName + " (Size " + sizeName + ")";
+                    } else if (colorName != null) {
+                        fullName += " - " + colorName;
+                    } else if (sizeName != null) {
+                        fullName += " - Size " + sizeName;
+                    }
+                    
+                    dto.setProductName(fullName);
                     dto.setPrice(rs.getLong("price"));
                     dto.setQuantity(rs.getInt("quantity"));
-                    dto.setSizeName(rs.getString("size_name"));
-                    dto.setColorName(rs.getString("color_name"));
+                    dto.setSizeName(sizeName);
+                    dto.setColorName(colorName);
                     dto.setThumbnail(rs.getString("thumb"));
                     dto.setTotalPrice(dto.getPrice() * dto.getQuantity());
                     list.add(dto);
