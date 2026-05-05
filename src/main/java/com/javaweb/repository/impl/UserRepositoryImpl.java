@@ -10,9 +10,9 @@ import com.javaweb.utils.ConnectionJDBCUtil;
 @Repository
 public class UserRepositoryImpl implements UserRepository {
     @Override
-    public UserEntity findByEmailAndPassword(String email, String password_hash)
+    public UserEntity findByEmail(String email)
     {
-        String sql = "SELECT * FROM users WHERE email = ? AND password_hash = ?";
+        String sql = "SELECT * FROM users WHERE email = ?";
         // Implementation for finding user by email and password
         UserEntity user = null;
 
@@ -20,7 +20,7 @@ public class UserRepositoryImpl implements UserRepository {
                 PreparedStatement pstmt = conn.prepareStatement(sql))
                 {
                     pstmt.setString(1,email);
-                    pstmt.setString(2,password_hash);
+//                    pstmt.setString(2,password_hash);
 
                     try (ResultSet rs = pstmt.executeQuery())
                     {
@@ -31,6 +31,7 @@ public class UserRepositoryImpl implements UserRepository {
                             user.setFullname(rs.getString("full_name"));
                             user.setEmail(rs.getString("email"));
                             user.setRole_id(rs.getInt("role_id"));
+                            user.setPassword_hash(rs.getString("password_hash")); // them hash pass
                         }
                     }
                 } catch (Exception e) {
