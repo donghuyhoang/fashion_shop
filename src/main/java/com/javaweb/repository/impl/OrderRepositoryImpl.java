@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 @Repository
@@ -22,11 +24,14 @@ public class OrderRepositoryImpl implements OrderRepository {
             conn.setAutoCommit(false); // BẮT ĐẦU TRANSACTION
 
             // 1. Lấy tất cả sản phẩm trong giỏ và kiểm tra tồn kho
-            String getCartDetailsSql = "SELECT ci.product_detail_id, ci.quantity, pd.price, pd.stock_quantity, p.name as product_name " +
+            String getCartDetailsSql = "SELECT ci.product_detail_id, ci.quantity, pd.price, pd.stock_quantity, p.name as product_name, " +
+                                       "s.value as size_name, c_color.name as color_name " +
                                        "FROM cart_items ci " +
                                        "JOIN carts c ON ci.cart_id = c.cart_id " +
                                        "JOIN product_details pd ON ci.product_detail_id = pd.product_detail_id " +
                                        "JOIN products p ON pd.product_id = p.product_id " +
+                                       "LEFT JOIN sizes s ON pd.size_id = s.size_id " +
+                                       "LEFT JOIN colors c_color ON pd.color_id = c_color.color_id " +
                                        "WHERE c.user_id = ?";
             
             List<CartItemResponseDTO> itemsToOrder = new ArrayList<>();
@@ -36,8 +41,20 @@ public class OrderRepositoryImpl implements OrderRepository {
                 getDetailsStmt.setInt(1, userId);
                 try (ResultSet rs = getDetailsStmt.executeQuery()) {
                     while (rs.next()) {
+                        String pName = rs.getString("product_name");
+                        String sizeName = rs.getString("size_name");
+                        String colorName = rs.getString("color_name");
+                        String fullName = pName;
+                        if (colorName != null && sizeName != null) {
+                            fullName += " - " + colorName + " (Size " + sizeName + ")";
+                        } else if (colorName != null) {
+                            fullName += " - " + colorName;
+                        } else if (sizeName != null) {
+                            fullName += " - Size " + sizeName;
+                        }
+
                         if (rs.getInt("quantity") > rs.getInt("stock_quantity")) {
-                            throw new RuntimeException("Sản phẩm '" + rs.getString("product_name") + "' không đủ số lượng trong kho (còn " + rs.getInt("stock_quantity") + ").");
+                            throw new RuntimeException("Sản phẩm '" + fullName + "' không đủ số lượng trong kho (còn " + rs.getInt("stock_quantity") + ").");
                         }
                         CartItemResponseDTO item = new CartItemResponseDTO();
                         item.setProductDetailId(rs.getInt("product_detail_id"));
@@ -54,7 +71,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             }
 
             // 2. Tạo một đơn hàng mới trong bảng `orders`
-            String createOrderSql = "INSERT INTO orders (user_id, order_date, total_money, discount_money, final_money, shipping_status, payment_status, shipping_address, receiver_name, receiver_phone, payment_method) VALUES (?, NOW(), ?, 0, ?, '1', '1', ?, ?, ?, ?)";
+            String createOrderSql = "INSERT INTO orders (user_id, order_date, total_money, discount_money, final_money, shipping_status, payment_status, shipping_address, receiver_name, receiver_phone, payment_method) VALUES (?, NOW(), ?, 0, ?, 'Processing', 'Unpaid', ?, ?, ?, ?)";
             int orderId;
             try (PreparedStatement createOrderStmt = conn.prepareStatement(createOrderSql, Statement.RETURN_GENERATED_KEYS)) {
                 createOrderStmt.setInt(1, userId);
@@ -118,5 +135,98 @@ public class OrderRepositoryImpl implements OrderRepository {
                 }
             } catch (SQLException e) { e.printStackTrace(); }
         }
+    }
+
+    @Override
+    public List<Map<String, Object>> getOrdersByStatus(String status) {
+        System.out.println(">>> [DEBUG Backend] Đang lấy đơn hàng có trạng thái: " + status);
+        List<Map<String, Object>> orders = new ArrayList<>();
+        // Ánh xạ trạng thái Frontend sang trạng thái Database Enum
+        String dbStatus = status.equals("PENDING") ? "Processing" : (status.equals("SHIPPING") ? "Shipping" : (status.equals("CANCELLED") ? "Cancelled" : status));
+        
+        String sql = "SELECT order_id, receiver_name, receiver_phone, order_date, final_money FROM orders WHERE shipping_status = ?";
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, dbStatus);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> order = new HashMap<>();
+                    order.put("id", rs.getInt("order_id"));
+                    order.put("receiverName", rs.getString("receiver_name"));
+                    order.put("receiverPhone", rs.getString("receiver_phone"));
+                    order.put("date", rs.getTimestamp("order_date"));
+                    order.put("total", rs.getLong("final_money"));
+                    orders.add(order);
+                }
+            }
+            System.out.println(">>> [DEBUG Backend] Đã tìm thấy " + orders.size() + " đơn hàng.");
+        } catch (Exception e) {
+            System.out.println(">>> [DEBUG Backend] LỖI CSDL KHI TÌM ĐƠN HÀNG: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    @Override
+    public boolean updateOrderStatus(Integer orderId, String status) {
+        String dbStatus = status.equals("PENDING") ? "Processing" : (status.equals("SHIPPING") ? "Shipping" : (status.equals("CANCELLED") ? "Cancelled" : status));
+        String sql = "UPDATE orders SET shipping_status = ? WHERE order_id = ?";
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, dbStatus);
+            pstmt.setInt(2, orderId);
+            return pstmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ==========================================
+    // THỐNG KÊ DOANH THU & DASHBOARD (DÀNH CHO ADMIN)
+    // ==========================================
+    public Map<String, Object> getDashboardStats() {
+        Map<String, Object> stats = new HashMap<>();
+        
+        // Lấy Tổng doanh thu và Tổng số đơn hàng (Bỏ qua đơn đã Hủy)
+        String sqlOrder = "SELECT COUNT(order_id) as total_orders, SUM(final_money) as total_revenue FROM orders WHERE shipping_status != 'Cancelled'";
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sqlOrder);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                stats.put("totalOrders", rs.getInt("total_orders"));
+                stats.put("totalRevenue", rs.getLong("total_revenue"));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        // Lấy Tổng số lượng khách hàng (role_id = 2)
+        String sqlUser = "SELECT COUNT(user_id) as total_users FROM users WHERE role_id = 2";
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sqlUser);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                stats.put("totalUsers", rs.getInt("total_users"));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        return stats;
+    }
+
+    public List<Map<String, Object>> getMonthlyRevenue(int year) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String sql = "SELECT MONTH(order_date) as month, SUM(final_money) as revenue FROM orders WHERE YEAR(order_date) = ? AND shipping_status != 'Cancelled' GROUP BY MONTH(order_date) ORDER BY MONTH(order_date)";
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, year);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("month", rs.getInt("month"));
+                    map.put("revenue", rs.getLong("revenue"));
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
     }
 }

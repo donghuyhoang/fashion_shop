@@ -5,6 +5,8 @@ import model.OrderRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -14,6 +16,10 @@ public class OrderAPI {
     @Autowired
     private OrderService orderService;
 
+    // Tiêm trực tiếp Repository để xử lý nhanh báo cáo
+    @Autowired
+    private com.javaweb.repository.impl.OrderRepositoryImpl orderRepositoryImpl;
+
     @PostMapping("/checkout")
     public ResponseEntity<?> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
         try {
@@ -22,5 +28,41 @@ public class OrderAPI {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    // ==========================================
+    // API LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI
+    // ==========================================
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Map<String, Object>>> getOrdersByStatus(@PathVariable String status) {
+        return ResponseEntity.ok(orderService.getOrdersByStatus(status));
+    }
+
+    // ==========================================
+    // API DUYỆT / HỦY ĐƠN HÀNG (CẬP NHẬT TRẠNG THÁI)
+    // ==========================================
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Integer id, @RequestBody Map<String, String> payload) {
+        String newStatus = payload.get("status");
+        boolean success = orderService.updateOrderStatus(id, newStatus);
+        
+        if (success) {
+            return ResponseEntity.ok("Cập nhật trạng thái thành công");
+        }
+        return ResponseEntity.badRequest().body("Cập nhật trạng thái thất bại");
+    }
+
+    // ==========================================
+    // API BÁO CÁO THỐNG KÊ (DASHBOARD ADMIN)
+    // ==========================================
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<Map<String, Object>> getDashboardStats() {
+        return ResponseEntity.ok(orderRepositoryImpl.getDashboardStats());
+    }
+
+    // VD: /api/orders/dashboard/revenue/2024
+    @GetMapping("/dashboard/revenue/{year}")
+    public ResponseEntity<List<Map<String, Object>>> getMonthlyRevenue(@PathVariable Integer year) {
+        return ResponseEntity.ok(orderRepositoryImpl.getMonthlyRevenue(year));
     }
 }

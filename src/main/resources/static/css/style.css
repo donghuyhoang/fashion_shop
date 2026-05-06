@@ -7,13 +7,18 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
 body {
     background-color: #12151c !important;
     color: #fafbfc;
     font-family: 'Montserrat', sans-serif;
     line-height: 1.6;
     overflow-x: hidden;
-    padding-top: 85px; /* Đẩy nội dung xuống tránh bị Header đè lên */
+    padding-top: 85px; 
 }
 
 a {
@@ -71,31 +76,48 @@ a:hover {
     color: #2b5cff;
 }
 
-/* Thanh tìm kiếm */
+/* ==========================================
+   3. THANH TÌM KIẾM (ĐÃ GỘP TỐI ƯU)
+   ========================================== */
 .nav-search {
-    background: #1e2129;
-    border: 1px solid #3a3f4a;
-    border-radius: 25px;
-    padding: 0.5rem 1rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    background-color: #1a1d24; 
+    border: 1px solid #3a3f4a; 
+    border-radius: 20px; 
+    padding: 8px 16px; 
+    width: 250px; 
+    transition: all 0.3s ease; 
+}
+
+.nav-search:focus-within {
+    border-color: #10b981; 
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.2); 
+    background-color: #1e2129; 
 }
 
 .nav-search i {
     color: #9ca3af;
     font-size: 0.9rem;
+    margin-right: 10px;
 }
 
 .nav-search input {
-    background: transparent;
-    border: none;
-    color: #fafbfc;
-    outline: none;
-    font-size: 0.875rem;
-    width: 200px;
+    background: transparent; 
+    border: none; 
+    color: #ffffff; 
+    width: 100%;
+    outline: none; 
+    font-size: 0.9rem;
 }
 
+.nav-search input::placeholder {
+    color: #6b7280;
+}
+
+/* ==========================================
+   4. ICON ACTIONS & BADGE
+   ========================================== */
 .nav-actions {
     display: flex;
     align-items: center;
@@ -115,7 +137,7 @@ a:hover {
 }
 
 /* ==========================================
-   3. HERO SECTION (ẢNH NỀN LẤP ĐẦY)
+   5. HERO SECTION (ẢNH NỀN LẤP ĐẦY)
    ========================================== */
 .hero-section {
     position: relative;
@@ -236,7 +258,7 @@ a:hover {
 }
 
 /* ==========================================
-   4. CATEGORY PILLS (NÚT LỌC TRÒN)
+   6. CATEGORY PILLS (NÚT LỌC TRÒN)
    ========================================== */
 .category-pills-section {
     padding: 2rem 0;
@@ -265,10 +287,8 @@ a:hover {
 }
 
 /* ==========================================
-   5. PRODUCT CARDS - IMPECCABLE DESIGN
+   7. PRODUCT CARDS - IMPECCABLE DESIGN
    ========================================== */
-
-/* Grid layout cho danh sách sản phẩm */
 .collection-block .row {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important; 
@@ -285,12 +305,11 @@ a:hover {
 
 @media (min-width: 1200px) {
     .collection-block .row {
-        grid-template-columns: repeat(4, 1fr) !important; 
+        grid-template-columns: repeat(4, 280px) !important; /* Cố định chiều rộng thẻ ở 280px */
+        justify-content: center !important; /* Căn giữa danh sách thẻ vào giữa màn hình */
     }
 }
 
-/* 🔥 ĐÂY LÀ ĐOẠN CODE CHỮA LỖI THẺ BỊ ÉP NHỎ 🔥 */
-/* Ép các thẻ con phải phóng to lấp đầy 100% ô Grid, không bị Bootstrap bóp lại thành 25% nữa */
 .collection-block .row > div {
     width: 100% !important;
     max-width: 100% !important;
@@ -299,7 +318,6 @@ a:hover {
     margin: 0 !important;
 }
 
-/* Thẻ card sản phẩm tối sang trọng */
 .dark-card {
     background: linear-gradient(145deg, #1e2129 0%, #242933 100%);
     border: 1px solid #3a3f4a !important;
@@ -311,26 +329,22 @@ a:hover {
     backdrop-filter: blur(10px);
 }
 
-
-/* Hiệu ứng nổi lên khi di chuột (hover) */
 .dark-card:hover {
     transform: translateY(-12px) scale(1.02);
     box-shadow: 
-        0 30px 60px rgba(50, 55, 65, 0.5), /* Bóng đổ sâu */
-        0 0 0 1px rgba(43, 92, 255, 0.3), /* Viền sáng xanh */
-        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important; /* Viền sáng trên đỉnh */
+        0 30px 60px rgba(50, 55, 65, 0.5), 
+        0 0 0 1px rgba(43, 92, 255, 0.3), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important; 
     border-color: #4a5260 !important;
 }
 
-/* Khung ảnh giày khổng lồ */
 .product-img {
-    height: 260px !important; /* PHÓNG TO chiều cao ảnh */
+    height: 260px !important; 
     background: linear-gradient(135deg, #2a2f3a 0%, #1e2129 100%);
     position: relative;
     overflow: hidden;
 }
 
-/* Lớp phủ radial gradient khi hover */
 .product-img::before {
     content: '';
     position: absolute;
@@ -345,7 +359,6 @@ a:hover {
     opacity: 1;
 }
 
-/* Ảnh giày lấp đầy ô */
 .product-img img {
     width: 100%;
     height: 100%;
@@ -356,20 +369,17 @@ a:hover {
     z-index: 2;
 }
 
-/* Hiệu ứng zoom và nghiêng ảnh khi hover */
 .dark-card:hover .product-img img {
     transform: scale(1.15) rotate(-1.5deg);
 }
 
-/* Thân card chứa thông tin */
 .dark-card .card-body {
-    padding: 24px 28px 28px !important; /* Khoảng trống thoáng đãng */
+    padding: 24px 28px 28px !important; 
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
-/* Tên giày in bold đậm nét */
 .product-name {
     font-weight: 900 !important;
     font-size: 17px !important;
@@ -380,7 +390,6 @@ a:hover {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Thương hiệu/Danh mục */
 .product-category {
     font-size: 13px !important;
     color: #9ca3af !important;
@@ -390,7 +399,6 @@ a:hover {
     text-transform: uppercase;
 }
 
-/* Giá giày vàng nổi bật */
 .d-flex.justify-content-between.align-items-center.mt-auto .product-price {
     font-size: 24px !important;
     font-weight: 900 !important;
@@ -402,7 +410,6 @@ a:hover {
     letter-spacing: -0.5px;
 }
 
-/* Nút mua hàng (Cart icon) */
 .btn-buy {
     background: linear-gradient(135deg, #f9fafb 0%, #f1f5f9 100%);
     color: #334155 !important;
@@ -427,7 +434,7 @@ a:hover {
 }
 
 /* ==========================================
-   6. BANNERS STORYTELLING
+   8. BANNERS STORYTELLING
    ========================================== */
 .section-title {
     font-size: 2.5rem;
@@ -460,14 +467,13 @@ a:hover {
     transform: translateX(4px);
 }
 
-/* Banner thu gọn để vừa 1 màn hình */
 .story-banner {
     position: relative;
     width: 100%;
     min-height: 320px !important; 
     background-size: cover;
     background-position: center;
-    background-attachment: fixed; /* 🔥 THÊM DÒNG NÀY: Bật hiệu ứng Parallax trượt ảnh 3D 🔥 */
+    background-attachment: fixed; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -515,7 +521,7 @@ a:hover {
 }
 
 .banner-title {
-    font-size: 3.5rem !important; /* Ép nhỏ chữ banner */
+    font-size: 3.5rem !important; 
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: -1.5px;
@@ -532,7 +538,7 @@ a:hover {
 }
 
 /* ==========================================
-   7. TOAST THÔNG BÁO (THÊM VÀO GIỎ)
+   9. TOAST THÔNG BÁO (THÊM VÀO GIỎ)
    ========================================== */
 .toast-container-custom {
     position: fixed;
@@ -564,11 +570,48 @@ a:hover {
 .toast-msg.error { border-left-color: #ef4444; }
 
 /* ==========================================
-   8. UTILITIES & RESPONSIVE
+   10. USER MESSAGE BOX (HỘP THOẠI NGƯỜI DÙNG)
+   ========================================== */
+.user-message-box {
+    display: none;
+    position: absolute;
+    top: 130%;
+    right: 0;
+    width: 220px;
+    background: #1e2129;
+    border: 1px solid #3a3f4a;
+    border-radius: 12px;
+    padding: 0.5rem 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    z-index: 1050;
+    overflow: hidden; 
+}
+
+.dropdown-custom-item {
+    display: flex;
+    align-items: center;
+    color: #fafbfc;
+    text-decoration: none;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-custom-item:hover {
+    background-color: #242933;
+    color: #2b5cff;
+}
+
+.dropdown-custom-item.text-danger:hover {
+    color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* ==========================================
+   11. UTILITIES & RESPONSIVE
    ========================================== */
 .container { max-width: 1400px; }
 
-/* Đẩy card lên gần banner */
 .collection-block .container.mt-5 {
     margin-top: 15px !important; 
 }
@@ -592,47 +635,4 @@ footer {
     .hero-content { padding: 0 1rem; }
     .section-title { font-size: 2rem; }
     .banner-title { font-size: 2.5rem !important; }
-}
-
-/* ==========================================
-   CSS CHO Ô TÌM KIẾM (DARK THEME)
-   ========================================== */
-.nav-search {
-    display: flex;
-    align-items: center;
-    background-color: #1a1d24; /* Nền tối hòa hợp với giao diện */
-    border: 1px solid #3a3f4a; /* Viền xám mờ tinh tế */
-    border-radius: 20px; /* Bo góc tròn trịa hình viên thuốc */
-    padding: 8px 16px; /* Khoảng cách bên trong */
-    width: 250px; /* Chiều dài của thanh tìm kiếm */
-    transition: all 0.3s ease; /* Hiệu ứng chuyển động mượt mà */
-}
-
-/* Hiệu ứng khi người dùng click chuột vào ô tìm kiếm */
-.nav-search:focus-within {
-    border-color: #10b981; /* Đổi viền sang màu xanh lá (Success) */
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.2); /* Tỏa sáng nhẹ */
-    background-color: #1e2129; 
-}
-
-/* Chỉnh màu cho Icon kính lúp */
-.nav-search i {
-    color: #9ca3af;
-    font-size: 0.9rem;
-    margin-right: 10px;
-}
-
-/* Chỉnh cấu trúc ô nhập chữ */
-.nav-search input {
-    background: transparent; /* Xóa phông nền trắng mặc định */
-    border: none; /* Xóa viền đen mặc định */
-    color: #ffffff; /* Chữ gõ vào màu trắng */
-    width: 100%;
-    outline: none; /* Bỏ viền xanh lè mặc định của trình duyệt */
-    font-size: 0.9rem;
-}
-
-/* Chỉnh màu chữ mờ của dòng "Tìm kiếm giày..." */
-.nav-search input::placeholder {
-    color: #6b7280;
 }
