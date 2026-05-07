@@ -2,21 +2,21 @@ package com.javaweb.utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.util.ResourceBundle;
 
 public class ConnectionJDBCUtil {
-	static final String DB_URL = "jdbc:mysql://localhost:3306/fashion_shop";
-	static final String USER = "root";
-	static final String PASS = "Taibui2710@";
-	public static Connection getConnection() {
-		Connection conn = null; 
-		try {
-			conn = DriverManager.getConnection(DB_URL,USER,PASS);
-			return conn;
-		}
-		catch(SQLException e) {
-			e.printStackTrace();
-		}
-		return conn;
-	}
+    // Đọc thông tin từ file application.properties
+    private static final ResourceBundle bundle = ResourceBundle.getBundle("application");
+    
+    private static final String URL = bundle.getString("spring.datasource.url");
+    private static final String USER = bundle.getString("spring.datasource.username");
+    private static final String PASS = bundle.getString("spring.datasource.password");
+
+    public static Connection getConnection() {
+        try {
+            return DriverManager.getConnection(URL, USER, PASS);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi kết nối cơ sở dữ liệu: " + e.getMessage());
+        }
+    }
 }
