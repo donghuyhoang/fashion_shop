@@ -17,7 +17,7 @@ public class ProductImageAPI {
 
     // API lấy danh sách toàn bộ ảnh của 1 sản phẩm
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ProductImageDTO>> getImagesByProduct(@PathVariable Integer productId) {
+    public ResponseEntity<List<ProductImageDTO>> getImagesByProduct(@PathVariable("productId") Integer productId) {
         List<ProductImageDTO> images = productImageService.getImagesByProductId(productId);
         if (images.isEmpty()) {
             return ResponseEntity.notFound().build();

@@ -4,12 +4,12 @@ import java.util.List;
 
 import com.javaweb.builder.ProductSearchBuilder;
 
-import model.productDTO;
+import model.ProductDTO;
 
 public interface ProductService {
-	List<productDTO> findAll();
-	List<productDTO> findProduct(ProductSearchBuilder params);
-	void save(model.productDTO dto);
-    void update(model.productDTO dto);
+	List<ProductDTO> findAll();
+	List<ProductDTO> findProduct(ProductSearchBuilder params);
+	void save(model.ProductDTO dto);
+    void update(model.ProductDTO dto);
     void delete(Integer id);
 }

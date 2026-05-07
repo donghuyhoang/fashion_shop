@@ -2,6 +2,8 @@ package com.javaweb.repository.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 import com.javaweb.repository.UserRepository;
 import com.javaweb.repository.entity.UserEntity;
@@ -30,7 +32,9 @@ public class UserRepositoryImpl implements UserRepository {
                             user.setUser_id(rs.getInt("user_id"));
                             user.setFullname(rs.getString("full_name"));
                             user.setEmail(rs.getString("email"));
+                            user.setPhone(rs.getString("phone"));
                             user.setRole_id(rs.getInt("role_id"));
+                            user.setIs_active(rs.getObject("is_active") != null ? rs.getInt("is_active") : 1);
                         }
                     }
                 } catch (Exception e) {
@@ -61,6 +65,27 @@ public class UserRepositoryImpl implements UserRepository {
             return false;
     }
     
+    public boolean checkPhoneExists(String phone) 
+    {
+        String sql = "SELECT COUNT(*) FROM users WHERE phone = ?";
+        try(Connection conn = ConnectionJDBCUtil.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql))
+            {
+                pstmt.setString(1, phone);
+                try(ResultSet rs = pstmt.executeQuery())
+                {
+                    if(rs.next() && rs.getInt(1) > 0)
+                    {
+                        return true;
+                    }
+                }
+            } catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            return false;
+    }
+
     @Override
     public boolean register(UserEntity user) {
         String sql = "INSERT INTO users (full_name, email, phone, password_hash, role_id, is_active, created_at) VALUES (?, ?, ?, ?, ?, 1, NOW())";
@@ -80,12 +105,130 @@ public class UserRepositoryImpl implements UserRepository {
                 
                 return rowsAffected > 0; // Trả về true nếu insert thành công
             } catch (Exception e) {
-                conn.rollback(); // Nếu có lỗi thì hoàn tác
+                try {
+                    conn.rollback(); // Thêm try-catch vì rollback ném ra SQLException
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
                 e.printStackTrace();
+            }finally {
+                try {
+                    conn.setAutoCommit(true); // Thêm try-catch vì setAutoCommit ném ra SQLException
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false; // Trả về false nếu thất bại
+    }
+
+    public UserEntity findById(Integer userId) {
+        String sql = "SELECT * FROM users WHERE user_id = ?";
+        UserEntity user = null;
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    user = new UserEntity();
+                    user.setUser_id(rs.getInt("user_id"));
+                    user.setFullname(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setPhone(rs.getString("phone"));
+                    user.setRole_id(rs.getInt("role_id"));
+                    user.setIs_active(rs.getObject("is_active") != null ? rs.getInt("is_active") : 1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    public boolean updateUser(UserEntity user) {
+        String sql = "UPDATE users SET full_name = ?, phone = ?, email = ? WHERE user_id = ?";
+
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, user.getFullname());
+            pstmt.setString(2, user.getPhone());
+            pstmt.setString(3, user.getEmail());
+            pstmt.setInt(4, user.getUser_id());
+            
+            pstmt.executeUpdate();
+            return true;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean changePassword(Integer userId, String oldPassword, String newPassword) {
+        String checkSql = "SELECT password_hash FROM users WHERE user_id = ? AND password_hash = ?";
+        String updateSql = "UPDATE users SET password_hash = ? WHERE user_id = ?";
+        
+        try (Connection conn = ConnectionJDBCUtil.getConnection()) {
+            // Kiểm tra mật khẩu cũ
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setInt(1, userId);
+                checkStmt.setString(2, oldPassword);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (!rs.next()) return false; // Không khớp mật khẩu cũ
+                }
+            }
+            // Cập nhật mật khẩu mới
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                updateStmt.setString(1, newPassword);
+                updateStmt.setInt(2, userId);
+                updateStmt.executeUpdate();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<UserEntity> findAllUsers() {
+        List<UserEntity> users = new ArrayList<>();
+        String sql = "SELECT user_id, full_name, email, phone, role_id, is_active FROM users";
+        
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+             
+            while (rs.next()) {
+                UserEntity user = new UserEntity();
+                user.setUser_id(rs.getInt("user_id"));
+                user.setFullname(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+                user.setRole_id(rs.getInt("role_id"));
+                user.setIs_active(rs.getObject("is_active") != null ? rs.getInt("is_active") : 1);
+                users.add(user);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public boolean updateUserStatus(Integer userId, Integer isActive) {
+        String sql = "UPDATE users SET is_active = ? WHERE user_id = ?";
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, isActive);
+            pstmt.setInt(2, userId);
+            pstmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

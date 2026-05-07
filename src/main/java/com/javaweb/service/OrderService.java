@@ -1,0 +1,11 @@
+package com.javaweb.service;
+
+import model.OrderRequestDTO;
+import java.util.List;
+import java.util.Map;
+
+public interface OrderService {
+    Integer checkout(OrderRequestDTO orderRequestDTO);
+    List<Map<String, Object>> getOrdersByStatus(String status);
+    boolean updateOrderStatus(Integer orderId, String status);
+}

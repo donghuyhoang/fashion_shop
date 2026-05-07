@@ -17,7 +17,7 @@ public class ProductDetailAPI {
 
     // API lấy toàn bộ thông tin chi tiết (các phiên bản) của 1 sản phẩm
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ProductDetailDTO>> getDetailsByProduct(@PathVariable Integer productId) {
+    public ResponseEntity<List<ProductDetailDTO>> getDetailsByProduct(@PathVariable("productId") Integer productId) {
         List<ProductDetailDTO> details = productDetailService.getDetailsByProductId(productId);
         if (details.isEmpty()) {
             return ResponseEntity.notFound().build();
