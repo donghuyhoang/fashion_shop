@@ -9,7 +9,7 @@ public class ProductDTOConverter {
 		ProductDTO product = new ProductDTO();
 		product.setId(productEntity.getProduct_id());
 		product.setName(productEntity.getName());
-		product.setPrice(productEntity.getPrice());
+		product.setPrice(productEntity.getPrice() != null ? Double.valueOf(productEntity.getPrice().toString()) : null);
 		product.setDescription(productEntity.getDescription());
 		product.setBrandName(productEntity.getBrandName());
 		product.setStock(productEntity.getStockQuantity());

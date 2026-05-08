@@ -8,4 +8,6 @@ public interface OrderService {
     Integer checkout(OrderRequestDTO orderRequestDTO);
     List<Map<String, Object>> getOrdersByStatus(String status);
     boolean updateOrderStatus(Integer orderId, String status);
+    List<Map<String, Object>> getOrderDetails(Integer orderId);
+    List<Map<String, Object>> getOrdersByUser(Integer userId);
 }

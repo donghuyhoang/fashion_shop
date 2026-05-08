@@ -26,8 +26,18 @@ public class OrderAPI {
             Integer orderId = orderService.checkout(orderRequestDTO);
             return ResponseEntity.ok(orderId);
         } catch (Exception e) {
+            // In toàn bộ lỗi màu đỏ ra Console của Spring Boot để dễ bắt bệnh
+            e.printStackTrace(); 
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    // ==========================================
+    // API LẤY CHI TIẾT ĐƠN HÀNG
+    // ==========================================
+    @GetMapping("/{id}/details")
+    public ResponseEntity<List<Map<String, Object>>> getOrderDetails(@PathVariable Integer id) {
+        return ResponseEntity.ok(orderService.getOrderDetails(id));
     }
 
     // ==========================================
@@ -39,17 +49,30 @@ public class OrderAPI {
     }
 
     // ==========================================
+    // API LẤY DANH SÁCH ĐƠN HÀNG THEO USER (KHÁCH HÀNG)
+    // ==========================================
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Map<String, Object>>> getOrdersByUser(@PathVariable Integer userId) {
+        return ResponseEntity.ok(orderService.getOrdersByUser(userId));
+    }
+
+    // ==========================================
     // API DUYỆT / HỦY ĐƠN HÀNG (CẬP NHẬT TRẠNG THÁI)
     // ==========================================
     @PutMapping("/{id}/status")
     public ResponseEntity<?> updateOrderStatus(@PathVariable Integer id, @RequestBody Map<String, String> payload) {
-        String newStatus = payload.get("status");
-        boolean success = orderService.updateOrderStatus(id, newStatus);
-        
-        if (success) {
-            return ResponseEntity.ok("Cập nhật trạng thái thành công");
+        try {
+            String newStatus = payload.get("status");
+            boolean success = orderService.updateOrderStatus(id, newStatus);
+            
+            if (success) {
+                return ResponseEntity.ok("Cập nhật trạng thái thành công");
+            }
+            return ResponseEntity.badRequest().body("Cập nhật trạng thái thất bại");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Lỗi Database: " + e.getMessage());
         }
-        return ResponseEntity.badRequest().body("Cập nhật trạng thái thất bại");
     }
 
     // ==========================================

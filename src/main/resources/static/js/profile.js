@@ -4,7 +4,11 @@ $(document).ready(function() {
 
     if (!userId || userId === "undefined") {
         alert("Vui lòng đăng nhập để xem hồ sơ!");
-        window.location.href = "login.html";
+        if (typeof window.smoothNavigate === 'function') {
+            window.smoothNavigate("login.html");
+        } else {
+            window.location.href = "login.html";
+        }
         return;
     }
 
@@ -99,7 +103,11 @@ $(document).ready(function() {
                     localStorage.removeItem("user_id"); 
                     
                     alert("Đổi mật khẩu thành công! Vui lòng đăng nhập lại để tiếp tục.");
-                    window.location.href = "login.html"; // Chuyển về trang đăng nhập
+                    if (typeof window.smoothNavigate === 'function') {
+                        window.smoothNavigate("login.html");
+                    } else {
+                        window.location.href = "login.html";
+                    }
                 }, 1500);
             },
             error: function(xhr) {

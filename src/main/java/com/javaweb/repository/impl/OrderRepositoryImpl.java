@@ -114,7 +114,8 @@ public class OrderRepositoryImpl implements OrderRepository {
             }
 
             // 4. Xóa sạch giỏ hàng
-            String clearCartSql = "DELETE FROM cart_items WHERE cart_id = (SELECT cart_id FROM carts WHERE user_id = ?)";
+            // SỬA LỖI SQL BỀN VỮNG: Đổi "=" thành "IN" phòng trường hợp user có nhiều cart rác
+            String clearCartSql = "DELETE FROM cart_items WHERE cart_id IN (SELECT cart_id FROM carts WHERE user_id = ?)";
             try (PreparedStatement clearCartStmt = conn.prepareStatement(clearCartSql)) {
                 clearCartStmt.setInt(1, userId);
                 clearCartStmt.executeUpdate();
@@ -142,7 +143,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         System.out.println(">>> [DEBUG Backend] Đang lấy đơn hàng có trạng thái: " + status);
         List<Map<String, Object>> orders = new ArrayList<>();
         // Ánh xạ trạng thái Frontend sang trạng thái Database Enum
-        String dbStatus = status.equals("PENDING") ? "Processing" : (status.equals("SHIPPING") ? "Shipping" : (status.equals("CANCELLED") ? "Cancelled" : status));
+        String dbStatus = status.equals("PENDING") ? "Processing" : (status.equals("SHIPPING") ? "Shipping" : (status.equals("CANCELLED") ? "Cancelled" : (status.equals("COMPLETED") ? "Delivered" : status)));
         
         String sql = "SELECT order_id, receiver_name, receiver_phone, order_date, final_money FROM orders WHERE shipping_status = ?";
         try (Connection conn = ConnectionJDBCUtil.getConnection();
@@ -169,17 +170,146 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public boolean updateOrderStatus(Integer orderId, String status) {
-        String dbStatus = status.equals("PENDING") ? "Processing" : (status.equals("SHIPPING") ? "Shipping" : (status.equals("CANCELLED") ? "Cancelled" : status));
-        String sql = "UPDATE orders SET shipping_status = ? WHERE order_id = ?";
+        String dbStatus = status.equals("PENDING") ? "Processing" : (status.equals("SHIPPING") ? "Shipping" : (status.equals("CANCELLED") ? "Cancelled" : (status.equals("COMPLETED") ? "Delivered" : status)));
+        
+        Connection conn = null;
+        try {
+            conn = ConnectionJDBCUtil.getConnection();
+            conn.setAutoCommit(false); // Đảm bảo an toàn Transaction
+            
+            // TÍNH NĂNG MỚI: HOÀN TRẢ SỐ LƯỢNG (STOCK) VÀO KHO KHI HỦY ĐƠN
+            if ("Cancelled".equals(dbStatus)) {
+                String checkSql = "SELECT shipping_status FROM orders WHERE order_id = ?";
+                try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                    checkStmt.setInt(1, orderId);
+                    try (ResultSet rs = checkStmt.executeQuery()) {
+                        // Tránh trường hợp spam click khiến hàng được cộng dồn nhiều lần
+                        if (rs.next() && "Cancelled".equalsIgnoreCase(rs.getString("shipping_status"))) {
+                            return true; 
+                        }
+                    }
+                }
+                
+                // Thực hiện trả lại kho
+                String restoreStockSql = "UPDATE product_details pd " +
+                                         "JOIN order_details od ON pd.product_detail_id = od.product_detail_id " +
+                                         "SET pd.stock_quantity = pd.stock_quantity + od.quantity " +
+                                         "WHERE od.order_id = ?";
+                try (PreparedStatement restoreStmt = conn.prepareStatement(restoreStockSql)) {
+                    restoreStmt.setInt(1, orderId);
+                    restoreStmt.executeUpdate();
+                }
+            }
+            
+            // Cập nhật trạng thái đơn hàng
+            String sql = "UPDATE orders SET shipping_status = ? WHERE order_id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, dbStatus);
+                pstmt.setInt(2, orderId);
+                pstmt.executeUpdate();
+            }
+            
+            conn.commit();
+            return true; // Luôn trả về true nếu không có lỗi SQL nào xảy ra
+        } catch (Exception e) {
+            if (conn != null) { try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); } }
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage()); // Ném lỗi cho OrderAPI bắt
+        } finally {
+            if (conn != null) { try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); } }
+        }
+    }
+
+    // ==========================================
+    // LẤY CHI TIẾT ĐƠN HÀNG
+    // ==========================================
+    public List<Map<String, Object>> getOrderDetails(Integer orderId) {
+        List<Map<String, Object>> details = new ArrayList<>();
+        String sql = "SELECT od.quantity, od.unit_price, p.name as product_name, " +
+                     "s.value as size_name, c_color.name as color_name, " +
+                     "pd.thumbnail_img_url as thumb " +
+                     "FROM order_details od " +
+                     "JOIN product_details pd ON od.product_detail_id = pd.product_detail_id " +
+                     "JOIN products p ON pd.product_id = p.product_id " +
+                     "LEFT JOIN sizes s ON pd.size_id = s.size_id " +
+                     "LEFT JOIN colors c_color ON pd.color_id = c_color.color_id " +
+                     "WHERE od.order_id = ?";
         try (Connection conn = ConnectionJDBCUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, dbStatus);
-            pstmt.setInt(2, orderId);
-            return pstmt.executeUpdate() > 0;
+            pstmt.setInt(1, orderId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> item = new HashMap<>();
+                    String fullName = rs.getString("product_name");
+                    String sizeName = rs.getString("size_name");
+                    String colorName = rs.getString("color_name");
+                    
+                    if (colorName != null && sizeName != null) fullName += " - " + colorName + " (Size " + sizeName + ")";
+                    else if (colorName != null) fullName += " - " + colorName;
+                    else if (sizeName != null) fullName += " - Size " + sizeName;
+                    
+                    item.put("productName", fullName);
+                    item.put("quantity", rs.getInt("quantity"));
+                    item.put("price", rs.getLong("unit_price"));
+                    item.put("thumbnail", rs.getString("thumb"));
+                    details.add(item);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
+        return details;
+    }
+
+    // ==========================================
+    // LẤY DANH SÁCH ĐƠN HÀNG CỦA MỘT USER CỤ THỂ
+    // ==========================================
+    public List<Map<String, Object>> getOrdersByUser(Integer userId) {
+        List<Map<String, Object>> orders = new ArrayList<>();
+        String sql = "SELECT o.order_id, o.receiver_name, o.receiver_phone, o.order_date, o.final_money, o.shipping_status, o.payment_method, " +
+                     "(SELECT SUM(quantity) FROM order_details WHERE order_id = o.order_id) as items_count " +
+                     "FROM orders o WHERE o.user_id = ? ORDER BY o.order_date DESC";
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> order = new HashMap<>();
+                    order.put("id", rs.getInt("order_id"));
+                    order.put("receiverName", rs.getString("receiver_name"));
+                    order.put("receiverPhone", rs.getString("receiver_phone"));
+                    order.put("date", rs.getTimestamp("order_date"));
+                    order.put("total", rs.getLong("final_money"));
+                    
+                    // Quy đổi phương thức thanh toán
+                    String paymentMethod = rs.getString("payment_method");
+                    if ("VNPAY".equalsIgnoreCase(paymentMethod)) {
+                        order.put("methodName", "Thanh toán VNPay");
+                    } else if ("MOMO".equalsIgnoreCase(paymentMethod)) {
+                        order.put("methodName", "Thanh toán MoMo");
+                    } else if ("BANKING".equalsIgnoreCase(paymentMethod)) {
+                        order.put("methodName", "Chuyển khoản");
+                    } else {
+                        order.put("methodName", "Thanh toán COD");
+                    }
+                    
+                    order.put("itemsCount", rs.getInt("items_count") == 0 ? 1 : rs.getInt("items_count"));
+
+                    // Quy đổi trạng thái DB sang trạng thái giao diện HTML (PENDING, SHIPPING, COMPLETED, CANCELLED)
+                    String dbStatus = rs.getString("shipping_status");
+                    String status = "PENDING";
+                    if ("Shipping".equalsIgnoreCase(dbStatus)) status = "SHIPPING";
+                    else if ("Delivered".equalsIgnoreCase(dbStatus)) status = "COMPLETED";
+                    else if ("Cancelled".equalsIgnoreCase(dbStatus)) status = "CANCELLED";
+                    
+                    order.put("status", status);
+                    orders.add(order);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return orders;
     }
 
     // ==========================================
