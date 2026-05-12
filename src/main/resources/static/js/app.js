@@ -24,6 +24,32 @@ $(document).ready(function () {
     updateCartBadge(); // Cập nhật số lượng giỏ hàng ngay khi mở trang
 
     // ==========================================
+    // 1.1 HIỆU ỨNG CHUYỂN TRANG MƯỢT MÀ (GLOBAL)
+    // ==========================================
+    // Hàm chuyển trang có hiệu ứng dùng chung
+    window.smoothNavigate = function(url) {
+        $('body').addClass('page-transitioning');
+        setTimeout(function() {
+            window.location.href = url;
+        }, 400); // Khớp với thời gian transition 0.4s trong CSS
+    };
+
+    // Bắt sự kiện click vào các thẻ <a> nội bộ
+    $(document).on('click', 'a', function(e) {
+        const target = $(this).attr('href');
+        const targetAttr = $(this).attr('target');
+        const hasOnClick = $(this).attr('onclick');
+
+        // Bỏ qua các link rỗng, neo (#), js thực thi, link ngoài, tab mới hoặc nút gọi hàm
+        if (!target || target === '#' || target.startsWith('#') || target.startsWith('javascript:') || target.startsWith('http') || target.startsWith('mailto') || targetAttr === '_blank' || hasOnClick) {
+            return;
+        }
+
+        e.preventDefault();
+        window.smoothNavigate(target);
+    });
+
+    // ==========================================
     // 2. HÀM LẤY DATA VÀ HIỂN THỊ 24 ĐÔI GIÀY
     // ==========================================
     function loadStorytellingCollections() {
@@ -31,23 +57,26 @@ $(document).ready(function () {
             url: API_URL + "products",
             type: "GET",
             success: function (allProducts) {
-                let productsForStorytelling = [...allProducts];
+                if (!allProducts) return;
+                
+                // 1. Sắp xếp tất cả sản phẩm mới nhất lên đầu (Dựa vào ID)
+                const sortedProducts = [...allProducts].sort((a, b) => b.id - a.id);
+                
+                // 2. Phân loại sản phẩm (Bắt lỗi an toàn: check cả categoryId và category_id từ API)
+                const running = sortedProducts.filter(p => p.categoryId == 1 || p.category_id == 1 || (p.categoryName && p.categoryName.toLowerCase().includes('chạy bộ')));
+                const football = sortedProducts.filter(p => p.categoryId == 2 || p.category_id == 2 || (p.categoryName && p.categoryName.toLowerCase().includes('bóng đá')));
+                const basketball = sortedProducts.filter(p => p.categoryId == 3 || p.category_id == 3 || (p.categoryName && p.categoryName.toLowerCase().includes('bóng rổ')));
+                const sneaker = sortedProducts.filter(p => p.categoryId == 4 || p.category_id == 4 || (p.categoryName && p.categoryName.toLowerCase().includes('sneaker')));
+                const tennis = sortedProducts.filter(p => p.categoryId == 5 || p.category_id == 5 || (p.categoryName && p.categoryName.toLowerCase().includes('tennis')));
 
-                // Nhân bản sản phẩm thật để lấp đầy 24 ô giao diện nếu số lượng không đủ
-                if (allProducts && allProducts.length > 0) {
-                    let i = 0;
-                    while (productsForStorytelling.length < 24) {
-                        productsForStorytelling.push(allProducts[i % allProducts.length]);
-                        i++;
-                    }
-                }
-
-                renderCardsToSpecificGrid(productsForStorytelling.slice(0, 4), "#newArrivalsGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(4, 8), "#runningGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(8, 12), "#basketballGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(12, 16), "#luxuryGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(16, 20), "#collabGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(20, 24), "#ecoGrid");
+                // 3. Đổ dữ liệu vào giao diện băng chuyền
+                // New Arrivals mặc định lấy 10 sản phẩm mới nhất bất kể danh mục
+                renderCarouselCards(sortedProducts.slice(0, 10), "#newArrivalsGrid");
+                renderCarouselCards(running, "#runningGrid");
+                renderCarouselCards(football, "#footballGrid");
+                renderCarouselCards(basketball, "#basketballGrid");
+                renderCarouselCards(sneaker, "#sneakerGrid");
+                renderCarouselCards(tennis, "#tennisGrid");
             },
             error: function () {
                 console.error("Lỗi kết nối Backend. Không lấy được sản phẩm!");
@@ -55,10 +84,10 @@ $(document).ready(function () {
         });
     }
 
-    function renderCardsToSpecificGrid(products, gridId) {
+    function renderCarouselCards(products, gridId) {
         const $grid = $(gridId);
         if (!products || products.length === 0) {
-            $grid.html('<div class="col-12 text-center text-muted py-4">Không có sản phẩm nào.</div>');
+            $grid.html('<div class="w-100 text-center text-muted py-5" style="font-size:0.9rem;">Đang cập nhật sản phẩm cho bộ sưu tập này...</div>');
             return;
         }
 
@@ -71,11 +100,11 @@ $(document).ready(function () {
 
         let html = "";
         $.each(products, function (index, product) {
-            const imgSrc = product.thumb ? product.thumb : localImages[index % localImages.length];
+            const imgSrc = product.thumb ? product.thumb : (product.thumbnail_img_url ? product.thumbnail_img_url : localImages[index % localImages.length]);
             const fallbackImg = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20fill%3D%22%23eee%22%20width%3D%22200%22%20height%3D%22200%22%2F%3E%3Ctext%20fill%3D%22%23999%22%20font-family%3D%22sans-serif%22%20font-size%3D%2216%22%20dy%3D%2210.5%22%20font-weight%3D%22bold%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E";
 
             html += `
-                <div class="col-md-4 col-lg-3 mb-4">
+                <div class="product-card-wrapper">
                     <div class="card h-100 product-card border-0 shadow-sm dark-card">
                         <a href="product-detail.html?id=${product.id}" class="product-img text-decoration-none d-block">
                             <img src="${imgSrc}" alt="${product.name}" onerror="this.onerror=null; this.src='${fallbackImg}';">
@@ -84,7 +113,7 @@ $(document).ready(function () {
                             <a href="product-detail.html?id=${product.id}" class="text-decoration-none text-light">
                                 <h6 class="product-name text-truncate" title="${product.name}">${product.name}</h6>
                             </a>
-                            <p class="product-category text-truncate" title="${product.brandName || 'Sneaker'}">${product.brandName || 'Sneaker'}</p>
+                        <p class="product-category text-truncate" title="${product.brandName || product.brand_name || 'Sneaker'}">${product.brandName || product.brand_name || 'Sneaker'}</p>
                             <div class="d-flex justify-content-between align-items-center mt-auto">
                                 <h5 class="product-price mb-0">${product.price ? product.price.toLocaleString('vi-VN') : 0} ₫</h5>
                                 <button class="btn-buy" data-id="${product.id}" title="Thêm vào giỏ">
@@ -98,6 +127,18 @@ $(document).ready(function () {
         });
         $grid.html(html);
     }
+
+    // ==========================================
+    // XỬ LÝ SỰ KIỆN CLICK NÚT MŨI TÊN (CUỘN BĂNG CHUYỀN)
+    // ==========================================
+    $(document).on('click', '.btn-scroll-right', function() {
+        const target = $($(this).data('target'));
+        target.animate({ scrollLeft: target.scrollLeft() + 1200 }, 800); // Cuộn 4 sản phẩm (300px * 4) mượt mà trong 0.8s
+    });
+    $(document).on('click', '.btn-scroll-left', function() {
+        const target = $($(this).data('target'));
+        target.animate({ scrollLeft: target.scrollLeft() - 1200 }, 800);
+    });
 
     // ==========================================
     // 3. XỬ LÝ SỰ KIỆN CLICK CATEGORY PILLS (CUỘN TRANG)
@@ -131,6 +172,11 @@ $(document).ready(function () {
                     </div>
                     
                     <div class="user-message-box">
+                        
+                        <div class="px-3 py-2 mb-2" style="border-bottom: 1px dashed #3a3f4a;">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Tài khoản của bạn:</small>
+                            <strong class="text-light text-truncate d-block" style="max-width: 150px;">${localStorage.getItem('user_email') || ''}</strong>
+                        </div>
                         
                         <a href="#" id="btnProfile" class="dropdown-custom-item">
                             <i class="fas fa-id-badge fa-fw me-3 text-primary"></i> Hồ sơ của tôi
@@ -181,7 +227,7 @@ $(document).ready(function () {
         console.log("Đang mở trang hồ sơ...");
         
         // Chuyển sang trang profile
-        window.location.href = "profile.html"; 
+        window.smoothNavigate("profile.html"); 
     });
 
     // ==========================================
@@ -193,8 +239,6 @@ $(document).ready(function () {
         // Xóa sạch mọi dấu vết của user trong két sắt
         localStorage.removeItem("user_name"); 
         localStorage.removeItem("user_email"); 
-        localStorage.removeItem("user_token"); 
-        localStorage.removeItem("staff_token"); 
         
         // 🔥 ĐÂY CHÍNH LÀ DÒNG QUAN TRỌNG NHẤT ĐỂ SỬA LỖI 🔥
         localStorage.removeItem("user_id"); 
@@ -203,7 +247,10 @@ $(document).ready(function () {
         localStorage.removeItem("user_cart"); 
 
         // Load lại trang
-        window.location.reload(); 
+        $('body').addClass('page-transitioning');
+        setTimeout(function() {
+            window.location.reload();
+        }, 400);
     });
 
     // ==========================================
@@ -217,7 +264,7 @@ $(document).ready(function () {
         
         if (!userId || userId === "undefined") {
             alert("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
-            window.location.href = "login.html"; 
+            window.smoothNavigate("login.html"); 
             return;
         }
 
@@ -471,6 +518,8 @@ $(document).ready(function () {
             }
         });
     }
+    
+    window.updateCartBadge = updateCartBadge;
 
     // ==========================================
     // HÀM BẬT THÔNG BÁO GÓC MÀN HÌNH (Giữ nguyên)
@@ -498,6 +547,24 @@ $(document).ready(function () {
             setTimeout(() => $toast.remove(), 400); 
         }, 3000);
     }
+    
+    window.showToastSuccess = showToastSuccess;
+
+    // ==========================================
+    // 1.5. HIỂN THỊ NÚT THÊM SẢN PHẨM TRỰC TIẾP CHO ADMIN
+    // ==========================================
+    const userRole = localStorage.getItem("user_role");
+    if (userRole === "1") {
+        $('.admin-add-product-btn').removeClass('d-none');
+    }
+
+    $(document).on('click', '.admin-add-product-btn', function(e) {
+        e.preventDefault();
+        const category = $(this).data('category');
+        // Lưu danh mục admin vừa bấm vào bộ nhớ tạm
+        localStorage.setItem("admin_auto_select_category", category);
+        window.location.href = "adminpage.html?action=add_product";
+    });
 
     // ==========================================
     // 6. XỬ LÝ TÌM KIẾM SẢN PHẨM (ENTER & CLICK KÍNH LÚP)
@@ -514,7 +581,7 @@ $(document).ready(function () {
     function performSearch() {
         const keyword = $('#searchInput').val().trim();
         if (keyword !== "") {
-            window.location.href = `search.html?keyword=${encodeURIComponent(keyword)}`;
+            window.smoothNavigate(`search.html?keyword=${encodeURIComponent(keyword)}`);
         }
     }
 

@@ -55,7 +55,12 @@ $(document).ready(function() {
                 
                 setTimeout(function() {
                     // Điều hướng chính xác vào adminpage.html nếu role = 1
-                    window.location.href = response.roleId === 1 ? 'adminpage.html' : 'index.html';
+                    const targetUrl = response.roleId == 1 ? 'adminpage.html' : 'index.html';
+                    if (typeof window.smoothNavigate === 'function') {
+                        window.smoothNavigate(targetUrl);
+                    } else {
+                        window.location.href = targetUrl;
+                    }
                 }, 1000);
             },
             error: function(xhr) {

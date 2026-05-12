@@ -28,4 +28,15 @@ public class OrderServiceImpl implements OrderService {
     public boolean updateOrderStatus(Integer orderId, String status) {
         return orderRepository.updateOrderStatus(orderId, status);
     }
+
+    @Override
+    public List<Map<String, Object>> getOrderDetails(Integer orderId) {
+        // Ép kiểu để gọi trực tiếp hàm từ lớp Impl
+        return ((com.javaweb.repository.impl.OrderRepositoryImpl) orderRepository).getOrderDetails(orderId);
+    }
+
+    @Override
+    public List<Map<String, Object>> getOrdersByUser(Integer userId) {
+        return ((com.javaweb.repository.impl.OrderRepositoryImpl) orderRepository).getOrdersByUser(userId);
+    }
 }

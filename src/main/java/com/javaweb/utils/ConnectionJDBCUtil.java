@@ -11,10 +11,9 @@ public class ConnectionJDBCUtil {
 	public static Connection getConnection() {
 		Connection conn = null; 
 		try {
-			conn = DriverManager.getConnection(DB_URL,USER,PASS);
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 			return conn;
-		}
-		catch(SQLException e) {
+		} catch(SQLException e) {
 			e.printStackTrace();
 		}
 		return conn;
