@@ -42,7 +42,8 @@ public class ProductDetailRepositoryImpl implements ProductDetailRepository {
                 }
             }
         } catch (Exception e) { 
-            e.printStackTrace(); 
+//            e.printStackTrace();
+        	throw new RuntimeException("Da xay ra loi khi truy van chi tiet san pham voi ID:" + productId,e);
         }
         return list;
     }
