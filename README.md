@@ -1,53 +1,58 @@
-# 🛍️ Fashion Shop RESTful API
+# 🛍️ Fashion Shop - E-commerce Backend System
 
-Một hệ thống quản lý cửa hàng thời trang (Fashion Shop) với kiến trúc Backend cung cấp các RESTful API cho việc quản lý Sản phẩm, Đơn hàng, Giỏ hàng và Người dùng.
+Một hệ thống quản lý cửa hàng thời trang trực tuyến với phần "lõi" (Backend) được thiết kế nguyên bản và mạnh mẽ bằng Java. Dự án cung cấp toàn bộ nền tảng logic để xử lý các nghiệp vụ phức tạp của một trang thương mại điện tử, từ quản lý luồng sản phẩm, giỏ hàng cho đến hệ thống phân quyền người dùng.
 
-## 🚀 Giới thiệu
-Dự án **fashion_shop** là một ứng dụng web phục vụ việc kinh doanh thời trang. Hệ thống chú trọng vào việc tuân thủ các chuẩn thiết kế RESTful API (hỗ trợ tìm kiếm an toàn với JSON Body) và quản lý ngoại lệ (Exception Handling) chặt chẽ để đảm bảo hệ thống vận hành ổn định và trả về log lỗi chính xác.
+## 🚀 Giới thiệu dự án
+**Fashion Shop** không chỉ là một trang web bán hàng cơ bản, mà là một minh chứng cho việc xây dựng kiến trúc Backend vững chắc. Hệ thống được chia lớp (Layered Architecture) rõ ràng để dễ dàng mở rộng và bảo trì. Mặc dù dự án có bao gồm giao diện người dùng (Frontend bằng HTML/JS/CSS), nhưng linh hồn thực sự của dự án nằm ở hệ thống API và các luồng xử lý dữ liệu (Data Processing) ở phía Server.
+
+## 💎 Điểm nổi bật của Backend
+Dự án được xây dựng với tư duy ưu tiên hiệu năng và khả năng kiểm soát dữ liệu:
+- **Kiến trúc phân tầng (Layered Architecture):** Tách biệt hoàn toàn giữa `API Layer` (tiếp nhận yêu cầu), `Service Layer` (xử lý logic nghiệp vụ) và `Repository Layer` (tương tác trực tiếp với Database).
+- **Tối ưu hóa truy vấn Database:** Sử dụng kết nối JDBC thuần (`ConnectionJDBCUtil`) kết hợp với các câu lệnh SQL tối ưu để nắm quyền kiểm soát hoàn toàn hiệu năng truy vấn chi tiết sản phẩm.
+- **Hệ sinh thái E-commerce đầy đủ:** Cung cấp sẵn các module quản lý: `Product`, `Category`, `Brand`, `Cart`, `Order`, `Size`, `Color` và hệ thống phân quyền `Role/User`.
+- **Triển khai hiện đại (Modern Deployment):** Đóng gói sẵn sàng với `Docker` và `docker-compose`, giúp khởi chạy toàn bộ hệ thống (cả App lẫn Database) chỉ với một câu lệnh.
 
 ## 🛠️ Công nghệ sử dụng
-Dự án được xây dựng dựa trên các ngôn ngữ và công nghệ:
-- **Backend:** Java (Spring Boot)
-- **Frontend:** HTML, JavaScript, CSS
-- **Quản lý thư viện:** Maven (`pom.xml`)
-- **Triển khai (Deployment):** Docker & Docker Compose (`Dockerfile`, `docker-compose.yml`)
-
-## ✨ Các chức năng chính (Dự kiến)
-- **Product Management:** Thêm, Sửa, Xóa và Tìm kiếm sản phẩm (hỗ trợ các bộ lọc phức tạp).
-- **Brand & Category Management:** Phân loại sản phẩm theo nhãn hiệu và danh mục.
-- **Cart & Order System:** Quản lý giỏ hàng và xử lý thanh toán đơn hàng.
-- **User API:** Quản lý thông tin và phân quyền người dùng.
+- **Backend (Core):** Java (Spring Boot) [1]
+- **Tương tác Cơ sở dữ liệu:** JDBC/SQL trực tiếp [2]
+- **Quản lý thư viện & Build:** Maven (`pom.xml`) [3]
+- **DevOps & Triển khai:** Docker, Docker Compose (`Dockerfile`, `docker-compose.yml`) [3]
+- **Frontend (Giao diện):** HTML (44.3%), JavaScript (16.5%), CSS [1]
 
 ## ⚙️ Hướng dẫn cài đặt và chạy dự án (Getting Started)
 
-### Yêu cầu hệ thống:
-- Java JDK 11/17 (hoặc phiên bản bạn đang dùng)
+### Yêu cầu môi trường:
+- Java JDK 11/17+
 - Maven
-- Docker & Docker Compose (nếu chạy qua container)
+- Docker & Docker Compose (Khuyên dùng)
 
-### Cách 1: Chạy trực tiếp bằng Maven
-1. Clone dự án về máy:
-   ```bash
-   git clone https://github.com/donghuyhoang/fashion_shop.git
+### 🐳 Chạy cực nhanh với Docker
+Dự án đã được cấu hình sẵn môi trường container hoá. Chỉ cần chạy lệnh sau tại thư mục gốc:
+```bash
+docker-compose up -d --build
 
-    Di chuyển vào thư mục dự án và tải các dependency:
+Hệ thống sẽ tự động build file .jar, thiết lập cơ sở dữ liệu và khởi động server.
+💻 Chạy ở chế độ Dev (Dành cho lập trình viên)
+
+    Clone dự án về máy:
+    Cài đặt các thư viện phụ thuộc:
     Khởi chạy ứng dụng:
 
-Cách 2: Chạy bằng Docker
-Hệ thống đã được tích hợp sẵn cấu hình Docker.
+📚 Cấu trúc thư mục lõi (Backend)
+Hệ thống mã nguồn Java được đặt tại src/main/java/com/javaweb/:
 
-    Build và khởi chạy các container (Bao gồm cả Database nếu có cấu hình):
+    📁 api/: Nơi định nghĩa các Endpoints giao tiếp với Client (chứa ProductAPI, OrderAPI, UserAPI, CartAPI...).
+    📁 service/: Trái tim của hệ thống, chứa toàn bộ logic tính toán kinh doanh (Business Logic).
+    📁 repository/: Tầng xử lý giao tiếp cơ sở dữ liệu, thực thi các câu lệnh SQL phức tạp lấy dữ liệu sản phẩm, chi tiết kho.
+    📁 builder/: Chứa các mẫu thiết kế (Design Patterns) như Builder để hỗ trợ tìm kiếm với nhiều tiêu chí linh hoạt.
 
-📚 Cấu trúc thư mục mã nguồn chính
+🤝 Tương lai và Đóng góp
+Dự án đang trong quá trình liên tục hoàn thiện. Các kế hoạch sắp tới bao gồm:
 
-    src/main/java/com/javaweb/api: Chứa các REST Controller xử lý HTTP Request (ProductAPI, OrderAPI, v.v...).
-    src/main/java/com/javaweb/service: Chứa các Business Logic nghiệp vụ.
-    src/main/java/com/javaweb/repository: Tầng giao tiếp với cơ sở dữ liệu (đã được cấu hình xử lý log và exception).
-    Dockerfile & docker-compose.yml: Cấu hình môi trường triển khai.
+    Chuẩn hóa toàn bộ hệ thống API theo nguyên tắc RESTful chặt chẽ hơn.
+    Cải thiện hệ thống bắt lỗi (Global Exception Handling) và ghi log tập trung.
 
-🤝 Đóng góp (Contributing)
-Mọi đóng góp (Pull Request) hay báo lỗi (Issue) đều được hoan nghênh.
+Mọi Pull Request đóng góp mã nguồn hoặc báo lỗi (Issue) đều được chào đón!
 
 
 ***
-
