@@ -1,4 +1,16 @@
 $(document).ready(function() {
+    // ==========================================
+    // CẤU HÌNH GỬI TOKEN JWT KÈM MỌI REQUEST AJAX
+    // ==========================================
+    $.ajaxSetup({
+        beforeSend: function(xhr) {
+            const token = localStorage.getItem("user_token");
+            if (token) {
+                xhr.setRequestHeader("Authorization", "Bearer " + token);
+            }
+        }
+    });
+
     const API_URL = "/api/";
     const userId = localStorage.getItem("user_id");
 

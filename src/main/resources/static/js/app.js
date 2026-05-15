@@ -155,6 +155,18 @@ $(document).ready(function () {
     }
 
     // ==========================================
+    // CẤU HÌNH GỬI TOKEN JWT KÈM MỌI REQUEST AJAX
+    // ==========================================
+    $.ajaxSetup({
+        beforeSend: function(xhr) {
+            const token = localStorage.getItem("user_token");
+            if (token) {
+                xhr.setRequestHeader("Authorization", "Bearer " + token);
+            }
+        }
+    });
+
+    // ==========================================
     // 3. XỬ LÝ SỰ KIỆN CLICK CATEGORY PILLS (LỌC SẢN PHẨM & CUỘN TRANG)
     // ==========================================
     let currentIndexFilterType = 'all';
@@ -314,6 +326,7 @@ $(document).ready(function () {
         
         // 🔥 ĐÂY CHÍNH LÀ DÒNG QUAN TRỌNG NHẤT ĐỂ SỬA LỖI 🔥
         localStorage.removeItem("user_id"); 
+        localStorage.removeItem("user_token"); 
         
         // (Tùy chọn) Xóa luôn giỏ hàng tạm nếu bạn còn dùng
         localStorage.removeItem("user_cart"); 

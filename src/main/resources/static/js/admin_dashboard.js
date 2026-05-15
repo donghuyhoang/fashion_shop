@@ -939,6 +939,18 @@ $(document).ready(function() {
     });
 
     // ==========================================
+    // CẤU HÌNH GỬI TOKEN JWT KÈM MỌI REQUEST AJAX
+    // ==========================================
+    $.ajaxSetup({
+        beforeSend: function(xhr) {
+            const token = localStorage.getItem("user_token");
+            if (token) {
+                xhr.setRequestHeader("Authorization", "Bearer " + token);
+            }
+        }
+    });
+
+    // ==========================================
     // 10. ĐĂNG XUẤT
     // ==========================================
     $("#btnLogout").click(function (e) {
@@ -947,6 +959,7 @@ $(document).ready(function() {
         localStorage.removeItem("user_email"); 
         localStorage.removeItem("user_role"); 
         localStorage.removeItem("user_id"); 
+        localStorage.removeItem("user_token"); 
         window.location.href = "login.html"; 
     });
 });

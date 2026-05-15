@@ -55,6 +55,7 @@ $(document).ready(function() {
                 localStorage.setItem('user_name', response.fullName);
                 localStorage.setItem('user_email', response.email);
                 localStorage.setItem('user_role', response.roleId);
+                localStorage.setItem('user_token', response.token); // Lưu lại vòng tay JWT
                 
                 $('#loginAlert').removeClass('d-none alert-danger').addClass('alert-success').text('Đăng nhập thành công! Đang chuyển hướng...');
                 

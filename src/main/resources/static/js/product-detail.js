@@ -1,4 +1,16 @@
 $(document).ready(function() {
+    // ==========================================
+    // CẤU HÌNH GỬI TOKEN JWT KÈM MỌI REQUEST AJAX
+    // ==========================================
+    $.ajaxSetup({
+        beforeSend: function(xhr) {
+            const token = localStorage.getItem("user_token");
+            if (token) {
+                xhr.setRequestHeader("Authorization", "Bearer " + token);
+            }
+        }
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
     if (!productId) { window.location.href = "index.html"; return; }
