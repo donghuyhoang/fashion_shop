@@ -10,151 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="css/style.css"> 
-    <style>
-        .product-detail-container {
-            margin-top: 120px;
-            margin-bottom: 80px;
-        }
-        .main-img-container {
-            background: linear-gradient(145deg, #1e2129, #242933);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid #3a3f4a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 500px;
-            position: relative;
-            overflow: hidden;
-        }
-        .main-img-container::before {
-            content: '';
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(43,92,255,0.1) 0%, rgba(0,0,0,0) 70%);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 0;
-        }
-        .main-img-container img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6));
-            z-index: 1;
-            position: relative;
-            transition: transform 0.3s ease;
-        }
-        .main-img-container img:hover {
-            transform: scale(1.05) rotate(-2deg);
-        }
-        .product-info {
-            padding-left: 20px;
-        }
-        .product-info h1 {
-            font-weight: 900;
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            color: #fafbfc;
-            line-height: 1.1;
-            letter-spacing: -1px;
-        }
-        .product-brand {
-            color: #2b5cff;
-            font-weight: 800;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            font-size: 1rem;
-            margin-bottom: 15px;
-            display: inline-block;
-            background: rgba(43, 92, 255, 0.1);
-            padding: 5px 15px;
-            border-radius: 20px;
-        }
-        .product-price {
-            font-size: 2.2rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 30px;
-            letter-spacing: -0.5px;
-        }
-        .section-label {
-            font-weight: 700;
-            color: #9ca3af;
-            margin-bottom: 15px;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .variant-btn {
-            background: #1a1d24;
-            border: 1px solid #3a3f4a;
-            color: #fafbfc;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            margin-right: 12px;
-            margin-bottom: 12px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .variant-btn:hover {
-            background: #242933;
-            border-color: #4a5260;
-        }
-        .variant-btn.active {
-            background: linear-gradient(135deg, #2b5cff, #1e40af);
-            border-color: transparent;
-            color: white;
-            box-shadow: 0 4px 15px rgba(43, 92, 255, 0.4);
-        }
-        .btn-add-to-cart {
-            background: linear-gradient(135deg, #2b5cff, #1e40af);
-            color: white;
-            border: none;
-            padding: 18px 30px;
-            border-radius: 14px;
-            font-weight: 800;
-            font-size: 1.1rem;
-            width: 100%;
-            margin-top: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 25px rgba(43, 92, 255, 0.4);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .btn-add-to-cart:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(43, 92, 255, 0.5);
-            color: white;
-        }
-        .btn-add-to-cart:disabled {
-            background: #242933;
-            color: #6b7280;
-            box-shadow: none;
-            cursor: not-allowed;
-            border: 1px solid #3a3f4a;
-        }
-        .product-desc {
-            color: #b4b9c3;
-            line-height: 1.8;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid #2a2d34;
-            font-size: 1.05rem;
-        }
-        @media (max-width: 991px) {
-            .product-info { padding-left: 0; margin-top: 20px; }
-            .main-img-container { height: 400px; }
-        }
-    </style>
 </head>
 <body>
     <div class="toast-container-custom" id="toastBox"></div>
@@ -163,9 +18,11 @@
     <header class="main-navbar fixed-top">
         <div class="logo"><a href="index.html">SNEAK<span>PEAK</span></a></div>
         <nav class="nav-links d-none d-lg-flex">
-            <a href="index.html">HOME</a>
-            <a href="#">MAN</a>
-            <a href="#">WOMEN</a>
+                <a href="index.html">NEW ARRIVALS</a>
+                <a href="category.html?id=1">RUNNING</a>
+                <a href="category.html?id=2">FOOTBALL</a>
+                <a href="category.html?id=3">BASKETBALL</a>
+                <a href="category.html?id=4">SNEAKERS</a>
         </nav>
         <div class="nav-search d-none d-md-flex"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search shoes..."></div>
         <div class="nav-actions">
@@ -177,12 +34,24 @@
     <!-- KHUNG CHI TIẾT SẢN PHẨM -->
     <div class="container product-detail-container">
         <div class="row g-5">
-            <div class="col-lg-6">
-                <div class="main-img-container">
-                    <img id="pdMainImage" src="" alt="Loading...">
+            <div class="col-lg-7">
+                <div class="d-flex flex-column flex-lg-row gap-3 align-items-start">
+                    <div class="flex-grow-1 w-100">
+                        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner rounded-4 shadow-sm border" id="carouselInner" style="background: #1e2129; border-color: #3a3f4a !important; height: 500px; display: flex; align-items: center;">
+                                <div class="carousel-item active w-100 h-100 d-flex justify-content-center align-items-center p-4">
+                                    <img id="pdMainImage" src="" class="d-block" style="max-width: 90%; max-height: 90%; object-fit: contain; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6));" alt="Loading...">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(1);"></span><span class="visually-hidden">Previous</span></button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(1);"></span><span class="visually-hidden">Next</span></button>
+                        </div>
+                        <!-- Thanh cuộn hình thu nhỏ ở dưới cùng -->
+                        <div class="d-flex gap-2 mt-3 overflow-auto custom-scrollbar-hide" id="carouselThumbnails" style="padding-bottom: 10px;"></div>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-6 product-info">
+            <div class="col-lg-5 product-info">
                 <div class="product-brand" id="pdBrand">ĐANG TẢI...</div>
                 <h1 id="pdName">Đang tải sản phẩm...</h1>
                 <div class="product-price" id="pdPrice">0 ₫</div>
@@ -223,115 +92,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/app.js"></script>
-    
-    <script>
-        $(document).ready(function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const productId = urlParams.get('id');
-            if (!productId) { window.location.href = "index.html"; return; }
-
-            const API_URL = "/api/";
-            let productDetails = [], sizesCache = [], colorsCache = [], baseProductInfo = {};
-
-            // Tải ngầm mọi dữ liệu
-            $.when(
-                $.get(API_URL + "sizes").done(res => sizesCache = res),
-                $.get(API_URL + "colors").done(res => colorsCache = res),
-                $.get(API_URL + "products").done(res => { baseProductInfo = (res || []).find(p => p.id == productId) || {}; })
-            ).always(function() {
-                renderBaseInfo();
-                loadProductDetails();
-            loadSuggestedProducts();
-            });
-
-            function renderBaseInfo() {
-                $('#pdName').text(baseProductInfo.name || `Sản phẩm #${productId}`);
-                $('#pdBrand').text(baseProductInfo.brandName || 'SNEAK PEAK');
-                $('#pdPrice').text((baseProductInfo.price || 0).toLocaleString('vi-VN') + ' ₫');
-                $('#pdDescription').html(baseProductInfo.description || 'Sản phẩm chính hãng với thiết kế hiện đại.');
-                if(baseProductInfo.thumb) $('#pdMainImage').attr('src', baseProductInfo.thumb);
-            }
-
-            function loadProductDetails() {
-                $.get(API_URL + "product-details/product/" + productId).done(function(details) {
-                    productDetails = details;
-                    if (!details || details.length === 0) return $('#pdStockStatus').html('<span class="text-danger">Sản phẩm hiện đang hết hàng.</span>');
-                    const colorMap = new Map(), sizeMap = new Map();
-                    details.forEach(d => {
-                        const sId = d.sizeId !== undefined ? d.sizeId : d.size_id;
-                        const cId = d.colorId !== undefined ? d.colorId : d.color_id;
-                        if (!colorMap.has(cId)) colorMap.set(cId, colorsCache.find(c => c.id === cId) || { id: cId, name: cId });
-                        if (!sizeMap.has(sId)) sizeMap.set(sId, sizesCache.find(s => s.id === sId) || { id: sId, name: sId });
-                    });
-                    let htmlColor = ''; colorMap.forEach(color => htmlColor += `<button class="variant-btn color-btn" data-id="${color.id}">${color.name}</button>`); $('#pdColorOptions').html(htmlColor);
-                    let htmlSize = ''; sizeMap.forEach(size => htmlSize += `<button class="variant-btn size-btn" data-id="${size.id}">Size ${size.name}</button>`); $('#pdSizeOptions').html(htmlSize);
-                });
-            }
-
-        // Hàm xử lý tải Sản phẩm gợi ý ngẫu nhiên
-        function loadSuggestedProducts() {
-            $.get(API_URL + "products").done(function(products) {
-                if (!products || products.length === 0) {
-                    $('#suggestedProductsGrid').html('<div class="col-12 text-muted">Không có sản phẩm gợi ý nào.</div>');
-                    return;
-                }
-                // Lấy 4 sản phẩm ngẫu nhiên khác với sản phẩm hiện tại
-                const suggested = products.filter(p => p.id != productId).sort(() => 0.5 - Math.random()).slice(0, 4);
-                if(suggested.length > 0) {
-                    let suggestHtml = "";
-                    suggested.forEach(p => {
-                        const pImg = p.thumb || "images/nike-air-force-1-low-white.jpg";
-                        suggestHtml += `
-                            <div class="col-md-3 col-6 mb-4">
-                                <div class="card h-100 product-card border-0 shadow-sm dark-card" style="background: #1a1d24; border: 1px solid #2a2d34 !important;">
-                                    <a href="product-detail.html?id=${p.id}" class="product-img text-decoration-none d-block p-3">
-                                        <img src="${pImg}" alt="${p.name}" class="img-fluid rounded" style="object-fit: contain; width: 100%; aspect-ratio: 1/1;">
-                                    </a>
-                                    <div class="card-body d-flex flex-column p-3">
-                                        <a href="product-detail.html?id=${p.id}" class="text-decoration-none text-light">
-                                            <h6 class="product-name text-truncate mb-1" style="font-size: 0.9rem;">${p.name}</h6>
-                                        </a>
-                                        <h6 class="mt-auto pt-2 text-warning mb-0" style="font-size: 1rem;">${p.price ? p.price.toLocaleString('vi-VN') : 0} ₫</h6>
-                                    </div>
-                                </div>
-                            </div>`;
-                    });
-                    $('#suggestedProductsGrid').html(suggestHtml);
-                }
-            });
-        }
-
-            $(document).on('click', '.color-btn, .size-btn', function() {
-                $(this).hasClass('color-btn') ? $('.color-btn').removeClass('active') : $('.size-btn').removeClass('active');
-                $(this).addClass('active');
-                
-                const colorId = $('.color-btn.active').data('id'), sizeId = $('.size-btn.active').data('id'), btnAdd = $('#pdBtnAddToCart');
-                if (colorId && sizeId) {
-                    const detail = productDetails.find(d => (d.colorId == colorId || d.color_id == colorId) && (d.sizeId == sizeId || d.size_id == sizeId));
-                    if (detail) {
-                        const stock = detail.stockQuantity !== undefined ? detail.stockQuantity : detail.stock_quantity;
-                        if (detail.price) $('#pdPrice').text(detail.price.toLocaleString('vi-VN') + ' ₫');
-                        if (detail.thumb || detail.thumbnailImgUrl || detail.thumbnail_img_url) $('#pdMainImage').attr('src', detail.thumb || detail.thumbnailImgUrl || detail.thumbnail_img_url);
-                        if (stock > 0) { $('#pdStockStatus').html(`<span class="text-success"><i class="fas fa-check-circle"></i> Còn ${stock} sản phẩm</span>`); btnAdd.prop('disabled', false).data('detail-id', detail.id || detail.productDetailId || detail.product_detail_id); }
-                        else { $('#pdStockStatus').html(`<span class="text-danger"><i class="fas fa-times-circle"></i> Đã hết hàng</span>`); btnAdd.prop('disabled', true); }
-                    } else { $('#pdStockStatus').html(`<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Phân loại không tồn tại</span>`); btnAdd.prop('disabled', true); }
-                }
-            });
-
-            $('#pdBtnAddToCart').click(function() {
-                const userId = localStorage.getItem("user_id");
-                if (!userId) return alert("Vui lòng đăng nhập để mua hàng!"), window.location.href = "login.html";
-                const $btn = $(this), originalText = $btn.html();
-                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> ĐANG XỬ LÝ...');
-                $.ajax({
-                    url: API_URL + "cart/add", type: "POST", contentType: "application/json",
-                    data: JSON.stringify({ userId: parseInt(userId), productDetailId: parseInt($(this).data('detail-id')), quantity: 1 }),
-                    success: function() { if(window.updateCartBadge) window.updateCartBadge(); if(window.showToastSuccess) window.showToastSuccess($('#pdName').text() + ` (${$('.color-btn.active').text()} - ${$('.size-btn.active').text()})`); },
-                    error: function(xhr) { alert("Lỗi khi thêm: " + xhr.responseText); },
-                    complete: function() { $btn.prop('disabled', false).html(originalText); }
-                });
-            });
-        });
-    </script>
+    <script src="js/product-detail.js"></script>
 </body>
 </html>

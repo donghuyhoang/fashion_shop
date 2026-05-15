@@ -24,4 +24,16 @@ public class ProductDetailAPI {
         }
         return ResponseEntity.ok(details);
     }
+
+    // API thêm mới phân loại (Size/Màu) cho sản phẩm đã có
+    @PostMapping
+    public ResponseEntity<?> addProductDetail(@RequestBody ProductDetailDTO dto) {
+        try {
+            productDetailService.addProductDetail(dto);
+            return ResponseEntity.ok().body("{\"message\": \"Thêm phân loại thành công!\"}");
+        } catch (Exception e) {
+            // Trả về JSON để Frontend dễ bóc tách thông báo lỗi
+            return ResponseEntity.status(500).body("{\"error\": \"" + e.getMessage().replace("\"", "\\\"") + "\"}");
+        }
+    }
 }

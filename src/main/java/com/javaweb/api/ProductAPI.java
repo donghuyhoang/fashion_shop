@@ -36,21 +36,36 @@ public class ProductAPI {
     	return result;
 	}
     @PostMapping
-	public void addProduct(@RequestBody ProductDTO dto) {
-		productService.save(dto);
-		System.out.println("Đã thêm sản phẩm thành công vào DB!");
+	public ResponseEntity<?> addProduct(@RequestBody ProductDTO dto) {
+		try {
+			// [QUAN TRỌNG] Phải nhận về ID từ Service
+			Integer newProductId = productService.save(dto); 
+			
+			// Trả về JSON chứa ID để Frontend sử dụng
+			return ResponseEntity.ok().body(java.util.Collections.singletonMap("id", newProductId));
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(java.util.Collections.singletonMap("error", "Lỗi khi thêm sản phẩm: " + e.getMessage()));
+		}
 	}
 
 	@PutMapping(value = "/{id}")
-	public void updateProduct(@PathVariable Integer id, @RequestBody ProductDTO dto) {
-		dto.setId(id);
-		productService.update(dto);
-		System.out.println("Đã cập nhật sản phẩm ID: " + id);
+	public ResponseEntity<?> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO dto) {
+		try {
+			dto.setId(id);
+			productService.update(dto);
+			return ResponseEntity.ok().body(java.util.Collections.singletonMap("message", "Đã cập nhật sản phẩm thành công!"));
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(java.util.Collections.singletonMap("error", "Lỗi khi cập nhật: " + e.getMessage()));
+		}
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<String> deleteProduct(@PathVariable("id") Integer id) {
-	    productService.delete(id);
-	    return ResponseEntity.ok("Đã xóa thành công sản phẩm ID: " + id);
+	public ResponseEntity<?> deleteProduct(@PathVariable("id") Integer id) {
+	    try {
+	        productService.delete(id);
+	        return ResponseEntity.ok(java.util.Collections.singletonMap("message", "Đã xóa thành công sản phẩm ID: " + id));
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500).body(java.util.Collections.singletonMap("error", e.getMessage()));
+	    }
 	}
 }

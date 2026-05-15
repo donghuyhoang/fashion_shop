@@ -1,4 +1,9 @@
 $(document).ready(function() {
+    // Áp dụng ngay giao diện Sáng nếu người dùng đã cài đặt
+    if (localStorage.getItem('theme') === 'light') {
+        $('body').addClass('light-theme');
+    }
+
     const API_URL = "/api/users/";
     const userId = localStorage.getItem("user_id");
 

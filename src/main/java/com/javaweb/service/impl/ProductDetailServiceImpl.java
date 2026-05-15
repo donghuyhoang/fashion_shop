@@ -36,4 +36,8 @@ public class ProductDetailServiceImpl implements ProductDetailService {
         }
         return dtos;
     }
+    @Override
+    public void addProductDetail(model.ProductDetailDTO dto) {
+        productDetailRepository.addProductDetail(dto);
+    }
 }

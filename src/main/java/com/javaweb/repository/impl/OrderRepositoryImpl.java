@@ -227,7 +227,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         List<Map<String, Object>> details = new ArrayList<>();
         String sql = "SELECT od.quantity, od.unit_price, p.name as product_name, " +
                      "s.value as size_name, c_color.name as color_name, " +
-                     "pd.thumbnail_img_url as thumb " +
+                     "COALESCE((SELECT image_url FROM product_images WHERE product_id = p.product_id ORDER BY sort_order ASC LIMIT 1), pd.thumbnail_img_url) as thumb " +
                      "FROM order_details od " +
                      "JOIN product_details pd ON od.product_detail_id = pd.product_detail_id " +
                      "JOIN products p ON pd.product_id = p.product_id " +
