@@ -7,7 +7,7 @@ import java.util.List;
 public interface ProductService {
     List<ProductDTO> findAll();
     List<ProductDTO> findProduct(ProductSearchBuilder params);
-    void save(ProductDTO dto);
+    Integer save(ProductDTO dto);
     void update(ProductDTO dto);
     void delete(Integer id);
 }

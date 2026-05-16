@@ -1,0 +1,145 @@
+/* ==========================================
+   2. HEADER NAVBAR
+   ========================================== */
+.main-navbar { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 1rem 5%; background: rgba(18, 21, 28, 0.97); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(58, 63, 74, 0.5); z-index: 1000; }
+.logo a { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; color: #fafbfc; }
+.logo span { font-weight: 400; color: #2b5cff; }
+.nav-links { display: flex; gap: 2rem; }
+.nav-links a { font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #9ca3af; }
+.nav-links a.active { color: #2b5cff; }
+
+/* ==========================================
+   3. THANH TÌM KIẾM (ĐÃ GỘP TỐI ƯU)
+   ========================================== */
+.nav-search { display: flex; align-items: center; background-color: #1a1d24; border: 1px solid #3a3f4a; border-radius: 20px; padding: 8px 16px; width: 250px; transition: all 0.3s ease; }
+.nav-search:focus-within { border-color: #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.2); background-color: #1e2129; }
+.nav-search i { color: #9ca3af; font-size: 0.9rem; margin-right: 10px; }
+.nav-search input { background: transparent; border: none; color: #ffffff; width: 100%; outline: none; font-size: 0.9rem; }
+.nav-search input::placeholder { color: #6b7280; }
+
+/* ==========================================
+   4. ICON ACTIONS & BADGE
+   ========================================== */
+.nav-actions { display: flex; align-items: center; gap: 1.5rem; }
+.icon-link { font-size: 1.2rem; color: #fafbfc; position: relative; }
+#cartBadge { font-size: 0.65rem; min-width: 1.2rem; height: 1.2rem; }
+
+/* ==========================================
+   5. HERO SECTION (ẢNH NỀN LẤP ĐẦY)
+   ========================================== */
+.hero-section { position: relative; min-height: 100vh; display: flex; align-items: center; padding: 0 5%; overflow: hidden; }
+.hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center right; background-attachment: fixed; opacity: 0.35; filter: grayscale(0.4); z-index: 1; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(18, 21, 28, 0.95) 0%, rgba(18, 21, 28, 0.4) 50%, transparent 100%); z-index: 2; }
+.hero-content { position: relative; z-index: 10; max-width: 600px; }
+.badge-custom { display: inline-block; background: rgba(43, 92, 255, 0.15); color: #2b5cff; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; border: 1px solid rgba(43, 92, 255, 0.3); margin-bottom: 20px; }
+.hero-title { font-size: clamp(3rem, 8vw, 5rem); font-weight: 900; line-height: 1.1; margin: 1.5rem 0 1rem; letter-spacing: -1px; text-shadow: 0 8px 25px rgba(0,0,0,0.6); }
+.hero-desc { color: #b4b9c3; font-size: 1.1rem; margin-bottom: 2.5rem; line-height: 1.6; }
+.hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn-custom { padding: 1rem 2rem; border-radius: 50px; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; text-align: center; transition: all 0.3s ease; border: none; cursor: pointer; letter-spacing: 0.5px; }
+.btn-primary-custom { background: linear-gradient(135deg, #2b5cff, #1e40af); color: white; box-shadow: 0 12px 30px rgba(43, 92, 255, 0.4); }
+.btn-primary-custom:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(43, 92, 255, 0.5); color: white; }
+.btn-outline-custom { background: rgba(255,255,255,0.08); color: #fafbfc; border: 1px solid rgba(250,251,252,0.3); }
+.btn-outline-custom:hover { background: white; color: #12151c; transform: translateY(-3px); }
+.watermark { position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%); font-size: 12vw; font-weight: 900; color: rgba(255,255,255,0.02); z-index: 1; pointer-events: none; }
+
+/* ==========================================
+   6. CATEGORY PILLS (NÚT LỌC TRÒN)
+   ========================================== */
+.category-pills-section { padding: 2rem 0; }
+.pill-btn { background: transparent; border: 1px solid #3a3f4a; color: #9ca3af; padding: 0.75rem 1.75rem; border-radius: 50px; font-size: 0.875rem; font-weight: 600; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; }
+.pill-btn:hover, .pill-btn.active { background: linear-gradient(135deg, #2b5cff, #1e40af); color: white; border-color: transparent; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(43, 92, 255, 0.4); }
+
+/* ==========================================
+   7. PRODUCT CARDS - IMPECCABLE DESIGN
+   ========================================== */
+.collection-block .row { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 2.5rem !important; margin: 0; padding: 0; }
+@media (min-width: 768px) { .collection-block .row { grid-template-columns: repeat(3, 1fr) !important; } }
+@media (min-width: 1200px) { .collection-block .row { grid-template-columns: repeat(4, 280px) !important; justify-content: center !important; } }
+.collection-block .row > div { width: 100% !important; max-width: 100% !important; flex: 0 0 100% !important; padding: 0 !important; margin: 0 !important; }
+.dark-card { background: linear-gradient(145deg, #1e2129 0%, #242933 100%); border: 1px solid #3a3f4a !important; border-radius: 20px; padding: 0 !important; overflow: hidden; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); height: 100%; backdrop-filter: blur(10px); }
+.dark-card:hover { transform: translateY(-12px) scale(1.02); box-shadow: 0 30px 60px rgba(50, 55, 65, 0.5), 0 0 0 1px rgba(43, 92, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important; border-color: #4a5260 !important; }
+.product-img { height: 260px !important; background: linear-gradient(135deg, #2a2f3a 0%, #1e2129 100%); position: relative; overflow: hidden; }
+.product-img::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(43, 92, 255, 0.15) 0%, transparent 50%); opacity: 0; transition: opacity 0.4s ease; z-index: 1; }
+.dark-card:hover .product-img::before { opacity: 1; }
+.product-img img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); position: relative; z-index: 2; }
+.dark-card:hover .product-img img { transform: scale(1.15) rotate(-1.5deg); }
+.dark-card .card-body { padding: 24px 28px 28px !important; display: flex; flex-direction: column; flex-grow: 1; }
+.product-name { font-weight: 900 !important; font-size: 17px !important; line-height: 1.25; margin-bottom: 10px; color: #fafbfc !important; letter-spacing: -0.025em; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
+.product-category { font-size: 13px !important; color: #9ca3af !important; margin-bottom: 20px !important; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; }
+.d-flex.justify-content-between.align-items-center.mt-auto .product-price { font-size: 24px !important; font-weight: 900 !important; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0 !important; letter-spacing: -0.5px; }
+.btn-buy { background: linear-gradient(135deg, #f9fafb 0%, #f1f5f9 100%); color: #334155 !important; border: 1px solid #475569; width: 48px; height: 48px; border-radius: 14px; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); margin-left: auto; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.btn-buy:hover { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #1e293b !important; border-color: #f59e0b; transform: translateY(-2px) scale(1.1); box-shadow: 0 12px 25px rgba(255, 215, 0, 0.4); }
+
+/* ==========================================
+   8. BANNERS STORYTELLING
+   ========================================== */
+.section-title { font-size: 2.5rem; font-weight: 900; color: #fafbfc; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 0.5rem; }
+.section-title .text-muted { font-size: 1rem; font-weight: 400; color: #9ca3af; text-transform: none; }
+.view-all-link { color: #9ca3af; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; }
+.view-all-link:hover { color: #2b5cff; transform: translateX(4px); }
+.story-banner { position: relative; width: 100%; min-height: 320px !important; background-size: cover; background-position: center; background-attachment: fixed; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; border-radius: 20px; overflow: hidden; }
+.banner-overlay { position: absolute; inset: 0; background: rgba(18, 21, 28, 0.75); border-radius: inherit; z-index: 2; }
+.shoe-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-20deg); width: 80%; max-width: 800px; opacity: 0.25; z-index: 3; pointer-events: none; filter: grayscale(100%) brightness(1.2); }
+.banner-content { position: relative; z-index: 10; text-align: center; padding: 1.5rem; max-width: 90%; }
+.banner-subtitle { color: #2b5cff; font-weight: 800; letter-spacing: 3px; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 0px !important; }
+.banner-title { font-size: 3.5rem !important; font-weight: 900; text-transform: uppercase; letter-spacing: -1.5px; line-height: 1; color: #fafbfc; text-shadow: 0 12px 30px rgba(0,0,0,0.7); margin-bottom: 5px; }
+.banner-desc { color: #b4b9c3; font-size: 1.1rem; margin-top: 0.5rem; }
+
+/* ==========================================
+   9. TOAST & VARIANT SELECTOR (SHOPEE STYLE)
+   ========================================== */
+.shopee-toast-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1080; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(18, 21, 28, 0.95); color: #fff; padding: 30px 40px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; backdrop-filter: blur(10px); border: 1px solid #3a3f4a; }
+.shopee-toast-container.show { opacity: 1; visibility: visible; }
+.shopee-toast-icon { font-size: 3.5rem; color: #10b981; margin-bottom: 15px; }
+.shopee-toast-text { font-size: 1.1rem; font-weight: 600; text-align: center; }
+.variant-btn { background: #242933; border: 1px solid #3a3f4a; color: #d1d5db; padding: 8px 20px; border-radius: 6px; font-size: 0.9rem; cursor: pointer; position: relative; transition: all 0.2s ease; min-width: 80px; text-align: center; font-weight: 500; }
+.variant-btn:hover { border-color: #2b5cff; color: #2b5cff; background: rgba(43, 92, 255, 0.05); }
+.variant-btn.active { border-color: #2b5cff; color: #2b5cff; background: rgba(43, 92, 255, 0.1); }
+.variant-btn.active::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; bottom: -1px; right: -1px; background: #2b5cff; color: white; font-size: 0.5rem; padding: 3px 5px; border-top-left-radius: 6px; border-bottom-right-radius: 4px; }
+
+/* ==========================================
+   10. USER MESSAGE BOX (HỘP THOẠI NGƯỜI DÙNG)
+   ========================================== */
+.user-message-box { display: none; position: absolute; top: 130%; right: 0; width: 220px; background: #1e2129; border: 1px solid #3a3f4a; border-radius: 12px; padding: 0.5rem 0; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 1050; overflow: hidden; }
+.dropdown-custom-item { display: flex; align-items: center; color: #fafbfc; text-decoration: none; padding: 12px 20px; font-size: 0.9rem; transition: all 0.2s ease; }
+.dropdown-custom-item:hover { background-color: #242933; color: #2b5cff; }
+.dropdown-custom-item.text-danger:hover { color: #ef4444 !important; background-color: rgba(239, 68, 68, 0.1); }
+
+/* ==========================================
+   12. NÂNG CẤP HIỆU ỨNG SLIDE LOGIN / REGISTER
+   ========================================== */
+#authContainer .form-container, #authContainer .overlay-container, #authContainer .overlay, #authContainer .overlay-panel { transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1) !important; }
+#authContainer.right-panel-active .sign-in-container { transform: translateX(100%) scale(0.9) !important; opacity: 0 !important; }
+#authContainer:not(.right-panel-active) .sign-up-container { transform: translateX(0) scale(0.9) !important; opacity: 0 !important; }
+#authContainer.right-panel-active .sign-up-container { transform: translateX(100%) scale(1) !important; opacity: 1 !important; }
+#authContainer:not(.right-panel-active) .sign-in-container { transform: translateX(0) scale(1) !important; opacity: 1 !important; }
+@keyframes authSlideUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+#authContainer.right-panel-active .sign-up-container form { animation: authSlideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+#authContainer:not(.right-panel-active) .sign-in-container form { animation: authSlideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+#authContainer input { transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; }
+#authContainer input:focus { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(43, 92, 255, 0.2) !important; }
+
+/* ==========================================
+   14. CUSTOM MODAL MUA HÀNG (LUỒNG MỚI)
+   ========================================== */
+.custom-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.75); z-index: 9998; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+.custom-modal-content { background: linear-gradient(145deg, #1e2129 0%, #242933 100%); color: #fafbfc; width: 90%; max-width: 850px; border-radius: 16px; padding: 30px; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(58, 63, 74, 0.5); animation: modalSlideUp 0.3s ease-out; z-index: 9999; }
+@keyframes modalSlideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.close-modal-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: #9ca3af; cursor: pointer; transition: 0.2s; z-index: 10; }
+.close-modal-btn:hover { color: #ef4444; }
+.modal-flex-container { display: flex; gap: 30px; }
+.modal-img-wrapper { flex: 1; border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, #2a2f3a 0%, #1e2129 100%); display: flex; align-items: center; justify-content: center;}
+.modal-img-wrapper img { width: 100%; height: auto; mix-blend-mode: normal; object-fit: cover; aspect-ratio: 1; }
+.modal-info-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.modal-price { font-size: 24px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 900; margin-bottom: 20px; }
+.option-group { margin-bottom: 20px; }
+.option-group label { display: block; margin-bottom: 10px; color: #9ca3af; font-size: 0.9rem; }
+.color-list, .size-list { display: flex; gap: 10px; flex-wrap: wrap; }
+.size-box { padding: 8px 20px; background: #242933; border: 1px solid #3a3f4a; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; font-weight: 500; color: #d1d5db; text-align: center; font-size: 0.9rem; }
+.size-box:hover { border-color: #2b5cff; color: #2b5cff; background: rgba(43, 92, 255, 0.05); }
+.size-box.active { background: rgba(43, 92, 255, 0.1); border-color: #2b5cff; color: #2b5cff; position: relative; }
+.size-box.active::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; bottom: -1px; right: -1px; background: #2b5cff; color: white; font-size: 0.5rem; padding: 3px 5px; border-top-left-radius: 6px; border-bottom-right-radius: 4px; }
+.btn-buy-now { margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #2b5cff, #1e40af); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; width: 100%; }
+.btn-buy-now:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(43, 92, 255, 0.4); }
+.btn-buy-now:disabled { background: #3a3f4a; cursor: not-allowed; box-shadow: none; color: #9ca3af; }
+@media (max-width: 768px) { .modal-flex-container { flex-direction: column; gap: 15px; } .modal-img-wrapper { max-height: 250px; } .custom-modal-content { padding: 20px; max-height: 90vh; overflow-y: auto; } }

@@ -18,10 +18,11 @@
             <a href="index.html">SNEAK<span>PEAK</span></a>
         </div>
         <nav class="nav-links d-none d-lg-flex">
-            <a href="index.html">HOME</a>
-            <a href="men.html">MAN</a>
-            <a href="women.html">WOMEN</a>
-            <a href="collection.html">COLLECTION</a>
+            <a href="index.html">NEW ARRIVALS</a>
+            <a href="category.html?id=1">RUNNING</a>
+            <a href="category.html?id=2">FOOTBALL</a>
+            <a href="category.html?id=3">BASKETBALL</a>
+            <a href="category.html?id=4">SNEAKERS</a>
         </nav>
         
         <div class="nav-search d-none d-md-flex">
@@ -52,70 +53,28 @@
         <p class="text-muted small mb-0">&copy; 2026 SNEAK PEAK. All rights reserved.</p>
     </footer>
 
+    <!-- Modal Quick Add -->
+    <div class="modal fade dark-theme-modal" id="quickAddModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #1e2129; border: 1px solid #3a3f4a;">
+          <div class="modal-header border-bottom-0">
+            <h5 class="modal-title text-light fw-bold" id="quickAddTitle">Tùy chọn giày</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body pt-0">
+            <div id="quickAddOptions"></div>
+          </div>
+          <div class="modal-footer border-top-0">
+            <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary-custom" id="btnConfirmQuickAdd" disabled>Thêm vào giỏ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const keyword = urlParams.get('keyword');
-            
-            // 1. Mảng ảnh dự phòng y hệt trang chủ
-            const localImages = [
-                "images/nike-air-max-90-infrared.jpg",
-                "images/nike-air-force-1-low-white.jpg",
-                "images/air-jordan-1-high-chicago.jpg",
-                "images/nike-zoom-tempo-next-pink.jpg"
-            ];
-
-            if(keyword) {
-                $('#searchKeyword').text('"' + keyword + '"');
-                
-                $.ajax({
-                    url: "/api/products",
-                    type: "GET",
-                    success: function(products) {
-                        const filtered = products.filter(p => p.name.toLowerCase().includes(keyword.toLowerCase()));
-                        
-                        if(filtered.length > 0) {
-                            let html = "";
-                            filtered.forEach(product => {
-                                // 2. Lấy ID thật (Phòng trường hợp Java trả về productId thay vì id)
-                                const realId = product.id || product.productId;
-                                
-                                // 3. Áp dụng thuật toán gán ảnh quay vòng y hệt app.js
-                                const imgSrc = product.thumb || product.imageUrl || product.image || localImages[realId % localImages.length];
-                                
-                                html += `
-                                    <div class="col-md-4 col-lg-3 mb-4">
-                                        <div class="card h-100 product-card border-0 shadow-sm dark-card">
-                                            <a href="product-detail.html?id=${realId}" class="product-img text-decoration-none d-block">
-                                                <img src="${imgSrc}" alt="${product.name}">
-                                            </a>
-                                            <div class="card-body d-flex flex-column">
-                                                <a href="product-detail.html?id=${realId}" class="text-decoration-none text-light">
-                                                    <h6 class="product-name text-truncate" title="${product.name}">${product.name}</h6>
-                                                </a>
-                                                <p class="product-category">${product.brandName || 'Sneaker'}</p>
-                                                <div class="d-flex justify-content-between align-items-center mt-auto">
-                                                    <h5 class="product-price mb-0">${product.price ? product.price.toLocaleString('vi-VN') : 0} ₫</h5>
-                                                    <button class="btn-buy" data-id="${realId}" title="Thêm vào giỏ">
-                                                        <i class="fas fa-shopping-cart"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-                            });
-                            $('#searchResultsGrid').html(html);
-                        } else {
-                            $('#searchResultsGrid').html('<div class="col-12 text-center text-muted mt-5"><h5>Không tìm thấy sản phẩm!</h5></div>');
-                        }
-                    }
-                });
-            }
-        });
-    </script>
-    <script src="app.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/search.js"></script>
 </body>
 </html>

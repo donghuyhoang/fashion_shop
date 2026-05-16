@@ -10,40 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="css/style.css"> 
-    <style>
-        /* CSS cho thanh cuộn sản phẩm ngang */
-        .product-carousel {
-            display: flex;
-            gap: 40px; /* Tăng khoảng cách lên 40px cho thông thoáng */
-            overflow-x: auto;
-            padding: 10px 5px 20px 5px;
-            scrollbar-width: none; /* Ẩn scrollbar Firefox */
-            -ms-overflow-style: none; /* Ẩn scrollbar IE/Edge */
-        }
-        .product-carousel::-webkit-scrollbar { display: none; } /* Ẩn scrollbar Chrome/Safari */
-        
-        .product-card-wrapper {
-            min-width: 260px;
-            max-width: 260px;
-            flex: 0 0 auto;
-        }
-        .btn-scroll {
-            position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
-            width: 45px; height: 45px; border-radius: 50%; background: #1e2129;
-            border: 1px solid #3a3f4a; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            display: flex; align-items: center; justify-content: center; transition: 0.3s;
-        }
-        .btn-scroll:hover { background: #3b82f6; border-color: #3b82f6; }
-        .btn-scroll-left { left: -20px; }
-        .btn-scroll-right { right: -20px; }
-
-        /* Khung hiển thị giới hạn đúng 4 sản phẩm (như cuộn phim) */
-        .carousel-wrapper {
-            max-width: 1160px; /* 4 thẻ (260) + 3 khoảng cách (40) = 1160px */
-            margin: 0 auto;
-            position: relative;
-        }
-    </style>
 </head>
 <body>
 
@@ -54,10 +20,11 @@
             <a href="index.html">SNEAK<span>PEAK</span></a>
         </div>
         <nav class="nav-links d-none d-lg-flex">
-            <a href="index.html" class="active">HOME</a>
-            <a href="men.html">MAN</a>
-            <a href="women.html">WOMEN</a>
-            <a href="collection.html">COLLECTION</a>
+            <a href="index.html" class="active">NEW ARRIVALS</a>
+            <a href="category.html?id=1">RUNNING</a>
+            <a href="category.html?id=2">FOOTBALL</a>
+            <a href="category.html?id=3">BASKETBALL</a>
+            <a href="category.html?id=4">SNEAKERS</a>
         </nav>
         
         <div class="nav-search d-none d-md-flex">
@@ -66,6 +33,9 @@
         </div>
 
         <div class="nav-actions">
+            <button id="themeToggle" class="btn btn-link text-decoration-none p-0 me-3" style="color: inherit; border: none; box-shadow: none;">
+                <i class="fas fa-moon fs-5"></i>
+            </button>
             <a href="cart.html" class="icon-link position-relative">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none; font-size: 0.6rem;">0</span>
@@ -77,7 +47,7 @@
     </header>
 
     <section class="hero-section">
-        <div class="hero-bg" style="background-image: url('images/nike-air-max-basketball-concept.jpg');"></div>
+        <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1552346154-21d32810baa3?q=80&w=1920&auto=format&fit=crop');"></div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <span class="badge-custom">LATEST COLLECTION | 2026</span>
@@ -91,131 +61,41 @@
         <div class="watermark">PREMIUM</div>
     </section>
 
-    <section class="category-pills-section container my-4">
-        <div class="d-flex justify-content-center flex-wrap gap-3">
-            <button class="pill-btn active" data-target="#newArrivals">All Sneakers</button>
-            <button class="pill-btn" data-target="#runningSection">Giày chạy bộ</button>
-            <button class="pill-btn" data-target="#footballSection">Giày bóng đá</button>
-            <button class="pill-btn" data-target="#basketballSection">Giày bóng rổ</button>
-            <button class="pill-btn" data-target="#sneakerSection">Sneaker / Thời trang</button>
-            <button class="pill-btn" data-target="#tennisSection">Giày Tennis</button>
-        </div>
-    </section>
-
     <div id="storytellingSections">
 
+        <!-- BỘ LỌC SẢN PHẨM -->
+        <div class="container mt-5 category-pills-section">
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <button class="pill-btn active" data-filter="all">NEW ARRIVALS</button>
+                <button class="pill-btn" data-filter="brand" data-id="1">NIKE</button>
+                <button class="pill-btn" data-filter="brand" data-id="2">ADIDAS</button>
+                <button class="pill-btn" data-filter="brand" data-id="6">MIZUNO</button>
+                <button class="pill-btn" data-filter="brand" data-id="3">PUMA</button>
+            </div>
+        </div>
+
         <section id="newArrivals" class="collection-block container mb-5 pb-4 pt-4">
-            <div class="d-flex justify-content-between align-items-end mb-4">
+            <div class="d-flex justify-content-between align-items-end mb-4 border-bottom border-secondary pb-3">
                 <h2 class="section-title m-0">
-                    NEW ARRIVALS 
+                    <span id="sectionTitleText">NEW ARRIVALS</span> 
                     <button class="btn btn-sm btn-outline-primary ms-2 admin-add-product-btn d-none" data-category="" title="Thêm sản phẩm"><i class="fas fa-plus"></i></button>
-                    <span class="fs-6 text-muted fw-normal d-block">Khám phá những đôi giày mới cập bến.</span>
+                    <span class="fs-6 text-muted fw-normal d-block mt-2" id="sectionDescText">Khám phá những đôi giày mới cập bến.</span>
                 </h2>
-                <a href="#" class="view-all-link">View All <i class="fas fa-chevron-right fs-6"></i></a>
-            </div>
-            <div class="position-relative">
-                <button class="btn-scroll btn-scroll-left" data-target="#newArrivalsGrid"><i class="fas fa-chevron-left"></i></button>
-                <div class="product-carousel" id="newArrivalsGrid"></div>
-                <button class="btn-scroll btn-scroll-right" data-target="#newArrivalsGrid"><i class="fas fa-chevron-right"></i></button>
-            </div>
-        </section>
-
-        <section id="runningSection" class="collection-block mb-5">
-            <div class="story-banner" style="background-image: url('images/performance-running.jpg');">
-                <div class="banner-overlay"></div>
-                <div class="banner-content text-center">
-                    <h2 class="banner-title display-4 fw-black">
-                        GIÀY CHẠY BỘ (RUNNING)
-                        <button class="btn btn-primary rounded-circle ms-2 admin-add-product-btn d-none" style="width: 45px; height: 45px; vertical-align: middle;" data-category="1" title="Thêm sản phẩm vào mục này"><i class="fas fa-plus"></i></button>
-                    </h2>
+                <div class="d-flex gap-2">
+                    <select id="priceFilterIndexSelect" class="form-select form-select-sm w-auto bg-dark text-white border-secondary shadow-none" style="cursor: pointer;">
+                        <option value="all">Khoảng giá: Tất cả</option>
+                        <option value="under_1m">Dưới 1.000.000₫</option>
+                        <option value="1m_to_3m">1.000.000₫ - 3.000.000₫</option>
+                        <option value="over_3m">Trên 3.000.000₫</option>
+                    </select>
+                    <select id="sortIndexSelect" class="form-select form-select-sm w-auto bg-dark text-white border-secondary shadow-none" style="cursor: pointer;">
+                        <option value="default">Sắp xếp: Mới nhất</option>
+                        <option value="price_asc">Giá: Thấp đến Cao</option>
+                        <option value="price_desc">Giá: Cao đến Thấp</option>
+                    </select>
                 </div>
             </div>
-            <div class="container mt-5">
-                <div class="carousel-wrapper">
-                    <button class="btn-scroll btn-scroll-left" data-target="#runningGrid"><i class="fas fa-chevron-left"></i></button>
-                    <div class="product-carousel" id="runningGrid"></div>
-                    <button class="btn-scroll btn-scroll-right" data-target="#runningGrid"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-        </section>
-
-        <section id="footballSection" class="collection-block mb-5">
-            <div class="story-banner" style="background-image: url('images/nike-x-sacai-ldwaffle-green-orange.jpg');">
-                <div class="banner-overlay"></div>
-                <div class="banner-content text-start w-100 px-5">
-                    <h2 class="banner-title display-4 fw-black text-warning">
-                        GIÀY BÓNG ĐÁ (FOOTBALL)
-                        <button class="btn btn-primary rounded-circle ms-2 admin-add-product-btn d-none" style="width: 45px; height: 45px; vertical-align: middle;" data-category="2" title="Thêm sản phẩm vào mục này"><i class="fas fa-plus"></i></button>
-                    </h2>
-                    <p class="banner-desc w-50">Tốc độ, kiểm soát và sức mạnh. Sẵn sàng tỏa sáng trên sân cỏ.</p>
-                </div>
-            </div>
-            <div class="container mt-5">
-                <div class="carousel-wrapper">
-                    <button class="btn-scroll btn-scroll-left" data-target="#footballGrid"><i class="fas fa-chevron-left"></i></button>
-                    <div class="product-carousel" id="footballGrid"></div>
-                    <button class="btn-scroll btn-scroll-right" data-target="#footballGrid"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-        </section>
-
-        <section id="basketballSection" class="collection-block mb-5">
-            <div class="story-banner" style="background-image: url('images/basketball-heritage.jpg');">
-                <div class="banner-overlay"></div>
-                <div class="banner-content text-center">
-                    <h2 class="banner-title display-4 fw-black">
-                        GIÀY BÓNG RỔ (BASKETBALL)
-                        <button class="btn btn-primary rounded-circle ms-2 admin-add-product-btn d-none" style="width: 45px; height: 45px; vertical-align: middle;" data-category="3" title="Thêm sản phẩm vào mục này"><i class="fas fa-plus"></i></button>
-                    </h2>
-                    <p class="banner-desc">Court-ready performance meets street-approved style. Discover the silhouettes that defined generations of basketball culture.</p>
-                </div>
-            </div>
-            <div class="container mt-5">
-                <div class="carousel-wrapper">
-                    <button class="btn-scroll btn-scroll-left" data-target="#basketballGrid"><i class="fas fa-chevron-left"></i></button>
-                    <div class="product-carousel" id="basketballGrid"></div>
-                    <button class="btn-scroll btn-scroll-right" data-target="#basketballGrid"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-        </section>
-
-        <section id="sneakerSection" class="collection-block mb-5">
-            <div class="story-banner" style="background-image: url('images/nike-dunk-low-panda.jpg');">
-                <div class="banner-overlay light-overlay"></div>
-                <div class="banner-content text-center">
-                    <h2 class="banner-title display-3 fw-black" style="color: #12151c; text-shadow: 2px 2px 0px #fff;">
-                        GIÀY SNEAKER / THỜI TRANG
-                        <button class="btn btn-primary rounded-circle ms-2 admin-add-product-btn d-none" style="width: 45px; height: 45px; vertical-align: middle;" data-category="4" title="Thêm sản phẩm vào mục này"><i class="fas fa-plus"></i></button>
-                    </h2>
-                </div>
-            </div>
-            <div class="container mt-5">
-                <div class="carousel-wrapper">
-                    <button class="btn-scroll btn-scroll-left" data-target="#sneakerGrid"><i class="fas fa-chevron-left"></i></button>
-                    <div class="product-carousel" id="sneakerGrid"></div>
-                    <button class="btn-scroll btn-scroll-right" data-target="#sneakerGrid"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-        </section>
-
-        <section id="tennisSection" class="collection-block mb-5">
-            <div class="story-banner" style="background-image: url('images/nike-air-max-90-premium-brown.jpg');">
-                <div class="banner-overlay green-overlay"></div>
-                <div class="banner-content text-center">
-                    <h2 class="banner-title display-4 fw-black text-white">
-                        GIÀY TENNIS
-                        <button class="btn btn-primary rounded-circle ms-2 admin-add-product-btn d-none" style="width: 45px; height: 45px; vertical-align: middle;" data-category="5" title="Thêm sản phẩm vào mục này"><i class="fas fa-plus"></i></button>
-                    </h2>
-                    <p class="banner-desc">Built with sustainability in mind. Maximum style, minimum footprint.</p>
-                </div>
-            </div>
-            <div class="container mt-5">
-                <div class="carousel-wrapper">
-                    <button class="btn-scroll btn-scroll-left" data-target="#tennisGrid"><i class="fas fa-chevron-left"></i></button>
-                    <div class="product-carousel" id="tennisGrid"></div>
-                    <button class="btn-scroll btn-scroll-right" data-target="#tennisGrid"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
+            <div class="row g-4" id="newArrivalsGrid"></div>
         </section>
 
     </div>
@@ -229,7 +109,7 @@
     <script src="js/app.js"></script>
 
     <!-- Modal Giao diện Quick Add -->
-    <div class="modal fade dark-theme-modal" id="quickAddModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade dark-theme-modal" id="quickAddModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="background-color: #1e2129; border: 1px solid #3a3f4a;">
           <div class="modal-header border-bottom-0">
