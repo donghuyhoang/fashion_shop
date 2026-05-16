@@ -14,9 +14,10 @@ import com.javaweb.builder.ProductSearchBuilder;
 import com.javaweb.repository.ProductRepository;
 import com.javaweb.repository.entity.ProductEntity;
 import com.javaweb.utils.ConnectionJDBCUtil;
-@Repository
 
+@Repository
 public class ProductRepositoryImpl implements ProductRepository{
+	
 	@Override
 	public List<ProductEntity> findProduct(ProductSearchBuilder params) {
 	    StringBuilder sql = new StringBuilder("SELECT p.product_id, p.name, p.price, p.description, b.name as brand_name, SUM(pd.stock_quantity) as stock_quantity, MAX(pd.thumbnail_img_url) as thumbnail_img_url ");
@@ -54,7 +55,6 @@ public class ProductRepositoryImpl implements ProductRepository{
 	    try (Connection conn = ConnectionJDBCUtil.getConnection();
 	         PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
 	         
-	        // Set các tham số vào dấu ?
 	        for (int i = 0; i < queryParams.size(); i++) {
 	            pstmt.setObject(i + 1, queryParams.get(i));
 	        }
@@ -108,11 +108,15 @@ public class ProductRepositoryImpl implements ProductRepository{
 		}
 		return result;
 	}
+
+    // ĐÃ SỬA: Chuyển void thành Integer, và trả về generatedId
 	@Override
-	public void save(model.ProductDTO dto) {
+	public Integer save(model.ProductDTO dto) {
 		String sqlProduct = "INSERT INTO products (name, description, price, category_id, brand_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
 		String sqlDetail = "INSERT INTO product_details (product_id, size_id, color_id, stock_quantity, price, thumbnail_img_url) VALUES (?, ?, ?, ?, ?, ?)";
 		
+        Integer generatedId = null; // Khai báo biến để hứng ID
+
 		try (Connection conn = ConnectionJDBCUtil.getConnection()) {
 			conn.setAutoCommit(false); 
 			
@@ -127,11 +131,11 @@ public class ProductRepositoryImpl implements ProductRepository{
 				// Lấy product_id vừa được sinh ra
 				ResultSet rs = pstmt.getGeneratedKeys();
 				if (rs.next()) {
-					int productId = rs.getInt(1);
+					generatedId = rs.getInt(1); // Gán ID vào biến
 					
 					// Insert tiếp vào product_details
 					try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail)) {
-						pstmtDetail.setInt(1, productId);
+						pstmtDetail.setInt(1, generatedId); // Dùng ID vừa lấy được
 						pstmtDetail.setObject(2, dto.getSizeId());
 						pstmtDetail.setObject(3, dto.getColorId());
 						pstmtDetail.setObject(4, dto.getStock() != null ? dto.getStock() : 0);
@@ -145,11 +149,13 @@ public class ProductRepositoryImpl implements ProductRepository{
 				conn.rollback(); 
 				e.printStackTrace();
 			} finally {
-                conn.setAutoCommit(true); // Trả lại trạng thái mặc định cho Connection Pool
+                conn.setAutoCommit(true); 
             }
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+        
+        return generatedId; // Trả về ID cho ProductServiceImpl sử dụng
 	}
 
 	@Override
@@ -162,7 +168,6 @@ public class ProductRepositoryImpl implements ProductRepository{
 			try (PreparedStatement pstmt = conn.prepareStatement(sqlProduct);
 				 PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail)) {
 				
-				// Update bảng products
 				pstmt.setString(1, dto.getName());
 				pstmt.setString(2, dto.getDescription());
 				pstmt.setObject(3, dto.getPrice());
@@ -171,7 +176,6 @@ public class ProductRepositoryImpl implements ProductRepository{
 				pstmt.setInt(6, dto.getId());
 				pstmt.executeUpdate();
 				
-				// Update bảng product_details
 				pstmtDetail.setObject(1, dto.getSizeId());
 				pstmtDetail.setObject(2, dto.getColorId());
 				pstmtDetail.setObject(3, dto.getStock() != null ? dto.getStock() : 0);
@@ -192,34 +196,29 @@ public class ProductRepositoryImpl implements ProductRepository{
 		}
 	}
 
-	// Xóa sản phẩm sẽ phải xóa cả chi tiết, nên cần dùng Transaction để đảm bảo tính toàn vẹn dữ liệu
 	@Override
     public void delete(Integer id) {
-        // Xóa thằng con trước
         String sqlDetail = "DELETE FROM product_details WHERE product_id = ?";
-        // Xóa thằng bố sau
         String sqlProduct = "DELETE FROM products WHERE product_id = ?";
         
         try (Connection conn = ConnectionJDBCUtil.getConnection()) {
-            conn.setAutoCommit(false); // Bật khiên bảo vệ Transaction
+            conn.setAutoCommit(false); 
             
             try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail);
                  PreparedStatement pstmtProduct = conn.prepareStatement(sqlProduct)) {
                  
-                // Xóa chi tiết
                 pstmtDetail.setInt(1, id);
                 pstmtDetail.executeUpdate();
                 
-                // Xóa sản phẩm
                 pstmtProduct.setInt(1, id);
                 pstmtProduct.executeUpdate();
                 
-                conn.commit(); // Thành công thì lưu cả 2
+                conn.commit(); 
             } catch (SQLException e) {
-                conn.rollback(); // Lỗi thì hoàn tác
+                conn.rollback(); 
                 e.printStackTrace();
             } finally {
-                conn.setAutoCommit(true); // Trả lại trạng thái mặc định cho Connection Pool
+                conn.setAutoCommit(true); 
             }
         } catch (SQLException e) {
             e.printStackTrace();
