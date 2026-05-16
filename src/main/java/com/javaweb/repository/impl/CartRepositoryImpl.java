@@ -106,7 +106,7 @@ public class CartRepositoryImpl implements CartRepository {
         List<CartItemResponseDTO> list = new ArrayList<>();
         String sql = "SELECT pd.product_detail_id, p.name AS product_name, p.price, ci.quantity, " +
                      "s.value AS size_name, c_color.name AS color_name, " + 
-                     "pd.thumbnail_img_url AS thumb " +  
+                     "COALESCE((SELECT image_url FROM product_images WHERE product_id = p.product_id ORDER BY sort_order ASC LIMIT 1), pd.thumbnail_img_url) AS thumb " +  
                      "FROM cart_items ci " +
                      "JOIN carts c ON ci.cart_id = c.cart_id " +
                      "JOIN product_details pd ON ci.product_detail_id = pd.product_detail_id " +

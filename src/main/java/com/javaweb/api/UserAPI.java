@@ -5,8 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.javaweb.repository.impl.UserRepositoryImpl;
 import com.javaweb.repository.entity.UserEntity;
+import com.javaweb.security.JwtUtils;
 import model.UserDTO;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,9 @@ public class UserAPI {
 
     @Autowired
     private UserRepositoryImpl userRepository;
+    
+    @Autowired
+    private JwtUtils jwtUtils;
     
     // ==========================================
     // API ĐĂNG NHẬP
@@ -34,13 +39,18 @@ public class UserAPI {
                 return ResponseEntity.status(403).body("Tài khoản của bạn đã bị khóa! Vui lòng liên hệ Admin.");
             }
 
-            UserDTO responseDTO = new UserDTO();
-            responseDTO.setUserId(user.getUser_id());
-            responseDTO.setFullName(user.getFullname());
-            responseDTO.setEmail(user.getEmail());
-            responseDTO.setRoleId(user.getRole_id());
-            responseDTO.setIsActive(user.getIs_active());
-            return ResponseEntity.ok(responseDTO);
+            // Tạo token JWT (Vòng tay VIP)
+            String token = jwtUtils.generateToken(user.getEmail(), user.getRole_id(), user.getUser_id());
+            
+            // Đóng gói thông tin trả về kèm theo token
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("userId", user.getUser_id());
+            responseData.put("fullName", user.getFullname());
+            responseData.put("email", user.getEmail());
+            responseData.put("roleId", user.getRole_id());
+            responseData.put("isActive", user.getIs_active());
+            responseData.put("token", token);
+            return ResponseEntity.ok(responseData);
         }
         return ResponseEntity.status(401).body("Email hoặc mật khẩu không chính xác!");
     }
