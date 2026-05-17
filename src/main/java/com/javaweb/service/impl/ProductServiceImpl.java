@@ -1,5 +1,7 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.algorithm.ProductQuickSort;
+import com.javaweb.service.ProductTrieService;
 import com.javaweb.builder.ProductSearchBuilder;
 import com.javaweb.service.ProductService;
 import com.javaweb.repository.ProductRepository;
@@ -27,10 +29,13 @@ public class ProductServiceImpl implements ProductService {
     @Autowired // Kéo ProductImageRepository vào để dùng
     private ProductImageRepository productImageRepository; 
 
+    @Autowired // Kéo cây Trie vào để sử dụng
+    private ProductTrieService productTrieService;
+    
     @Override
     public List<ProductDTO> findAll() {
         List<ProductDTO> results = new ArrayList<>();
-        // Lấy ảnh trực tiếp từ bảng product_images và gộp lại bằng |||
+        
         String sql = "SELECT " +
                      "    p.product_id, p.name, p.description, p.price, p.created_at, " +
                      "    p.category_id, c.name AS category_name, " +
@@ -39,8 +44,7 @@ public class ProductServiceImpl implements ProductService {
                      "    (SELECT GROUP_CONCAT(pi.image_url SEPARATOR '|||') FROM product_images pi WHERE pi.product_id = p.product_id ORDER BY pi.sort_order ASC) AS thumb " +
                      "FROM products p " +
                      "LEFT JOIN categories c ON p.category_id = c.category_id " +
-                     "LEFT JOIN brands b ON p.brand_id = b.brand_id " +
-                     "ORDER BY p.product_id DESC";
+                     "LEFT JOIN brands b ON p.brand_id = b.brand_id"; 
 
         try (Connection conn = ConnectionJDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -63,12 +67,35 @@ public class ProductServiceImpl implements ProductService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // =======================================================
+        // ÁP DỤNG THUẬT TOÁN QUICKSORT ĐỂ XẾP HẠNG (RANKING)
+        // =======================================================
+        // Sắp xếp danh sách sản phẩm theo giá từ CAO xuống THẤP (false).
+        // Nếu muốn từ thấp đến cao, chỉ cần đổi thành true.
+        ProductQuickSort.sort(results, false);
+
         return results;
     }
 
     @Override
     public List<ProductDTO> findProduct(ProductSearchBuilder params) {
-        List<ProductEntity> entities = productRepository.findProduct(params);
+        List<Integer> matchedIds = null;
+        String keyword = params.getName();
+        
+        // BƯỚC 1: Nếu người dùng có gõ tên sản phẩm -> Gọi Trie chạy trên RAM
+        if (keyword != null && !keyword.trim().isEmpty() && !keyword.equals("null")) {
+            matchedIds = productTrieService.searchProductIds(keyword);
+            
+            // BƯỚC 2 (TỐI ƯU O(1)): Nếu Trie không tìm thấy -> Trả về rỗng ngay lập tức, khỏi gọi Database tốn thời gian
+            if (matchedIds.isEmpty()) {
+                return new ArrayList<>(); 
+            }
+        }
+
+        // BƯỚC 3: Nếu Trie tìm ra ID (hoặc người dùng không gõ tên), truyền xuống Repository xử lý tiếp
+        List<ProductEntity> entities = productRepository.findProduct(params, matchedIds);
+        
         List<ProductDTO> results = new ArrayList<>();
         for (ProductEntity item : entities) {
             results.add(ProductDTOConverter.toProductDTO(item));
@@ -92,14 +119,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Integer save(ProductDTO dto) {
-        Integer newId = productRepository.save(dto); // Lấy ID vừa tạo
+        Integer newId = productRepository.save(dto); 
         
-        // Giải nén ảnh và đưa vào Database bảng Product Images
         if (newId != null) {
             List<String> imageUrls = extractImages(dto);
             if (!imageUrls.isEmpty()) {
                 productImageRepository.saveAll(newId, imageUrls);
             }
+            //Nạp sản phẩm vừa tạo vào cây Trie ngay lập tức để tìm kiếm được liền
+            productTrieService.addProductToTrie(dto.getName(), newId);
         }
         return newId;
     }

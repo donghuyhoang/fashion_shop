@@ -19,7 +19,7 @@ import com.javaweb.utils.ConnectionJDBCUtil;
 public class ProductRepositoryImpl implements ProductRepository{
 	
 	@Override
-	public List<ProductEntity> findProduct(ProductSearchBuilder params) {
+	public List<ProductEntity> findProduct(ProductSearchBuilder params, List<Integer> matchedIds) {
 	    StringBuilder sql = new StringBuilder("SELECT p.product_id, p.name, p.price, p.description, b.name as brand_name, SUM(pd.stock_quantity) as stock_quantity, MAX(pd.thumbnail_img_url) as thumbnail_img_url ");
 	    sql.append("FROM products p ");
 	    sql.append("LEFT JOIN product_details pd ON p.product_id = pd.product_id ");
@@ -27,10 +27,25 @@ public class ProductRepositoryImpl implements ProductRepository{
 
 	    List<Object> queryParams = new ArrayList<>();
 
-	    if(params.getName() != null && !params.getName().trim().isEmpty() && !params.getName().equals("null")) {
-	        sql.append(" AND p.name LIKE ? ");
-	        queryParams.add("%" + params.getName() + "%");
-	    }
+        // ---- THAY THẾ SQL LIKE BẰNG TRIE IDs ----
+	    if (matchedIds != null) {
+            if (matchedIds.isEmpty()) {
+                // Nếu mảng ID rỗng (Trie không tìm thấy) -> Cho câu SQL sai luôn (1=0) để ko load dữ liệu thừa
+                sql.append(" AND 1=0 "); 
+            } else {
+                sql.append(" AND p.product_id IN (");
+                for (int i = 0; i < matchedIds.size(); i++) {
+                    sql.append("?");
+                    if (i < matchedIds.size() - 1) sql.append(",");
+                    queryParams.add(matchedIds.get(i));
+                }
+                sql.append(") ");
+            }
+        }
+        // ------------------------------------------
+
+        // LƯU Ý: Đã xóa bỏ đoạn if (params.getName() != null...) ở đây vì Trie đã lo phần đó
+
 	    if(params.getBrandId() != null) {
 	        sql.append(" AND p.brand_id = ? ");
 	        queryParams.add(params.getBrandId());
@@ -109,7 +124,6 @@ public class ProductRepositoryImpl implements ProductRepository{
 		return result;
 	}
 
-    // ĐÃ SỬA: Chuyển void thành Integer, và trả về generatedId
 	@Override
 	public Integer save(model.ProductDTO dto) {
 		String sqlProduct = "INSERT INTO products (name, description, price, category_id, brand_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
