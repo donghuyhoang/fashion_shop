@@ -13,8 +13,8 @@
         body { background-color: #121212; color: #ffffff; font-family: 'Montserrat', sans-serif; }
         
         /* Cấu trúc Ảnh */
-        .main-img-box { background-color: #1a1d24; border-radius: 16px; padding: 40px; text-align: center; border: 1px solid #2a2d34; }
-        .main-img-box img { width: 100%; max-width: 500px; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); }
+        .main-img-box { background-color: #1a1d24; border-radius: 16px; padding: 40px; text-align: center; border: 1px solid #2a2d34; transition: 0.3s; }
+        .main-img-box img { width: 100%; max-width: 500px; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); transition: 0.3s ease-in-out; }
         
         /* Chữ và Giá */
         .product-title { font-weight: 900; font-size: 2.5rem; letter-spacing: -1px; margin-top: 10px; }
@@ -36,6 +36,11 @@
         /* Nút Đặt Hàng */
         .btn-gradient { background: #10b981; color: white; width: 100%; border: none; padding: 18px; border-radius: 8px; font-weight: 800; letter-spacing: 1px; transition: 0.3s; font-size: 1.1rem; }
         .btn-gradient:hover { background: #0e9f6e; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
+
+        /* Khung Ảnh Mini (Thumbnails) */
+        .thumb-img { opacity: 0.6; transition: 0.3s; }
+        .thumb-img:hover { opacity: 1; transform: translateY(-2px); }
+        .thumb-img.active { opacity: 1; border-color: #10b981 !important; }
     </style>
 </head>
 <body>
@@ -87,21 +92,44 @@
                 url: "/api/products", 
                 type: "GET",
                 success: function(products) {
-                    // FIX LỖI "Chi tiết không hoạt động": Tìm theo id HOẶC productId
                     const product = products.find(p => (p.id == urlId) || (p.productId == urlId));
 
                     if (product) {
                         const realId = product.id || product.productId;
                         
-                        // Áp dụng thuật toán ảnh 
-                        const imgSrc = product.thumb || product.imageUrl || product.image || localImages[realId % localImages.length]; 
+                        // XỬ LÝ ẢNH ĐA LUỒNG
+                        let imageArray = [];
+                        if (product.thumb && product.thumb.includes('|||')) {
+                            imageArray = product.thumb.split('|||').map(img => img.trim()).filter(img => img !== "");
+                        } else if (product.thumb) {
+                            imageArray = [product.thumb];
+                        } else {
+                            imageArray = [localImages[realId % localImages.length]];
+                        }
+
+                        const mainImgSrc = imageArray[0];
+
+                        // TẠO GIAO DIỆN CÁC ẢNH NHỎ (THUMBNAILS)
+                        let thumbnailsHtml = '';
+                        if (imageArray.length > 1) {
+                            thumbnailsHtml = '<div class="d-flex justify-content-center mt-4 gap-3 flex-wrap">';
+                            imageArray.forEach((img, idx) => {
+                                const activeClass = idx === 0 ? 'active border-success' : 'border-secondary';
+                                thumbnailsHtml += `<img src="${img}" class="img-thumbnail thumb-img ${activeClass}" data-src="${img}" style="width: 80px; height: 80px; object-fit: cover; cursor: pointer; background-color: #1a1d24; border-width: 2px;">`;
+                            });
+                            thumbnailsHtml += '</div>';
+                        }
+
                         const priceVND = product.price ? product.price.toLocaleString('vi-VN') : "0";
                         const description = product.description || `Siêu phẩm ${product.name} mang đến trải nghiệm tuyệt vời với thiết kế thời thượng và chất liệu cao cấp. Sự lựa chọn hoàn hảo cho phong cách Hypebeast.`;
 
                         $('#productDetailContainer').html(`
                             <div class="row">
                                 <div class="col-lg-6 mb-4">
-                                    <div class="main-img-box shadow-lg"><img src="${imgSrc}" alt="${product.name}"></div>
+                                    <div class="main-img-box shadow-lg">
+                                        <img id="mainProductImage" src="${mainImgSrc}" alt="${product.name}">
+                                    </div>
+                                    ${thumbnailsHtml}
                                 </div>
                                 <div class="col-lg-6 px-lg-5">
                                     <h6 class="text-secondary text-uppercase fw-bold mb-1">${product.brandName || "Sneaker Peak"}</h6>
@@ -133,22 +161,21 @@
                     } else {
                         $('#productDetailContainer').html('<div class="col-12 text-center text-danger"><h3>Sản phẩm không tồn tại!</h3></div>');
                     }
-                    // --- BỔ SUNG CODE SẢN PHẨM GỢI Ý VÀO ĐÂY ---
+                    
+                    // --- SẢN PHẨM GỢI Ý ---
                     const suggested = products.filter(p => p.id != urlId).slice(0, 4); 
                     if(suggested.length > 0) {
                         let suggestHtml = "";
                         suggested.forEach(p => {
-                            // Dùng đúng biến p.thumb theo chuẩn ProductDTO của bạn
-                            const pImg = p.thumb || "images/nike-air-force-1-low-white.jpg";
-                            
+                            const pImg = p.thumb ? p.thumb.split('|||')[0] : "images/nike-air-force-1-low-white.jpg";
                             suggestHtml += `
                                 <div class="col-md-3">
                                     <div class="card h-100 product-card border-0 shadow-sm dark-card">
-                                        <a href="product-detail.html?id=${p.id}" class="product-img text-decoration-none d-block">
+                                        <a href="productdetail.html?id=${p.id}" class="product-img text-decoration-none d-block">
                                             <img src="${pImg}" alt="${p.name}">
                                         </a>
                                         <div class="card-body d-flex flex-column">
-                                            <a href="product-detail.html?id=${p.id}" class="text-decoration-none text-light">
+                                            <a href="productdetail.html?id=${p.id}" class="text-decoration-none text-light">
                                                 <h6 class="product-name text-truncate">${p.name}</h6>
                                             </a>
                                             <h6 class="mt-auto pt-3 text-success">${p.price ? p.price.toLocaleString('vi-VN') : 0} ₫</h6>
@@ -158,8 +185,17 @@
                         });
                         $('#suggestedProductsGrid').html(suggestHtml);
                     }
-                    // -------------------------------------------
                 }
+            });
+
+            // HIỆU ỨNG CLICK ĐỔI ẢNH CHÍNH
+            $(document).on('click', '.thumb-img', function() {
+                const newSrc = $(this).data('src');
+                $('#mainProductImage').attr('src', newSrc);
+                
+                // Đổi viền xanh cho ảnh đang được chọn
+                $('.thumb-img').removeClass('active border-success').addClass('border-secondary');
+                $(this).removeClass('border-secondary').addClass('active border-success');
             });
 
             // Hiệu ứng click Màu và Size

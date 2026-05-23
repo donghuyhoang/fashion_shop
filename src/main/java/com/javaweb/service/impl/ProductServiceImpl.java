@@ -5,7 +5,7 @@ import com.javaweb.service.ProductTrieService;
 import com.javaweb.builder.ProductSearchBuilder;
 import com.javaweb.service.ProductService;
 import com.javaweb.repository.ProductRepository;
-import com.javaweb.repository.ProductImageRepository; // Import thêm
+import com.javaweb.repository.ProductImageRepository; 
 import com.javaweb.repository.entity.ProductEntity;
 import com.javaweb.converter.ProductDTOConverter;
 import model.ProductDTO;
@@ -26,10 +26,10 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    @Autowired // Kéo ProductImageRepository vào để dùng
+    @Autowired 
     private ProductImageRepository productImageRepository; 
 
-    @Autowired // Kéo cây Trie vào để sử dụng
+    @Autowired 
     private ProductTrieService productTrieService;
     
     @Override
@@ -60,7 +60,10 @@ public class ProductServiceImpl implements ProductService {
                 dto.setBrandId(rs.getInt("brand_id"));
                 dto.setBrandName(rs.getString("brand_name"));
                 dto.setStock(rs.getInt("stock_quantity"));
-                dto.setThumb(rs.getString("thumb"));
+                
+                // Trả lại nguyên vẹn chuỗi ảnh chứa ||| để API truyền đủ ảnh lên web
+                dto.setThumb(rs.getString("thumb")); 
+                
                 dto.setCreatedAt(rs.getTimestamp("created_at"));
                 results.add(dto);
             }
@@ -68,11 +71,7 @@ public class ProductServiceImpl implements ProductService {
             e.printStackTrace();
         }
 
-        // =======================================================
-        // ÁP DỤNG THUẬT TOÁN QUICKSORT ĐỂ XẾP HẠNG (RANKING)
-        // =======================================================
-        // Sắp xếp danh sách sản phẩm theo giá từ CAO xuống THẤP (false).
-        // Nếu muốn từ thấp đến cao, chỉ cần đổi thành true.
+        // Sắp xếp danh sách sản phẩm theo giá từ CAO xuống THẤP
         ProductQuickSort.sort(results, false);
 
         return results;
@@ -87,23 +86,27 @@ public class ProductServiceImpl implements ProductService {
         if (keyword != null && !keyword.trim().isEmpty() && !keyword.equals("null")) {
             matchedIds = productTrieService.searchProductIds(keyword);
             
-            // BƯỚC 2 (TỐI ƯU O(1)): Nếu Trie không tìm thấy -> Trả về rỗng ngay lập tức, khỏi gọi Database tốn thời gian
+            // BƯỚC 2 (TỐI ƯU O(1)): Nếu Trie không tìm thấy -> Trả về rỗng ngay lập tức
             if (matchedIds.isEmpty()) {
                 return new ArrayList<>(); 
             }
         }
 
-        // BƯỚC 3: Nếu Trie tìm ra ID (hoặc người dùng không gõ tên), truyền xuống Repository xử lý tiếp
+        // BƯỚC 3: Nếu Trie tìm ra ID (hoặc người dùng không gõ tên), truyền xuống Repository
         List<ProductEntity> entities = productRepository.findProduct(params, matchedIds);
         
         List<ProductDTO> results = new ArrayList<>();
         for (ProductEntity item : entities) {
             results.add(ProductDTOConverter.toProductDTO(item));
         }
+        
+        // Sắp xếp cả kết quả tìm kiếm bằng thuật toán QuickSort 
+        ProductQuickSort.sort(results, false);
+
         return results;
     }
 
-    //Tách chuỗi ||| thành danh sách link
+    // Tách chuỗi ||| thành danh sách link
     private List<String> extractImages(ProductDTO dto) {
         List<String> list = new ArrayList<>();
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
@@ -126,7 +129,7 @@ public class ProductServiceImpl implements ProductService {
             if (!imageUrls.isEmpty()) {
                 productImageRepository.saveAll(newId, imageUrls);
             }
-            //Nạp sản phẩm vừa tạo vào cây Trie ngay lập tức để tìm kiếm được liền
+            // Nạp sản phẩm vừa tạo vào cây Trie ngay lập tức để tìm kiếm được liền
             productTrieService.addProductToTrie(dto.getName(), newId);
         }
         return newId;
@@ -134,7 +137,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void update(ProductDTO dto) {
-        productRepository.update(dto); // Cập nhật thông tin cơ bản
+        productRepository.update(dto); 
         
         // Cập nhật ảnh (Xóa ảnh cũ, thêm ảnh mới)
         if (dto.getId() != null) {

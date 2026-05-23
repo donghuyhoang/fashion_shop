@@ -71,17 +71,18 @@ $(document).ready(function () {
 
         let html = "";
         $.each(products, function (index, product) {
-            const imgSrc = product.thumb ? product.thumb : localImages[index % localImages.length];
+            // SỬA Ở ĐÂY: Dùng split('|||')[0] để chỉ lấy ảnh đầu tiên hiển thị lên trang chủ
+            const imgSrc = product.thumb ? product.thumb.split('|||')[0] : localImages[index % localImages.length];
             const fallbackImg = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20fill%3D%22%23eee%22%20width%3D%22200%22%20height%3D%22200%22%2F%3E%3Ctext%20fill%3D%22%23999%22%20font-family%3D%22sans-serif%22%20font-size%3D%2216%22%20dy%3D%2210.5%22%20font-weight%3D%22bold%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E";
 
             html += `
                 <div class="col-md-4 col-lg-3 mb-4">
                     <div class="card h-100 product-card border-0 shadow-sm dark-card">
-                        <a href="product-detail.html?id=${product.id}" class="product-img text-decoration-none d-block">
+                        <a href="productdetail.html?id=${product.id}" class="product-img text-decoration-none d-block">
                             <img src="${imgSrc}" alt="${product.name}" onerror="this.onerror=null; this.src='${fallbackImg}';">
                         </a>
                         <div class="card-body d-flex flex-column">
-                            <a href="product-detail.html?id=${product.id}" class="text-decoration-none text-light">
+                            <a href="productdetail.html?id=${product.id}" class="text-decoration-none text-light">
                                 <h6 class="product-name text-truncate" title="${product.name}">${product.name}</h6>
                             </a>
                             <p class="product-category text-truncate" title="${product.brandName || 'Sneaker'}">${product.brandName || 'Sneaker'}</p>
@@ -175,12 +176,8 @@ $(document).ready(function () {
 
     // 3. Xử lý sự kiện bấm nút Hồ Sơ (Không bị hiện dấu #)
     $(document).on("click", "#btnProfile", function(e) {
-        e.preventDefault(); // <-- Đây chính là "Thần chú" chặn dấu # trên URL
-        
-        // Bạn có thể viết code kiểm tra/xử lý gì đó ở đây trước khi chuyển trang
+        e.preventDefault(); 
         console.log("Đang mở trang hồ sơ...");
-        
-        // Chuyển sang trang profile
         window.location.href = "profile.html"; 
     });
 
@@ -195,14 +192,9 @@ $(document).ready(function () {
         localStorage.removeItem("user_email"); 
         localStorage.removeItem("user_token"); 
         localStorage.removeItem("staff_token"); 
-        
-        // 🔥 ĐÂY CHÍNH LÀ DÒNG QUAN TRỌNG NHẤT ĐỂ SỬA LỖI 🔥
         localStorage.removeItem("user_id"); 
-        
-        // (Tùy chọn) Xóa luôn giỏ hàng tạm nếu bạn còn dùng
         localStorage.removeItem("user_cart"); 
 
-        // Load lại trang
         window.location.reload(); 
     });
 
@@ -271,11 +263,9 @@ $(document).ready(function () {
                 const sizeMap = new Map();
                 
                 details.forEach(detail => {
-                    // Xử lý đọc tên trường phòng trường hợp API trả về camelCase (sizeId) hoặc snake_case (size_id)
                     const sId = detail.sizeId !== undefined ? detail.sizeId : detail.size_id;
                     const cId = detail.colorId !== undefined ? detail.colorId : detail.color_id;
                     
-                    // Mapping ID ra Tên gọi hiển thị
                     const sizeObj = sizesCache.find(s => s.id === sId) || { id: sId, name: sId };
                     const colorObj = colorsCache.find(c => c.id === cId) || { id: cId, name: cId };
                     
@@ -323,10 +313,8 @@ $(document).ready(function () {
     // ==========================================
     $(document).on('click', '.color-btn', function() {
         if ($(this).hasClass('btn-primary-custom')) {
-            // Nếu nút đã được chọn trước đó -> Hủy chọn
             $(this).removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
         } else {
-            // Nếu chưa chọn -> Xóa màu các nút khác và bôi màu nút này
             $('.color-btn').removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
             $(this).removeClass('btn-outline-custom').addClass('btn-primary-custom text-white');
         }
@@ -335,7 +323,6 @@ $(document).ready(function () {
 
     $(document).on('click', '.size-btn', function() {
         if ($(this).hasClass('btn-primary-custom')) {
-            // Nếu nút đã được chọn trước đó -> Hủy chọn
             $(this).removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
         } else {
             $('.size-btn').removeClass('btn-primary-custom text-white').addClass('btn-outline-custom');
@@ -355,7 +342,6 @@ $(document).ready(function () {
             const selectedColorId = selectedColorBtn.data('id');
             const selectedSizeId = selectedSizeBtn.data('id');
             
-            // Tìm chi tiết sản phẩm phù hợp với cả 2 tiêu chí
             const detail = details.find(d => 
                 (d.colorId === selectedColorId || d.color_id === selectedColorId) && 
                 (d.sizeId === selectedSizeId || d.size_id === selectedSizeId)
@@ -366,10 +352,8 @@ $(document).ready(function () {
                 const dId = detail.id !== undefined ? detail.id : (detail.productDetailId !== undefined ? detail.productDetailId : detail.product_detail_id);
                 const price = detail.price !== undefined ? detail.price : null;
                 
-                // Lấy ảnh của biến thể (nếu Database trả về)
                 const thumb = detail.thumbnailImgUrl || detail.thumbnail_img_url || detail.thumb;
                 
-                // THAY ĐỔI GIÁ & HÌNH ẢNH NGAY LẬP TỨC TRÊN GIAO DIỆN
                 if (price) $('#quickAddVariantPrice').text(price.toLocaleString('vi-VN') + ' ₫');
                 if (thumb) $('#quickAddVariantImage').attr('src', thumb);
 
@@ -419,7 +403,7 @@ $(document).ready(function () {
             contentType: "application/json",
             data: JSON.stringify(cartRequest),
             success: function () {
-                $('#quickAddModal').modal('hide'); // Tắt Modal đi
+                $('#quickAddModal').modal('hide'); 
                 updateCartBadge();
                 showToastSuccess(productName);
             },
@@ -441,7 +425,6 @@ $(document).ready(function () {
             return;
         }
 
-        // Đổi API đếm số lượng: truyền userId thay vì email
         $.ajax({
             url: API_URL + "cart/count/" + userId, 
             type: "GET",
@@ -473,7 +456,7 @@ $(document).ready(function () {
     }
 
     // ==========================================
-    // HÀM BẬT THÔNG BÁO GÓC MÀN HÌNH (Giữ nguyên)
+    // HÀM BẬT THÔNG BÁO GÓC MÀN HÌNH 
     // ==========================================
     function showToastSuccess(productName) {
         if ($('#toastContainer').length === 0) {
@@ -500,17 +483,15 @@ $(document).ready(function () {
     }
 
     // ==========================================
-    // 6. XỬ LÝ TÌM KIẾM SẢN PHẨM (ENTER & CLICK KÍNH LÚP)
+    // 6. XỬ LÝ TÌM KIẾM SẢN PHẨM 
     // ==========================================
     
-    // Tự động điền lại từ khóa cũ vào ô tìm kiếm nếu đang ở trang search
     const urlParams = new URLSearchParams(window.location.search);
     const currentKeyword = urlParams.get('keyword');
     if (currentKeyword) {
         $('#searchInput').val(currentKeyword);
     }
 
-    // Hàm xử lý logic chuyển trang tìm kiếm
     function performSearch() {
         const keyword = $('#searchInput').val().trim();
         if (keyword !== "") {
@@ -518,18 +499,15 @@ $(document).ready(function () {
         }
     }
 
-    // Bắt sự kiện ấn phím Enter trong ô input
     $(document).on('keypress', '#searchInput', function (e) {
         if (e.which === 13) { 
             e.preventDefault(); 
-        }
             performSearch();
+        }
     });
 
-    // Bắt sự kiện click vào icon kính lúp
     $(document).on('click', '.nav-search i', function () {
         performSearch();
     });
 
-
-}); // <-- Đóng hàm an toàn
+});
