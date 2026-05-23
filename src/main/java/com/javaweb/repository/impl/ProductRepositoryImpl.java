@@ -129,7 +129,7 @@ public class ProductRepositoryImpl implements ProductRepository{
 		String sqlProduct = "INSERT INTO products (name, description, price, category_id, brand_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
 		String sqlDetail = "INSERT INTO product_details (product_id, size_id, color_id, stock_quantity, price, thumbnail_img_url) VALUES (?, ?, ?, ?, ?, ?)";
 		
-        Integer generatedId = null; // Khai báo biến để hứng ID
+        Integer generatedId = null;
 
 		try (Connection conn = ConnectionJDBCUtil.getConnection()) {
 			conn.setAutoCommit(false); 
@@ -142,19 +142,24 @@ public class ProductRepositoryImpl implements ProductRepository{
 				pstmt.setObject(5, dto.getBrandId());
 				pstmt.executeUpdate();
 				
-				// Lấy product_id vừa được sinh ra
 				ResultSet rs = pstmt.getGeneratedKeys();
 				if (rs.next()) {
-					generatedId = rs.getInt(1); // Gán ID vào biến
+					generatedId = rs.getInt(1); 
 					
-					// Insert tiếp vào product_details
 					try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail)) {
-						pstmtDetail.setInt(1, generatedId); // Dùng ID vừa lấy được
+						pstmtDetail.setInt(1, generatedId); 
 						pstmtDetail.setObject(2, dto.getSizeId());
 						pstmtDetail.setObject(3, dto.getColorId());
 						pstmtDetail.setObject(4, dto.getStock() != null ? dto.getStock() : 0);
 						pstmtDetail.setObject(5, dto.getPrice());
-						pstmtDetail.setString(6, dto.getThumb());
+
+                        // Cắt lấy đúng link ảnh đầu tiên để không bị quá ký tự
+                        String thumbUrl = dto.getThumb();
+                        if (thumbUrl != null && thumbUrl.contains("|||")) {
+                            thumbUrl = thumbUrl.split("\\|\\|\\|")[0].trim(); 
+                        }
+						pstmtDetail.setString(6, thumbUrl);
+
 						pstmtDetail.executeUpdate();
 					}
 				}
@@ -162,14 +167,18 @@ public class ProductRepositoryImpl implements ProductRepository{
 			} catch (SQLException e) {
 				conn.rollback(); 
 				e.printStackTrace();
+                // Ném lỗi báo về API
+                throw new RuntimeException("Lỗi CSDL khi insert dữ liệu: " + e.getMessage());
 			} finally {
                 conn.setAutoCommit(true); 
             }
 		} catch (SQLException e) {
 			e.printStackTrace();
+            // Ném lỗi báo về API
+            throw new RuntimeException("Lỗi kết nối hoặc thực thi SQL: " + e.getMessage());
 		}
         
-        return generatedId; // Trả về ID cho ProductServiceImpl sử dụng
+        return generatedId; 
 	}
 
 	@Override
@@ -194,7 +203,14 @@ public class ProductRepositoryImpl implements ProductRepository{
 				pstmtDetail.setObject(2, dto.getColorId());
 				pstmtDetail.setObject(3, dto.getStock() != null ? dto.getStock() : 0);
 				pstmtDetail.setObject(4, dto.getPrice());
-				pstmtDetail.setString(5, dto.getThumb());
+
+                // Cắt lấy đúng link ảnh đầu tiên
+                String thumbUrl = dto.getThumb();
+                if (thumbUrl != null && thumbUrl.contains("|||")) {
+                    thumbUrl = thumbUrl.split("\\|\\|\\|")[0].trim();
+                }
+				pstmtDetail.setString(5, thumbUrl);
+
 				pstmtDetail.setInt(6, dto.getId());
 				pstmtDetail.executeUpdate();
 				
@@ -202,11 +218,15 @@ public class ProductRepositoryImpl implements ProductRepository{
 			} catch (SQLException e) {
 				conn.rollback();
 				e.printStackTrace();
+                // Ném lỗi báo về API
+                throw new RuntimeException("Lỗi CSDL khi cập nhật dữ liệu: " + e.getMessage());
 			} finally {
 				conn.setAutoCommit(true);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+            // Ném lỗi báo về API
+            throw new RuntimeException("Lỗi kết nối hoặc thực thi SQL: " + e.getMessage());
 		}
 	}
 

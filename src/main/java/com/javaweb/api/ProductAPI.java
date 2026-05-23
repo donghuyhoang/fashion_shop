@@ -35,18 +35,32 @@ public class ProductAPI {
     	List<ProductDTO> result = productService.findProduct(params);
     	return result;
 	}
-    @PostMapping
-	public void addProduct(@RequestBody ProductDTO dto) {
-		productService.save(dto);
-		System.out.println("Đã thêm sản phẩm thành công vào DB!");
-	}
+    
 
-	@PutMapping(value = "/{id}")
-	public void updateProduct(@PathVariable Integer id, @RequestBody ProductDTO dto) {
-		dto.setId(id);
-		productService.update(dto);
-		System.out.println("Đã cập nhật sản phẩm ID: " + id);
-	}
+	@PostMapping
+    public ResponseEntity<?> addProduct(@RequestBody ProductDTO dto) {
+        try {
+            productService.save(dto);
+            System.out.println("Đã thêm sản phẩm thành công vào DB!");
+            return ResponseEntity.ok("Thêm sản phẩm thành công!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Lỗi thêm sản phẩm: " + e.getMessage());
+        }
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<?> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO dto) {
+        try {
+            dto.setId(id);
+            productService.update(dto);
+            System.out.println("Đã cập nhật sản phẩm ID: " + id);
+            return ResponseEntity.ok("Cập nhật sản phẩm thành công!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Lỗi cập nhật sản phẩm: " + e.getMessage());
+        }
+    }
 
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<String> deleteProduct(@PathVariable("id") Integer id) {
