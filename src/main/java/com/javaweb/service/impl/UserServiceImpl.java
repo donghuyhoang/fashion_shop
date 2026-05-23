@@ -1,4 +1,6 @@
 package com.javaweb.service.impl;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.javaweb.repository.UserRepository;
@@ -8,36 +10,40 @@ import model.UserDTO;
 
 @Service
 public class UserServiceImpl implements UserService {
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ModelMapper modelMapper; // Inject ModelMapper đã được cấu hình
 
     @Override
     public UserDTO login(String email, String password_hash) {
         UserEntity entity = userRepository.findByEmailAndPassword(email, password_hash);
         if (entity != null) {
-            UserDTO dto = new UserDTO();
-            dto.setUserId(entity.getUser_id());
-            dto.setEmail(entity.getEmail());
-            dto.setFullName(entity.getFullname());
-            dto.setRoleId(entity.getRole_id());
-            return dto;
+            /* * Thay vì dùng các hàm set thủ công như dto.setUserId(entity.getUser_id()),
+             * ta dùng modelMapper.map() để tự động chuyển đổi toàn bộ các trường tương ứng.
+             */
+            return modelMapper.map(entity, UserDTO.class);
         }
         return null;
     }
 
     @Override
-    public boolean register(UserDTO userDTO) 
-    {
-        if(userRepository.checkEmailExists(userDTO.getEmail())) {
+    public boolean register(UserDTO userDTO) {
+        if (userRepository.checkEmailExists(userDTO.getEmail())) {
             return false; // Email đã tồn tại
         }
 
-        UserEntity entity = new UserEntity();
-        entity.setFullname(userDTO.getFullName());
-        entity.setEmail(userDTO.getEmail());
-        entity.setPhone(userDTO.getPhoneNumber());
-        entity.setPassword_hash(userDTO.getPassword());
-        entity.setRole_id(2); // Gán role_id mặc định cho người dùng mới (ví dụ: 2 là khách hàng)
+        // Chuyển đổi ngược từ DTO sang Entity để lưu xuống Database
+        UserEntity entity = modelMapper.map(userDTO, UserEntity.class);
+        
+        /* * Sau khi map tự động, ta chỉ cần set thêm các giá trị mặc định 
+         * mà DTO không có (ví dụ: role_id mặc định cho khách hàng là 2).
+         */
+        entity.setPassword_hash(userDTO.getPassword()); // Giữ nguyên theo logic cũ của bạn
+        entity.setRole_id(2); 
+        
         return userRepository.register(entity);
     }
 }

@@ -35,29 +35,31 @@ public class ProductAPI {
     	List<ProductDTO> result = productService.findProduct(params);
     	return result;
 	}
-    @PostMapping
-	public ResponseEntity<?> addProduct(@RequestBody ProductDTO dto) {
-		try {
-			// [QUAN TRỌNG] Phải nhận về ID từ Service
-			Integer newProductId = productService.save(dto); 
-			
-			// Trả về JSON chứa ID để Frontend sử dụng
-			return ResponseEntity.ok().body(java.util.Collections.singletonMap("id", newProductId));
-		} catch (Exception e) {
-			return ResponseEntity.status(500).body(java.util.Collections.singletonMap("error", "Lỗi khi thêm sản phẩm: " + e.getMessage()));
-		}
-	}
 
-	@PutMapping(value = "/{id}")
-	public ResponseEntity<?> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO dto) {
-		try {
-			dto.setId(id);
-			productService.update(dto);
-			return ResponseEntity.ok().body(java.util.Collections.singletonMap("message", "Đã cập nhật sản phẩm thành công!"));
-		} catch (Exception e) {
-			return ResponseEntity.status(500).body(java.util.Collections.singletonMap("error", "Lỗi khi cập nhật: " + e.getMessage()));
-		}
-	}
+	@PostMapping
+    public ResponseEntity<?> addProduct(@RequestBody ProductDTO dto) {
+        try {
+            productService.save(dto);
+            System.out.println("Đã thêm sản phẩm thành công vào DB!");
+            return ResponseEntity.ok("Thêm sản phẩm thành công!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Lỗi thêm sản phẩm: " + e.getMessage());
+        }
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<?> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO dto) {
+        try {
+            dto.setId(id);
+            productService.update(dto);
+            System.out.println("Đã cập nhật sản phẩm ID: " + id);
+            return ResponseEntity.ok("Cập nhật sản phẩm thành công!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Lỗi cập nhật sản phẩm: " + e.getMessage());
+        }
+    }
 
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<?> deleteProduct(@PathVariable("id") Integer id) {

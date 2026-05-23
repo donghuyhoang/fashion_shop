@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Vault - SNEAK PEAK</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="main-navbar fixed-top" style="background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #27272a;">
+        <div class="logo">
+            <a href="index.html">SNEAK<span>VAULT</span></a>
+        </div>
+        <div class="nav-actions ms-auto">
+            <a href="cart.html" class="icon-link"><i class="fa-solid fa-cart-shopping" style="color: #818cf8;"></i></a>
+            <div id="userArea"><a href="login.html" class="login-btn"><i class="fas fa-user"></i> LOGIN</a></div>
+        </div>
+    </header>
+
+    <div class="container" style="margin-top: 130px; margin-bottom: 100px;">
+        
+        <div class="mb-5">
+            <h1 class="page-title">YOUR VAULT</h1>
+            <p class="page-subtitle"><span id="totalItemsCount">0</span> ITEMS SECURED FOR CHECKOUT</p>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 pe-lg-5" id="cartItemsContainer">
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
+                    <p>Đang tải dữ liệu từ Vault...</p>
+                </div>
+                </div>
+
+            <div class="col-lg-4 mt-5 mt-lg-0">
+                <div class="summary-card shadow-lg">
+                    <h3 class="summary-title">ORDER SUMMARY</h3>
+                    
+                    <div class="summary-row">
+                        <span>SUBTOTAL</span>
+                        <span id="subtotalPrice" class="text-white">0₫</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>ESTIMATED SHIPPING</span>
+                        <span class="text-white">35.000₫</span>
+                    </div>
+                    <div class="summary-row" style="color: #818cf8;">
+                        <span>VAULT DISCOUNT</span>
+                        <span>-0₫</span>
+                    </div>
+                    
+                    <div class="summary-row total">
+                        <span>TOTAL</span>
+                        <span id="finalTotalPrice" class="total-price">0₫</span>
+                    </div>
+
+                    <button class="btn-checkout">CHECKOUT NOW</button>
+                    <a href="index.html"><button class="btn-continue">CONTINUE SHOPPING</button></a>
+
+                    <div class="guarantee-box">
+                        <i class="fas fa-check-decagram"></i>
+                        <div>
+                            <div class="guarantee-title">AUTHENTICITY GUARANTEED</div>
+                            <div class="guarantee-desc">Every item in the Vault is verified by our expert team of authenticators before shipping.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Checkout Information -->
+    <div class="modal fade dark-theme-modal" id="checkoutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #1e2129; border: 1px solid #3a3f4a; color: white;">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">THÔNG TIN GIAO HÀNG</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-0">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Người nhận</label>
+                        <input type="text" class="form-control" id="receiverName" placeholder="Tên người nhận (Bắt buộc)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Số điện thoại</label>
+                        <input type="text" class="form-control" id="receiverPhone" placeholder="Số điện thoại (Bắt buộc)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Địa chỉ giao hàng</label>
+                        <textarea class="form-control" id="shippingAddress" rows="2" placeholder="Số nhà, Đường, Xã/Phường, Quận/Huyện..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Phương thức thanh toán</label>
+                        <select class="form-select" id="paymentMethod">
+                            <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                            <option value="VNPAY">Thanh toán qua cổng VNPay</option>
+                            <option value="MOMO">Thanh toán qua ví MoMo</option>
+                            <option value="BANKING">Chuyển khoản ngân hàng</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary-custom" id="btnConfirmCheckout">Xác nhận Đặt Hàng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+    <script src="js/cart.js"></script>
+</body>
+</html>

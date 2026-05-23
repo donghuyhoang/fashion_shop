@@ -32,7 +32,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                                        "JOIN products p ON pd.product_id = p.product_id " +
                                        "LEFT JOIN sizes s ON pd.size_id = s.size_id " +
                                        "LEFT JOIN colors c_color ON pd.color_id = c_color.color_id " +
-                                       "WHERE c.user_id = ?";
+                                       "WHERE c.user_id = ? FOR UPDATE"; // LOCK
             
             List<CartItemResponseDTO> itemsToOrder = new ArrayList<>();
             long totalOrderPrice = 0;
@@ -359,4 +359,5 @@ public class OrderRepositoryImpl implements OrderRepository {
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
+    
 }
