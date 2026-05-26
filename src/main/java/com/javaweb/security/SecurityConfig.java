@@ -20,35 +20,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Tắt CSRF vì đang dùng JWT
-            .cors(cors -> {}) // Để Spring Security mở cho cấu hình CORS hiện tại (@CrossOrigin)
+            .csrf(csrf -> csrf.disable()) 
+            .cors(cors -> {}) 
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Mở cửa tự do cho Đăng nhập, Đăng ký
                 .requestMatchers("/api/users/login", "/api/users/register").permitAll()
-                // Mở cửa tự do cho các API đọc thông tin sản phẩm (GET)
-                .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/api/brands/**", "/api/sizes/**", "/api/colors/**", "/api/product-details/**").permitAll()
-                // Phân quyền: Thêm, sửa, xóa sản phẩm chỉ ADMIN (roleId = 1) mới được phép
-                .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
-                // Mở cửa triệt để cho toàn bộ các file giao diện tĩnh bất kể nằm ở thư mục nào
-                // Mở cửa triệt để cho toàn bộ các file giao diện tĩnh (Chuẩn Spring Boot 3)
+                
+                .requestMatchers(HttpMethod.GET, 
+                    "/api/products", "/api/products/**", 
+                    "/api/categories", "/api/categories/**", 
+                    "/api/brands", "/api/brands/**", 
+                    "/api/sizes", "/api/sizes/**", 
+                    "/api/colors", "/api/colors/**", 
+                    "/api/product-details", "/api/product-details/**", 
+                    "/api/product-images", "/api/product-images/**").permitAll()
+                
+                .requestMatchers(HttpMethod.POST, "/api/products/**", "/api/product-details/**", "/api/product-images/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/products/**", "/api/product-details/**", "/api/product-images/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/products/**", "/api/product-details/**", "/api/product-images/**").hasRole("ADMIN")
+                
                 .requestMatchers(
-                    "/", 
-                    "/*.html", 
-                    "/css/**", 
-                    "/js/**", 
-                    "/images/**", 
-                    "/assets/**", 
-                    "/fonts/**", 
-                    "/vendor/**",
-                    "/uploads/**"
+                    "/", "/*.html", "/css/**", "/js/**", "/images/**", "/assets/**", "/fonts/**", "/vendor/**", "/uploads/**", "/error"
                 ).permitAll()
-                // Các API nhạy cảm khác yêu cầu phải có Token hợp lệ
+                
                 .anyRequest().authenticated()
             )
-            // Lắp đặt chốt chặn JWT kiểm tra vé vào trước khi xử lý request
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();

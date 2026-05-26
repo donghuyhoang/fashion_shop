@@ -1,3 +1,10 @@
-/target/
 target/
+bin/
+build/
+out/
 src/main/resources/application.properties
+.settings/
+.classpath
+.project
+.idea/
+*.iml

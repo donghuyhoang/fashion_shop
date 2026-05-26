@@ -10,6 +10,7 @@ public class ProductEntity {
 	private String brandName;
 	private Integer stockQuantity;
 	private String thumbnailUrl;
+	private String thumb; 
 	
 	// Getter setter
 	public Integer getProduct_id() { return product_id; }
@@ -30,4 +31,6 @@ public class ProductEntity {
 	public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
 	public String getThumbnailUrl() { return thumbnailUrl; }
 	public void setThumbnailUrl(String thumbnailUrl) { this.thumbnailUrl = thumbnailUrl; }
+	public String getThumb() { return thumb; }
+	public void setThumb(String thumb) { this.thumb = thumb; }
 }

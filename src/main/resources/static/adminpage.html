@@ -133,7 +133,6 @@
 </head>
 <body>
     <div class="d-flex">
-        <!-- SIDEBAR -->
         <div class="sidebar d-none d-md-block">
             <div class="sidebar-brand">SNEAK<span>PEAK</span> <span class="d-block fs-6 fw-normal text-muted mt-1" style="letter-spacing: 0;">Workspace</span></div>
             <a href="#" id="navProducts" class="active"><i class="fas fa-box"></i> Quản lý sản phẩm</a>
@@ -144,11 +143,8 @@
             <a href="#" id="btnLogout" class="text-danger mt-5" style="border-top: 1px solid #1f2937;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
         </div>
 
-        <!-- MAIN CONTENT -->
         <div class="main-content flex-grow-1">
-            <!-- SECTION QUẢN LÝ SẢN PHẨM -->
             <div id="productManagementSection">
-                <!-- Header Area -->
                 <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                     <div>
                         <h2 class="fw-black mb-0">Quản lý Sản phẩm</h2>
@@ -165,7 +161,6 @@
                     </div>
                 </div>
 
-                <!-- BỘ LỌC TÌM KIẾM -->
                 <div class="card-custom">
                     <div class="card-body p-4">
                         <form id="searchForm" class="row g-3">
@@ -208,7 +203,6 @@
                     </div>
                 </div>
 
-                <!-- BẢNG DỮ LIỆU -->
                 <div class="card-custom">
                     <div class="card-header-custom d-flex justify-content-between align-items-center">
                         <span>Danh sách sản phẩm hiện có</span>
@@ -237,9 +231,7 @@
                 </div>
             </div>
 
-            <!-- SECTION QUẢN LÝ ĐƠN HÀNG (Mặc định ẩn) -->
             <div id="orderManagementSection" style="display: none;">
-                <!-- Header Area -->
                 <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                     <div>
                         <h2 class="fw-black mb-0">Quản lý Đơn hàng</h2>
@@ -256,7 +248,6 @@
                     </div>
                 </div>
 
-                <!-- BẢNG ĐƠN HÀNG CHỜ DUYỆT -->
                 <div class="card-custom">
                     <div class="card-header-custom d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
@@ -292,9 +283,7 @@
                 </div>
             </div>
 
-            <!-- SECTION QUẢN LÝ KHÁCH HÀNG (Mặc định ẩn) -->
             <div id="customerManagementSection" style="display: none;">
-                <!-- Header Area -->
                 <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                     <div>
                         <h2 class="fw-black mb-0">Quản lý Khách hàng</h2>
@@ -311,7 +300,6 @@
                     </div>
                 </div>
 
-                <!-- BẢNG KHÁCH HÀNG -->
                 <div class="card-custom">
                     <div class="card-header-custom d-flex justify-content-between align-items-center">
                         <span><i class="fas fa-users text-primary me-2"></i>Danh sách tài khoản</span>
@@ -342,9 +330,7 @@
                 </div>
             </div>
 
-            <!-- SECTION BÁO CÁO DOANH THU (Mặc định ẩn) -->
             <div id="reportManagementSection" style="display: none;">
-                <!-- Header Area -->
                 <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
                     <div>
                         <h2 class="fw-black mb-0">Báo cáo Doanh thu</h2>
@@ -361,7 +347,6 @@
                     </div>
                 </div>
 
-                <!-- Các thẻ thống kê nhanh -->
                 <div class="row text-center mb-4">
                     <div class="col-md-4">
                         <div class="card-custom py-4">
@@ -383,7 +368,6 @@
                     </div>
                 </div>
 
-                <!-- Thẻ vẽ biểu đồ -->
                 <div class="card-custom p-4">
                     <h4 class="mb-4 text-center fw-bold text-dark">Biểu đồ doanh thu năm nay</h4>
                     <div style="position: relative; height: 350px; width: 100%;">
@@ -478,9 +462,26 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label mb-2">Danh sách Link Ảnh (URL) <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="thumbnailUrl" rows="5" placeholder="Dán mỗi link ảnh trên một dòng..."></textarea>
-                            <div class="form-text small mt-2"><i class="fas fa-lightbulb text-warning"></i> <strong>Mẹo:</strong> Xuống dòng (Enter) cho mỗi bức ảnh. Hệ thống sẽ tự động biến chúng thành thanh trượt Slider (Carousel) hiện đại thay vì danh sách dọc kiểu cũ!</div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0">Danh sách Link Ảnh (URL) <span class="text-danger">*</span></label>
+                                <button type="button" class="btn btn-sm btn-outline-primary fw-bold" id="btnAddImageInput">
+                                    <i class="fas fa-plus"></i> Thêm Ảnh
+                                </button>
+                            </div>
+                            
+                            <div id="imageInputsContainer">
+                                <div class="input-group mb-2 image-input-row">
+                                    <input type="text" class="form-control bg-dark text-white border-secondary img-url-input" placeholder="Nhập link ảnh...">
+                                    <button type="button" class="btn btn-outline-danger btn-remove-image-input" disabled><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 p-3 bg-light border rounded" style="border-style: dashed !important;">
+                                <label class="form-label mb-2 fs-6 fw-bold text-secondary">Ảnh xem trước:</label>
+                                <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2">
+                                    <span class="text-muted small w-100 text-center my-1">Ảnh xem trước sẽ hiển thị tại đây ngay khi bạn dán link</span>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>

@@ -63,7 +63,6 @@
 
     <div id="storytellingSections">
 
-        <!-- BỘ LỌC SẢN PHẨM -->
         <div class="container mt-5 category-pills-section">
             <div class="d-flex flex-wrap justify-content-center gap-3">
                 <button class="pill-btn active" data-filter="all">NEW ARRIVALS</button>
@@ -78,24 +77,34 @@
             <div class="d-flex justify-content-between align-items-end mb-4 border-bottom border-secondary pb-3">
                 <h2 class="section-title m-0">
                     <span id="sectionTitleText">NEW ARRIVALS</span> 
-                    <button class="btn btn-sm btn-outline-primary ms-2 admin-add-product-btn d-none" data-category="" title="Thêm sản phẩm"><i class="fas fa-plus"></i></button>
                     <span class="fs-6 text-muted fw-normal d-block mt-2" id="sectionDescText">Khám phá những đôi giày mới cập bến.</span>
                 </h2>
-                <div class="d-flex gap-2">
-                    <select id="priceFilterIndexSelect" class="form-select form-select-sm w-auto bg-dark text-white border-secondary shadow-none" style="cursor: pointer;">
-                        <option value="all">Khoảng giá: Tất cả</option>
-                        <option value="under_1m">Dưới 1.000.000₫</option>
-                        <option value="1m_to_3m">1.000.000₫ - 3.000.000₫</option>
-                        <option value="over_3m">Trên 3.000.000₫</option>
-                    </select>
-                    <select id="sortIndexSelect" class="form-select form-select-sm w-auto bg-dark text-white border-secondary shadow-none" style="cursor: pointer;">
-                        <option value="default">Sắp xếp: Mới nhất</option>
-                        <option value="price_asc">Giá: Thấp đến Cao</option>
-                        <option value="price_desc">Giá: Cao đến Thấp</option>
-                    </select>
-                </div>
             </div>
             <div class="row g-4" id="newArrivalsGrid"></div>
+        </section>
+
+        <section id="runningShoes" class="collection-block container mb-5 pb-4 pt-2">
+            <div class="border-bottom border-secondary mb-4 pb-3">
+                <h2 class="section-title m-0">RUNNING EXCELLENCE</h2>
+                <span class="fs-6 text-muted fw-normal d-block mt-2">Bứt phá giới hạn tốc độ.</span>
+            </div>
+            <div class="row g-4" id="runningGrid"></div>
+        </section>
+
+        <section id="basketballShoes" class="collection-block container mb-5 pb-4 pt-2">
+            <div class="border-bottom border-secondary mb-4 pb-3">
+                <h2 class="section-title m-0">HARDWOOD CLASSICS</h2>
+                <span class="fs-6 text-muted fw-normal d-block mt-2">Làm chủ mọi sân đấu.</span>
+            </div>
+            <div class="row g-4" id="basketballGrid"></div>
+        </section>
+
+        <section id="lifestyleShoes" class="collection-block container mb-5 pb-4 pt-2">
+            <div class="border-bottom border-secondary mb-4 pb-3">
+                <h2 class="section-title m-0">STREET LIFESTYLE</h2>
+                <span class="fs-6 text-muted fw-normal d-block mt-2">Đậm chất đường phố.</span>
+            </div>
+            <div class="row g-4" id="luxuryGrid"></div>
         </section>
 
     </div>

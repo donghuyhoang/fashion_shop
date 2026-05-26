@@ -19,9 +19,7 @@ public class ProductImageAPI {
     @GetMapping("/product/{productId}")
     public ResponseEntity<List<ProductImageDTO>> getImagesByProduct(@PathVariable("productId") Integer productId) {
         List<ProductImageDTO> images = productImageService.getImagesByProductId(productId);
-        if (images.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        
         return ResponseEntity.ok(images);
     }
 }

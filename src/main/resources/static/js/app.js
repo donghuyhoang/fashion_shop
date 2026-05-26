@@ -23,82 +23,93 @@ $(document).ready(function () {
     updateHeaderAfterLogin();
     updateCartBadge(); // Cập nhật số lượng giỏ hàng ngay khi mở trang
 
-    // ==========================================
-    // 2. HÀM LẤY DATA VÀ HIỂN THỊ 24 ĐÔI GIÀY
-    // ==========================================
-    function loadStorytellingCollections() {
-        $.ajax({
-            url: API_URL + "products",
-            type: "GET",
-            success: function (allProducts) {
-                let productsForStorytelling = [...allProducts];
+	// ==========================================
+	    // 2. HÀM LẤY DATA VÀ HIỂN THỊ ĐỘNG TRÊN TRANG CHỦ
+	    // ==========================================
+	    function loadStorytellingCollections() {
+	        $.ajax({
+	            url: API_URL + "products",
+	            type: "GET",
+	            success: function (allProducts) {
+	                if (!allProducts || allProducts.length === 0) return;
 
-                // Nhân bản sản phẩm thật để lấp đầy 24 ô giao diện nếu số lượng không đủ
-                if (allProducts && allProducts.length > 0) {
-                    let i = 0;
-                    while (productsForStorytelling.length < 24) {
-                        productsForStorytelling.push(allProducts[i % allProducts.length]);
-                        i++;
-                    }
-                }
+	                // Đảo ngược mảng để sản phẩm vừa thêm (ID lớn nhất) lên đầu tiên
+	                let sortedProducts = [...allProducts].reverse();
 
-                renderCardsToSpecificGrid(productsForStorytelling.slice(0, 4), "#newArrivalsGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(4, 8), "#runningGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(8, 12), "#basketballGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(12, 16), "#luxuryGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(16, 20), "#collabGrid");
-                renderCardsToSpecificGrid(productsForStorytelling.slice(20, 24), "#ecoGrid");
-            },
-            error: function () {
-                console.error("Lỗi kết nối Backend. Không lấy được sản phẩm!");
-            }
-        });
-    }
+	                // Lọc sản phẩm theo Category (Khớp với dữ liệu SQL: 2=Chạy Bộ, 4=Bóng Rổ, 1&3=Lifestyle)
+	                const runningShoes = sortedProducts.filter(p => p.categoryId === 2);
+	                const basketballShoes = sortedProducts.filter(p => p.categoryId === 4);
+	                const lifestyleShoes = sortedProducts.filter(p => p.categoryId === 1 || p.categoryId === 3);
 
-    function renderCardsToSpecificGrid(products, gridId) {
-        const $grid = $(gridId);
-        if (!products || products.length === 0) {
-            $grid.html('<div class="col-12 text-center text-muted py-4">Không có sản phẩm nào.</div>');
-            return;
-        }
+	                // Render dữ liệu vào các Grid (Tăng giới hạn hiển thị lên 8-12 sản phẩm)
+	                renderCardsToSpecificGrid(sortedProducts.slice(0, 12), "#newArrivalsGrid"); // 12 đôi mới nhất
+	                renderCardsToSpecificGrid(runningShoes.slice(0, 8), "#runningGrid");        // 8 đôi chạy bộ
+	                renderCardsToSpecificGrid(basketballShoes.slice(0, 8), "#basketballGrid");  // 8 đôi bóng rổ
+	                renderCardsToSpecificGrid(lifestyleShoes.slice(0, 8), "#luxuryGrid");       // 8 đôi lifestyle
+	            },
+	            error: function () {
+	                console.error("Lỗi kết nối Backend. Không lấy được sản phẩm!");
+	            }
+	        });
+	    }
 
-        const localImages = [
-            "images/nike-air-max-90-infrared.jpg", 
-            "images/nike-air-force-1-low-white.jpg",
-            "images/air-jordan-1-high-chicago.jpg", 
-            "images/nike-zoom-tempo-next-pink.jpg"
-        ];
+	function renderCardsToSpecificGrid(products, gridId) {
+	        const $grid = $(gridId);
+	        if (!products || products.length === 0) {
+	            $grid.html('<div class="col-12 text-center text-muted py-4">Không có sản phẩm nào.</div>');
+	            return;
+	        }
 
-        let html = "";
-        $.each(products, function (index, product) {
-            // SỬA Ở ĐÂY: Dùng split('|||')[0] để chỉ lấy ảnh đầu tiên hiển thị lên trang chủ
-            const imgSrc = product.thumb ? product.thumb.split('|||')[0] : localImages[index % localImages.length];
-            const fallbackImg = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20fill%3D%22%23eee%22%20width%3D%22200%22%20height%3D%22200%22%2F%3E%3Ctext%20fill%3D%22%23999%22%20font-family%3D%22sans-serif%22%20font-size%3D%2216%22%20dy%3D%2210.5%22%20font-weight%3D%22bold%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E";
+	        const localImages = [
+	            "images/nike-air-max-90-infrared.jpg", 
+	            "images/nike-air-force-1-low-white.jpg",
+	            "images/air-jordan-1-high-chicago.jpg", 
+	            "images/nike-zoom-tempo-next-pink.jpg"
+	        ];
 
-            html += `
-                <div class="col-md-4 col-lg-3 mb-4">
-                    <div class="card h-100 product-card border-0 shadow-sm dark-card">
-                        <a href="productdetail.html?id=${product.id}" class="product-img text-decoration-none d-block">
-                            <img src="${imgSrc}" alt="${product.name}" onerror="this.onerror=null; this.src='${fallbackImg}';">
-                        </a>
-                        <div class="card-body d-flex flex-column">
-                            <a href="productdetail.html?id=${product.id}" class="text-decoration-none text-light">
-                                <h6 class="product-name text-truncate" title="${product.name}">${product.name}</h6>
-                            </a>
-                            <p class="product-category text-truncate" title="${product.brandName || 'Sneaker'}">${product.brandName || 'Sneaker'}</p>
-                            <div class="d-flex justify-content-between align-items-center mt-auto">
-                                <h5 class="product-price mb-0">${product.price ? product.price.toLocaleString('vi-VN') : 0} ₫</h5>
-                                <button class="btn-buy" data-id="${product.id}" title="Thêm vào giỏ">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        $grid.html(html);
-    }
+	        let html = "";
+	        $.each(products, function (index, product) {
+	            
+	            let imgSrc = product.thumbnailUrl || product.thumb || product.thumbnailImgUrl || product.image;
+	            
+	            // Nếu chuỗi chứa nhiều link ảnh ngăn cách bằng |||, bóc tách lấy link đầu tiên làm ảnh đại diện
+	            if (imgSrc && imgSrc.includes('|||')) {
+	                imgSrc = imgSrc.split('|||')[0].trim();
+	            } else if (imgSrc && imgSrc.includes(';')) {
+	                imgSrc = imgSrc.split(';')[0].trim();
+	            }
+	            
+	            // Nếu hoàn toàn không có ảnh trong DB thì mới dùng ảnh local dự phòng
+	            if (!imgSrc) {
+	                imgSrc = localImages[index % localImages.length];
+	            }
+
+	            const fallbackImg = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20fill%3D%22%23eee%22%20width%3D%22200%22%20height%3D%22200%22%2F%3E%3Ctext%20fill%3D%22%23999%22%20font-family%3D%22sans-serif%22%20font-size%3D%2216%22%20dy%3D%2210.5%22%20font-weight%3D%22bold%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E";
+
+	            html += `
+	                <div class="col-md-4 col-lg-3 mb-4">
+	                    <div class="card h-100 product-card border-0 shadow-sm dark-card">
+	                        <a href="product-detail.html?id=${product.id}" class="product-img text-decoration-none d-block">
+	                            <img src="${imgSrc}" alt="${product.name}" onerror="this.onerror=null; this.src='${fallbackImg}';">
+	                        </a>
+	                        <div class="card-body d-flex flex-column">
+	                            <a href="product-detail.html?id=${product.id}" class="text-decoration-none text-light">
+	                                <h6 class="product-name text-truncate" title="${product.name}">${product.name}</h6>
+	                            </a>
+	                            <p class="product-category text-truncate" title="${product.brandName || 'Sneaker'}">${product.brandName || 'Sneaker'}</p>
+	                            <div class="d-flex justify-content-between align-items-center mt-auto">
+	                                <h5 class="product-price mb-0">${product.price ? product.price.toLocaleString('vi-VN') : 0} ₫</h5>
+	                                <button class="btn-buy" data-id="${product.id}" title="Thêm vào giỏ">
+	                                    <i class="fas fa-shopping-cart"></i>
+	                                </button>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            `;
+	        });
+	        $grid.html(html);
+	    }
 
     // ==========================================
     // 3. XỬ LÝ SỰ KIỆN CLICK CATEGORY PILLS (CUỘN TRANG)

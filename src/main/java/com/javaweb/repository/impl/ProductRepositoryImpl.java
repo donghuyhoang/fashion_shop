@@ -19,7 +19,40 @@ import com.javaweb.utils.ConnectionJDBCUtil;
 public class ProductRepositoryImpl implements ProductRepository{
 	
 	@Override
+	public List<ProductEntity> findAll() {
+		String sql = "SELECT p.product_id, p.name, p.price, p.description, b.name as brand_name, SUM(pd.stock_quantity) as stock_quantity, MAX(pd.thumbnail_img_url) as thumbnail_img_url " +
+                     "FROM products p " +
+                     "LEFT JOIN product_details pd ON p.product_id = pd.product_id " +
+                     "LEFT JOIN brands b ON p.brand_id = b.brand_id " +
+                     "GROUP BY p.product_id, p.name, p.price, p.description, b.name";
+                     
+		List<ProductEntity> result = new ArrayList<>();
+		try(Connection conn = ConnectionJDBCUtil.getConnection();
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql);){
+			while(rs.next()) {
+				ProductEntity product = new ProductEntity();
+				product.setProduct_id(rs.getInt("product_id"));
+				product.setName(rs.getString("name"));
+    			product.setPrice(rs.getInt("price"));
+    			product.setDescription(rs.getString("description"));
+				product.setBrandName(rs.getString("brand_name"));
+				product.setStockQuantity(rs.getInt("stock_quantity"));
+                // Lấy ảnh từ product_details (MAX)
+				product.setThumbnailUrl(rs.getString("thumbnail_img_url")); 
+				product.setThumb(rs.getString("thumbnail_img_url"));
+				
+    			result.add(product);
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
 	public List<ProductEntity> findProduct(ProductSearchBuilder params, List<Integer> matchedIds) {
+        // Đã xóa p.thumb khỏi SELECT
 	    StringBuilder sql = new StringBuilder("SELECT p.product_id, p.name, p.price, p.description, b.name as brand_name, SUM(pd.stock_quantity) as stock_quantity, MAX(pd.thumbnail_img_url) as thumbnail_img_url ");
 	    sql.append("FROM products p ");
 	    sql.append("LEFT JOIN product_details pd ON p.product_id = pd.product_id ");
@@ -27,10 +60,8 @@ public class ProductRepositoryImpl implements ProductRepository{
 
 	    List<Object> queryParams = new ArrayList<>();
 
-        // ---- THAY THẾ SQL LIKE BẰNG TRIE IDs ----
 	    if (matchedIds != null) {
             if (matchedIds.isEmpty()) {
-                // Nếu mảng ID rỗng (Trie không tìm thấy) -> Cho câu SQL sai luôn (1=0) để ko load dữ liệu thừa
                 sql.append(" AND 1=0 "); 
             } else {
                 sql.append(" AND p.product_id IN (");
@@ -42,9 +73,6 @@ public class ProductRepositoryImpl implements ProductRepository{
                 sql.append(") ");
             }
         }
-        // ------------------------------------------
-
-        // LƯU Ý: Đã xóa bỏ đoạn if (params.getName() != null...) ở đây vì Trie đã lo phần đó
 
 	    if(params.getBrandId() != null) {
 	        sql.append(" AND p.brand_id = ? ");
@@ -83,45 +111,15 @@ public class ProductRepositoryImpl implements ProductRepository{
 	                product.setDescription(rs.getString("description"));
 	                product.setBrandName(rs.getString("brand_name"));
 	                product.setStockQuantity(rs.getInt("stock_quantity"));
-	                product.setThumbnailUrl(rs.getString("thumbnail_img_url"));
+	                product.setThumbnailUrl(rs.getString("thumbnail_img_url")); 
+	                product.setThumb(rs.getString("thumbnail_img_url"));
 	                result.add(product);
 	            }
 	        }
-	    }
-		 catch(SQLException e) {
+	    } catch(SQLException e) {
 	        e.printStackTrace();
 	    }
 	    return result;
-	}
-
-	@Override
-	public List<ProductEntity> findAll() {
-		String sql = "SELECT p.product_id, p.name, p.price, p.description, b.name as brand_name, SUM(pd.stock_quantity) as stock_quantity, MAX(pd.thumbnail_img_url) as thumbnail_img_url " +
-                     "FROM products p " +
-                     "LEFT JOIN product_details pd ON p.product_id = pd.product_id " +
-                     "LEFT JOIN brands b ON p.brand_id = b.brand_id " +
-                     "GROUP BY p.product_id, p.name, p.price, p.description, b.name";
-		List<ProductEntity> result = new ArrayList<>();
-		try(Connection conn = ConnectionJDBCUtil.getConnection();
-				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery(sql);){
-			while(rs.next()) {
-				ProductEntity product = new ProductEntity();
-				product.setProduct_id(rs.getInt("product_id"));
-				product.setName(rs.getString("name"));
-    			product.setPrice(rs.getInt("price"));
-    			product.setDescription(rs.getString("description"));
-				product.setBrandName(rs.getString("brand_name"));
-				product.setStockQuantity(rs.getInt("stock_quantity"));
-				product.setThumbnailUrl(rs.getString("thumbnail_img_url"));
-    			result.add(product);
-			}
-			
-		}
-		catch(SQLException e) {
-			e.printStackTrace();
-		}
-		return result;
 	}
 
 	@Override

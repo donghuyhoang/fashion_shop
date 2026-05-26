@@ -19,9 +19,7 @@ public class ProductDetailAPI {
     @GetMapping("/product/{productId}")
     public ResponseEntity<List<ProductDetailDTO>> getDetailsByProduct(@PathVariable("productId") Integer productId) {
         List<ProductDetailDTO> details = productDetailService.getDetailsByProductId(productId);
-        if (details.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        
         return ResponseEntity.ok(details);
     }
 
@@ -32,7 +30,6 @@ public class ProductDetailAPI {
             productDetailService.addProductDetail(dto);
             return ResponseEntity.ok().body("{\"message\": \"Thêm phân loại thành công!\"}");
         } catch (Exception e) {
-            // Trả về JSON để Frontend dễ bóc tách thông báo lỗi
             return ResponseEntity.status(500).body("{\"error\": \"" + e.getMessage().replace("\"", "\\\"") + "\"}");
         }
     }
