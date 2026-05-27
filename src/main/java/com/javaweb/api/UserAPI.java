@@ -11,11 +11,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/api/users")
 public class UserAPI {
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
     private UserRepositoryImpl userRepository;
@@ -32,8 +35,9 @@ public class UserAPI {
             return ResponseEntity.badRequest().body("Vui lòng nhập đầy đủ email và mật khẩu!");
         }
 
-        UserEntity user = userRepository.findByEmailAndPassword(userDTO.getEmail(), userDTO.getPassword());
-        if (user != null) {
+        // Lấy user theo email, sau đó verify password bằng BCrypt
+        UserEntity user = userRepository.findByEmail(userDTO.getEmail());
+        if (user != null && passwordEncoder.matches(userDTO.getPassword(), user.getPassword_hash())) {
             // Kiểm tra an toàn để tránh lỗi NullPointerException
             if (user.getIs_active() != null && user.getIs_active() == 0) {
                 return ResponseEntity.status(403).body("Tài khoản của bạn đã bị khóa! Vui lòng liên hệ Admin.");
@@ -89,7 +93,8 @@ public class UserAPI {
         newUser.setFullname(userDTO.getFullName());
         newUser.setEmail(userDTO.getEmail());
         newUser.setPhone(userDTO.getPhoneNumber());
-        newUser.setPassword_hash(userDTO.getPassword());
+        // Hash mật khẩu trước khi lưu vào DB (không lưu plain text)
+        newUser.setPassword_hash(passwordEncoder.encode(userDTO.getPassword()));
         newUser.setRole_id(2); // Mặc định role_id = 2 (Khách hàng)
         
         if (userRepository.register(newUser)) {
@@ -194,7 +199,9 @@ public class UserAPI {
             return ResponseEntity.badRequest().body("Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
         }
 
-        boolean isSuccess = userRepository.changePassword(id, oldPassword, newPassword);
+        // Hash mật khẩu mới trước khi truyền xuống
+        String hashedNew = passwordEncoder.encode(newPassword);
+        boolean isSuccess = userRepository.changePassword(id, oldPassword, hashedNew);
         if (isSuccess) {
             return ResponseEntity.ok("Đổi mật khẩu thành công!");
         }

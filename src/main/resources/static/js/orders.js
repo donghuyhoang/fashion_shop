@@ -14,6 +14,17 @@ $(document).ready(function() {
     const API_URL = "/api/orders/user/";
     const userId = localStorage.getItem("user_id");
 
+    // Helper format ngày từ milliseconds hoặc string timestamp
+    function formatDate(dateVal) {
+        if (!dateVal) return "N/A";
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return dateVal; // fallback nếu đã là string đẹp rồi
+        const day   = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year  = d.getFullYear();
+        return day + "/" + month + "/" + year;
+    }
+
     if (!userId || userId === "undefined") {
         alert("Vui lòng đăng nhập để xem đơn hàng!");
         window.location.href = "login.html";

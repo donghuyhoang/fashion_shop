@@ -181,13 +181,14 @@ public class ProductRepositoryImpl implements ProductRepository{
 
 	@Override
 	public void update(model.ProductDTO dto) {
+		// CHỈ update bảng products - KHÔNG update product_details ở đây
+		// Vì mỗi variant (size/màu) được cập nhật riêng qua ProductDetailRepositoryImpl.addProductDetail()
+		// Nếu update product_details theo WHERE product_id thì sẽ ghi đè tất cả variant bằng 1 giá trị (BUG)
 		String sqlProduct = "UPDATE products SET name=?, description=?, price=?, category_id=?, brand_id=? WHERE product_id=?";
-		String sqlDetail = "UPDATE product_details SET size_id=?, color_id=?, stock_quantity=?, price=?, thumbnail_img_url=? WHERE product_id=?";
 		
 		try (Connection conn = ConnectionJDBCUtil.getConnection()) {
 			conn.setAutoCommit(false);
-			try (PreparedStatement pstmt = conn.prepareStatement(sqlProduct);
-				 PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail)) {
+			try (PreparedStatement pstmt = conn.prepareStatement(sqlProduct)) {
 				
 				pstmt.setString(1, dto.getName());
 				pstmt.setString(2, dto.getDescription());
@@ -197,48 +198,43 @@ public class ProductRepositoryImpl implements ProductRepository{
 				pstmt.setInt(6, dto.getId());
 				pstmt.executeUpdate();
 				
-				pstmtDetail.setObject(1, dto.getSizeId());
-				pstmtDetail.setObject(2, dto.getColorId());
-				pstmtDetail.setObject(3, dto.getStock() != null ? dto.getStock() : 0);
-				pstmtDetail.setObject(4, dto.getPrice());
-
-                // Cắt lấy đúng link ảnh đầu tiên
-                String thumbUrl = dto.getThumb();
-                if (thumbUrl != null && thumbUrl.contains("|||")) {
-                    thumbUrl = thumbUrl.split("\\|\\|\\|")[0].trim();
-                }
-				pstmtDetail.setString(5, thumbUrl);
-
-				pstmtDetail.setInt(6, dto.getId());
-				pstmtDetail.executeUpdate();
-				
 				conn.commit();
 			} catch (SQLException e) {
 				conn.rollback();
 				e.printStackTrace();
-                // Ném lỗi báo về API
-                throw new RuntimeException("Lỗi CSDL khi cập nhật dữ liệu: " + e.getMessage());
+                throw new RuntimeException("Lỗi CSDL khi cập nhật sản phẩm: " + e.getMessage());
 			} finally {
 				conn.setAutoCommit(true);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-            // Ném lỗi báo về API
             throw new RuntimeException("Lỗi kết nối hoặc thực thi SQL: " + e.getMessage());
 		}
 	}
 
 	@Override
     public void delete(Integer id) {
-        String sqlDetail = "DELETE FROM product_details WHERE product_id = ?";
-        String sqlProduct = "DELETE FROM products WHERE product_id = ?";
+        // Xóa đúng thứ tự: bảng con trước, bảng cha sau
+        // cart_items và order_details tham chiếu product_details -> phải xóa trước
+        String sqlCartItems    = "DELETE FROM cart_items WHERE product_detail_id IN (SELECT product_detail_id FROM product_details WHERE product_id = ?)";
+        String sqlOrderDetails = "DELETE FROM order_details WHERE product_detail_id IN (SELECT product_detail_id FROM product_details WHERE product_id = ?)";
+        String sqlDetail       = "DELETE FROM product_details WHERE product_id = ?";
+        String sqlProduct      = "DELETE FROM products WHERE product_id = ?";
         
         try (Connection conn = ConnectionJDBCUtil.getConnection()) {
             conn.setAutoCommit(false); 
             
-            try (PreparedStatement pstmtDetail = conn.prepareStatement(sqlDetail);
+            try (PreparedStatement pstmtCart    = conn.prepareStatement(sqlCartItems);
+                 PreparedStatement pstmtOrder   = conn.prepareStatement(sqlOrderDetails);
+                 PreparedStatement pstmtDetail  = conn.prepareStatement(sqlDetail);
                  PreparedStatement pstmtProduct = conn.prepareStatement(sqlProduct)) {
                  
+                pstmtCart.setInt(1, id);
+                pstmtCart.executeUpdate();
+                
+                pstmtOrder.setInt(1, id);
+                pstmtOrder.executeUpdate();
+                
                 pstmtDetail.setInt(1, id);
                 pstmtDetail.executeUpdate();
                 
@@ -248,12 +244,13 @@ public class ProductRepositoryImpl implements ProductRepository{
                 conn.commit(); 
             } catch (SQLException e) {
                 conn.rollback(); 
-                e.printStackTrace();
+                throw e; // ném lên để tầng trên biết lỗi
             } finally {
                 conn.setAutoCommit(true); 
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Loi khi xoa san pham ID: " + id, e);
         }
     }
 }

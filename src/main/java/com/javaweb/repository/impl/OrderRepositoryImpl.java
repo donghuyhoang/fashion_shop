@@ -71,16 +71,22 @@ public class OrderRepositoryImpl implements OrderRepository {
             }
 
             // 2. Tạo một đơn hàng mới trong bảng `orders`
-            String createOrderSql = "INSERT INTO orders (user_id, order_date, total_money, discount_money, final_money, shipping_status, payment_status, shipping_address, receiver_name, receiver_phone, payment_method) VALUES (?, NOW(), ?, 0, ?, 'Processing', 'Unpaid', ?, ?, ?, ?)";
+            // Áp dụng mã giảm giá nếu có
+            long discountMoney = dto.getDiscountMoney() != null ? dto.getDiscountMoney() : 0;
+            long finalMoney = totalOrderPrice + 35000 - discountMoney; // tổng + ship - giảm giá
+            if (finalMoney < 0) finalMoney = 0; // bảo vệ không âm
+
+            String createOrderSql = "INSERT INTO orders (user_id, order_date, total_money, discount_money, final_money, shipping_status, payment_status, shipping_address, receiver_name, receiver_phone, payment_method) VALUES (?, NOW(), ?, ?, ?, 'Processing', 'Unpaid', ?, ?, ?, ?)";
             int orderId;
             try (PreparedStatement createOrderStmt = conn.prepareStatement(createOrderSql, Statement.RETURN_GENERATED_KEYS)) {
                 createOrderStmt.setInt(1, userId);
                 createOrderStmt.setLong(2, totalOrderPrice);
-                createOrderStmt.setLong(3, totalOrderPrice + 35000); // final_money: Tổng tiền sản phẩm + 35k phí ship
-                createOrderStmt.setString(4, dto.getShippingAddress());
-                createOrderStmt.setString(5, dto.getReceiverName());
-                createOrderStmt.setString(6, dto.getReceiverPhone());
-                createOrderStmt.setString(7, dto.getPaymentMethod());
+                createOrderStmt.setLong(3, discountMoney);
+                createOrderStmt.setLong(4, finalMoney);
+                createOrderStmt.setString(5, dto.getShippingAddress());
+                createOrderStmt.setString(6, dto.getReceiverName());
+                createOrderStmt.setString(7, dto.getReceiverPhone());
+                createOrderStmt.setString(8, dto.getPaymentMethod());
                 createOrderStmt.executeUpdate();
                 try (ResultSet generatedKeys = createOrderStmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
@@ -155,7 +161,9 @@ public class OrderRepositoryImpl implements OrderRepository {
                     order.put("id", rs.getInt("order_id"));
                     order.put("receiverName", rs.getString("receiver_name"));
                     order.put("receiverPhone", rs.getString("receiver_phone"));
-                    order.put("date", rs.getTimestamp("order_date"));
+                    // Trả về milliseconds để Frontend dễ format với new Date(val)
+                    java.sql.Timestamp ts = rs.getTimestamp("order_date");
+                    order.put("date", ts != null ? ts.getTime() : null);
                     order.put("total", rs.getLong("final_money"));
                     orders.add(order);
                 }
@@ -278,7 +286,9 @@ public class OrderRepositoryImpl implements OrderRepository {
                     order.put("id", rs.getInt("order_id"));
                     order.put("receiverName", rs.getString("receiver_name"));
                     order.put("receiverPhone", rs.getString("receiver_phone"));
-                    order.put("date", rs.getTimestamp("order_date"));
+                    // Trả về milliseconds để Frontend dễ format
+                    java.sql.Timestamp uts = rs.getTimestamp("order_date");
+                    order.put("date", uts != null ? uts.getTime() : null);
                     order.put("total", rs.getLong("final_money"));
                     
                     // Quy đổi phương thức thanh toán

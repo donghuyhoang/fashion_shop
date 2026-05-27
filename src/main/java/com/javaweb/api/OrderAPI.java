@@ -15,9 +15,7 @@ public class OrderAPI {
 
     @Autowired
     private OrderService orderService;
-
-    @Autowired
-    private com.javaweb.repository.impl.OrderRepositoryImpl orderRepositoryImpl;
+    // Đã xóa injection trực tiếp OrderRepositoryImpl - dùng OrderService thay thế
 
     @PostMapping("/checkout")
     public ResponseEntity<?> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
@@ -63,12 +61,12 @@ public class OrderAPI {
 
     @GetMapping("/dashboard/stats")
     public ResponseEntity<Map<String, Object>> getDashboardStats() {
-        return ResponseEntity.ok(orderRepositoryImpl.getDashboardStats());
+        return ResponseEntity.ok(orderService.getDashboardStats());
     }
 
     // VD: /api/orders/dashboard/revenue/2024
     @GetMapping("/dashboard/revenue/{year}")
     public ResponseEntity<List<Map<String, Object>>> getMonthlyRevenue(@PathVariable Integer year) {
-        return ResponseEntity.ok(orderRepositoryImpl.getMonthlyRevenue(year));
+        return ResponseEntity.ok(orderService.getMonthlyRevenue(year));
     }
 }

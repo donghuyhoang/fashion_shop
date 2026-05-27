@@ -124,6 +124,31 @@ public class UserRepositoryImpl implements UserRepository {
         return false; // Trả về false nếu thất bại
     }
 
+
+    public UserEntity findByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        UserEntity user = null;
+        try (Connection conn = ConnectionJDBCUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    user = new UserEntity();
+                    user.setUser_id(rs.getInt("user_id"));
+                    user.setFullname(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setPhone(rs.getString("phone"));
+                    user.setPassword_hash(rs.getString("password_hash"));
+                    user.setRole_id(rs.getInt("role_id"));
+                    user.setIs_active(rs.getObject("is_active") != null ? rs.getInt("is_active") : 1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
     public UserEntity findById(Integer userId) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
         UserEntity user = null;
@@ -167,22 +192,29 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
-    public boolean changePassword(Integer userId, String oldPassword, String newPassword) {
-        String checkSql = "SELECT password_hash FROM users WHERE user_id = ? AND password_hash = ?";
+    public boolean changePassword(Integer userId, String oldPasswordPlain, String hashedNewPassword) {
+        // Lấy hash hiện tại từ DB
+        String selectSql = "SELECT password_hash FROM users WHERE user_id = ?";
         String updateSql = "UPDATE users SET password_hash = ? WHERE user_id = ?";
-        
+
         try (Connection conn = ConnectionJDBCUtil.getConnection()) {
-            // Kiểm tra mật khẩu cũ
-            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-                checkStmt.setInt(1, userId);
-                checkStmt.setString(2, oldPassword);
-                try (ResultSet rs = checkStmt.executeQuery()) {
-                    if (!rs.next()) return false; // Không khớp mật khẩu cũ
+            String currentHash = null;
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
+                selectStmt.setInt(1, userId);
+                try (ResultSet rs = selectStmt.executeQuery()) {
+                    if (rs.next()) currentHash = rs.getString("password_hash");
                 }
             }
-            // Cập nhật mật khẩu mới
+            if (currentHash == null) return false;
+
+            // Verify mật khẩu cũ bằng BCrypt
+            org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder =
+                new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+            if (!encoder.matches(oldPasswordPlain, currentHash)) return false;
+
+            // Lưu mật khẩu mới đã hash
             try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-                updateStmt.setString(1, newPassword);
+                updateStmt.setString(1, hashedNewPassword);
                 updateStmt.setInt(2, userId);
                 updateStmt.executeUpdate();
                 return true;

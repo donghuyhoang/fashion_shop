@@ -48,12 +48,14 @@ $(document).ready(function() {
                 const monthlyData = new Array(12).fill(0);
                 
                 // Đổ dữ liệu từ API vào đúng vị trí tháng
-                data.forEach(item => {
-                    // Nếu tháng hợp lệ từ 1 đến 12 thì nhét dữ liệu vào
-                    if (item.month >= 1 && item.month <= 12) {
-                        monthlyData[item.month - 1] = item.revenue;
-                    }
-                });
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        // Nếu tháng hợp lệ từ 1 đến 12 thì nhét dữ liệu vào
+                        if (item.month >= 1 && item.month <= 12) {
+                            monthlyData[item.month - 1] = item.revenue;
+                        }
+                    });
+                }
 
                 renderChart(monthlyData, year);
             },
@@ -69,7 +71,12 @@ $(document).ready(function() {
 
         // Hủy biểu đồ cũ nếu đã vẽ
         if (revenueChart) {
-            revenueChart.destroy();
+            // Cập nhật mượt mà dữ liệu mới thay vì xóa đi vẽ lại (cách chuẩn của ApexCharts)
+            revenueChart.updateSeries([{
+                name: 'Doanh thu',
+                data: data
+            }]);
+            return;
         }
 
         // Cấu hình vẽ biểu đồ bằng thư viện ApexCharts (giữ nguyên)
@@ -130,16 +137,19 @@ $(document).ready(function() {
 
     // 3. Hàm gộp chung toàn cục để gọi cả 2
     function refreshDashboard() {
+        // Luôn tải lại số liệu tổng quan để cập nhật dữ liệu mới nhất
+        loadDashboardStats();
+
         const $revenueChart = $('#revenueChart');
-        // Chỉ tải dữ liệu nếu tìm thấy element và nó chưa được khởi tạo
-        if ($revenueChart.length && !$revenueChart.data('chart-initialized')) {
-            console.log(">>> [Báo cáo] TÌM THẤY thẻ canvas, đang tiến hành nạp dữ liệu API...");
-            loadDashboardStats();
+        if ($revenueChart.length) {
+            // Tránh vẽ biểu đồ bằng ApexCharts khi thẻ đang bị ẩn (display: none) gây lỗi kích thước 0x0
+            if ($revenueChart.is(':hidden')) return;
+            
+            console.log(">>> [Báo cáo] TÌM THẤY thẻ chứa biểu đồ, đang tiến hành nạp dữ liệu API...");
             const currentYear = new Date().getFullYear();
             loadRevenueChart(currentYear);
-            $revenueChart.data('chart-initialized', true); // Đánh dấu đã vẽ để không vẽ lại
         } else if ($revenueChart.length === 0) {
-             console.warn(">>> [Báo cáo] CẢNH BÁO: Không tìm thấy thẻ <canvas id='revenueChart'>!");
+             console.warn(">>> [Báo cáo] CẢNH BÁO: Không tìm thấy thẻ <div id='revenueChart'>!");
         }
     }
 
@@ -268,7 +278,11 @@ $(document).ready(function() {
         $(this).addClass("active");
         $("#productManagementSection, #orderManagementSection, #customerManagementSection").hide();
         $("#reportManagementSection").show();
-        refreshDashboard();
+        
+        // Đợi 100ms để trình duyệt render hoàn chỉnh thẻ div đang bị ẩn, lúc này biểu đồ mới lấy được kích thước width/height chuẩn
+        setTimeout(() => {
+            refreshDashboard();
+        }, 100);
     });
 
     // ==========================================
@@ -561,10 +575,8 @@ $(document).ready(function() {
                 }
             });
         } else {
-            // Gắn sẵn size đầu tiên để tạo Product Detail mẫu
-            payload.sizeId = sizesAndStocks[0].sizeId;
-            payload.stock = sizesAndStocks[0].stock;
-
+            // Tạo sản phẩm mới - KHÔNG gắn size vào payload chính
+            // Tất cả size đều được tạo qua /api/product-details sau khi có productId (nhất quán với flow Update)
             $.ajax({
                 url: API_URL + "products",
                 type: "POST",
@@ -574,18 +586,19 @@ $(document).ready(function() {
                     let newId = null;
                     if (typeof response === 'object') newId = response.id || response.productId;
                     else {
-                        try { const parsed = JSON.parse(response); newId = parsed.id || parsed.productId; } 
+                        try { const parsed = JSON.parse(response); newId = parsed.id || parsed.productId; }
                         catch (e) { if (!isNaN(parseInt(response))) newId = parseInt(response); }
                     }
 
                     if (!newId || isNaN(parseInt(newId))) {
+                        // Fallback: lấy sản phẩm vừa tạo từ danh sách
                         $.get(API_URL + "products").done(function(list) {
                             const createdProduct = list.sort((a, b) => b.id - a.id).find(p => p.name === payload.name);
-                            if (createdProduct) addRemainingSizesAndFinish(createdProduct.id);
+                            if (createdProduct) addAllSizesAndFinish(createdProduct.id);
                             else fallbackSuccess();
                         }).fail(fallbackSuccess);
                     } else {
-                        addRemainingSizesAndFinish(newId);
+                        addAllSizesAndFinish(newId);
                     }
                 },
                 error: function (xhr) {
@@ -595,36 +608,31 @@ $(document).ready(function() {
             });
         }
 
-        function addRemainingSizesAndFinish(savedId) {
-            if (sizesAndStocks.length > 1) {
-                let promises = [];
-                for(let i = 1; i < sizesAndStocks.length; i++) {
-                    const ss = sizesAndStocks[i];
-                    promises.push($.ajax({
-                        url: API_URL + "product-details",
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify({
-                            productId: parseInt(savedId), 
-                            sizeId: ss.sizeId, 
-                            colorId: payload.colorId,
-                            stockQuantity: ss.stock, 
-                            price: payload.price,
-                            thumb: payload.thumb, 
-                            thumbnailImgUrl: payload.thumb, 
-                            thumbnailUrl: payload.thumb
-                        })
-                    }));
-                }
-                Promise.all(promises)
-                    .then(() => handleSaveSuccess(keepModalOpen, savedId))
-                    .catch(err => {
-                        alert("Đã tạo sản phẩm nhưng lỗi khi thêm một số size phụ.");
-                        handleSaveSuccess(keepModalOpen, savedId);
-                    });
-            } else {
-                handleSaveSuccess(keepModalOpen, savedId);
-            }
+        // Gửi TẤT CẢ size (kể cả size đầu tiên) qua /api/product-details - nhất quán với flow Update
+        function addAllSizesAndFinish(savedId) {
+            let promises = sizesAndStocks.map(ss => {
+                return $.ajax({
+                    url: API_URL + "product-details",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        productId: parseInt(savedId),
+                        sizeId: ss.sizeId,
+                        colorId: payload.colorId,
+                        stockQuantity: ss.stock,
+                        price: payload.price,
+                        thumb: payload.thumb,
+                        thumbnailImgUrl: payload.thumb,
+                        thumbnailUrl: payload.thumb
+                    })
+                });
+            });
+            Promise.all(promises)
+                .then(() => handleSaveSuccess(keepModalOpen, savedId))
+                .catch(err => {
+                    alert("Đã tạo sản phẩm nhưng lỗi khi thêm một số size: " + (err.responseText || "Unknown"));
+                    handleSaveSuccess(keepModalOpen, savedId);
+                });
         }
 
         function fallbackSuccess() {

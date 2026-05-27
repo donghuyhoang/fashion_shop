@@ -10,4 +10,7 @@ public interface OrderService {
     boolean updateOrderStatus(Integer orderId, String status);
     List<Map<String, Object>> getOrderDetails(Integer orderId);
     List<Map<String, Object>> getOrdersByUser(Integer userId);
+    // Dashboard stats - đưa vào Service thay vì inject Impl trực tiếp vào Controller
+    Map<String, Object> getDashboardStats();
+    List<Map<String, Object>> getMonthlyRevenue(int year);
 }

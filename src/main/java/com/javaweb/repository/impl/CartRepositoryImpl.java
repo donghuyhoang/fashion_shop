@@ -21,7 +21,8 @@ public class CartRepositoryImpl implements CartRepository {
         String findCartSql = "SELECT cart_id FROM carts WHERE user_id = ?";
         String createCartSql = "INSERT INTO carts (user_id, created_at) VALUES (?, NOW())";
         String checkItemSql = "SELECT cart_item_id, quantity FROM cart_items WHERE cart_id = ? AND product_detail_id = ?";
-        String updateItemSql = "UPDATE cart_items SET quantity = quantity + ? WHERE cart_item_id = ?";
+        // Dùng GREATEST để đảm bảo quantity không bao giờ xuống 0 hoặc âm
+        String updateItemSql = "UPDATE cart_items SET quantity = GREATEST(1, quantity + ?) WHERE cart_item_id = ?";
         String insertItemSql = "INSERT INTO cart_items (cart_id, product_detail_id, quantity) VALUES (?, ?, ?)";
 
         try (Connection conn = ConnectionJDBCUtil.getConnection()) {
@@ -56,10 +57,20 @@ public class CartRepositoryImpl implements CartRepository {
                         if (rs.next()) {
                             // Đã có -> Cộng dồn số lượng
                             int cartItemId = rs.getInt("cart_item_id");
-                            try (PreparedStatement updateItemStmt = conn.prepareStatement(updateItemSql)) {
-                                updateItemStmt.setInt(1, quantity);
-                                updateItemStmt.setInt(2, cartItemId);
-                                updateItemStmt.executeUpdate();
+                            int currentQty = rs.getInt("quantity");
+                            // Nếu kết quả <= 0 thì xóa item thay vì để âm
+                            if (currentQty + quantity <= 0) {
+                                String deleteItemSql = "DELETE FROM cart_items WHERE cart_item_id = ?";
+                                try (PreparedStatement delStmt = conn.prepareStatement(deleteItemSql)) {
+                                    delStmt.setInt(1, cartItemId);
+                                    delStmt.executeUpdate();
+                                }
+                            } else {
+                                try (PreparedStatement updateItemStmt = conn.prepareStatement(updateItemSql)) {
+                                    updateItemStmt.setInt(1, quantity);
+                                    updateItemStmt.setInt(2, cartItemId);
+                                    updateItemStmt.executeUpdate();
+                                }
                             }
                         } else {
                             // Chưa có -> Thêm mới vào chi tiết giỏ

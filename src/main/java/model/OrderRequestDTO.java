@@ -7,6 +7,7 @@ public class OrderRequestDTO {
     private String receiverPhone;
     private String shippingAddress;
     private String paymentMethod;
+    private Long discountMoney;
 
     public Integer getUserId() {
         return userId;
@@ -25,4 +26,7 @@ public class OrderRequestDTO {
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public Long getDiscountMoney() { return discountMoney; }
+    public void setDiscountMoney(Long discountMoney) { this.discountMoney = discountMoney; }
 }
