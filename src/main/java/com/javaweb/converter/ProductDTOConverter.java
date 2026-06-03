@@ -20,6 +20,8 @@ public class ProductDTOConverter {
 		product.setBrandName(productEntity.getBrandName());
 		product.setStock(productEntity.getStockQuantity());
 		product.setThumb(productEntity.getThumbnailUrl()); 
+		product.setBrandId(productEntity.getBrand_id()); // Hoặc getBrandId() tùy tên biến
+ 		product.setCategoryId(productEntity.getCategory_id()); // Hoặc getCategoryId()
 		
 		return product;
 	}

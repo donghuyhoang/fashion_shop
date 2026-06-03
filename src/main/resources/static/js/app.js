@@ -26,32 +26,32 @@ $(document).ready(function () {
 	// ==========================================
 	    // 2. HÀM LẤY DATA VÀ HIỂN THỊ ĐỘNG TRÊN TRANG CHỦ
 	    // ==========================================
-	    function loadStorytellingCollections() {
-	        $.ajax({
-	            url: API_URL + "products",
-	            type: "GET",
-	            success: function (allProducts) {
-	                if (!allProducts || allProducts.length === 0) return;
+	    let allProductsCache = []; // <--- THÊM BIẾN NÀY ĐỂ NHỚ DỮ LIỆU
 
-	                // Đảo ngược mảng để sản phẩm vừa thêm (ID lớn nhất) lên đầu tiên
-	                let sortedProducts = [...allProducts].reverse();
+    function loadStorytellingCollections() {
+        $.ajax({
+            url: API_URL + "products",
+            type: "GET",
+            success: function (allProducts) {
+                if (!allProducts || allProducts.length === 0) return;
 
-	                // Lọc sản phẩm theo Category (Khớp với dữ liệu SQL: 2=Chạy Bộ, 4=Bóng Rổ, 1&3=Lifestyle)
-	                const runningShoes = sortedProducts.filter(p => p.categoryId === 2);
-	                const basketballShoes = sortedProducts.filter(p => p.categoryId === 4);
-	                const lifestyleShoes = sortedProducts.filter(p => p.categoryId === 1 || p.categoryId === 3);
+                let sortedProducts = [...allProducts].reverse();
+                allProductsCache = sortedProducts; // <--- LƯU LẠI VÀO ĐÂY ĐỂ TÍNH SAU LỌC
 
-	                // Render dữ liệu vào các Grid (Tăng giới hạn hiển thị lên 8-12 sản phẩm)
-	                renderCardsToSpecificGrid(sortedProducts.slice(0, 12), "#newArrivalsGrid"); // 12 đôi mới nhất
-	                renderCardsToSpecificGrid(runningShoes.slice(0, 8), "#runningGrid");        // 8 đôi chạy bộ
-	                renderCardsToSpecificGrid(basketballShoes.slice(0, 8), "#basketballGrid");  // 8 đôi bóng rổ
-	                renderCardsToSpecificGrid(lifestyleShoes.slice(0, 8), "#luxuryGrid");       // 8 đôi lifestyle
-	            },
-	            error: function () {
-	                console.error("Lỗi kết nối Backend. Không lấy được sản phẩm!");
-	            }
-	        });
-	    }
+                const runningShoes = sortedProducts.filter(p => p.categoryId === 2);
+                const basketballShoes = sortedProducts.filter(p => p.categoryId === 4);
+                const lifestyleShoes = sortedProducts.filter(p => p.categoryId === 1 || p.categoryId === 3);
+
+                renderCardsToSpecificGrid(sortedProducts.slice(0, 12), "#newArrivalsGrid"); 
+                renderCardsToSpecificGrid(runningShoes.slice(0, 8), "#runningGrid");        
+                renderCardsToSpecificGrid(basketballShoes.slice(0, 8), "#basketballGrid");  
+                renderCardsToSpecificGrid(lifestyleShoes.slice(0, 8), "#luxuryGrid");       
+            },
+            error: function () {
+                console.error("Lỗi kết nối Backend. Không lấy được sản phẩm!");
+            }
+        });
+    }
 
 	function renderCardsToSpecificGrid(products, gridId) {
 	        const $grid = $(gridId);
@@ -112,19 +112,49 @@ $(document).ready(function () {
 	    }
 
     // ==========================================
-    // 3. XỬ LÝ SỰ KIỆN CLICK CATEGORY PILLS (CUỘN TRANG)
+    // 3. XỬ LÝ SỰ KIỆN CLICK CATEGORY PILLS (LỌC SẢN PHẨM TRANG CHỦ)
     // ==========================================
-    $(".pill-btn").click(function() {
-        $(".pill-btn").removeClass("active");
+    $(document).on('click', '.category-pills-section .pill-btn', function(e) {
+        e.preventDefault();
+        
+        $(".category-pills-section .pill-btn").removeClass("active");
         $(this).addClass("active");
-        const targetId = $(this).attr("data-target");
+        
+        let text = $(this).text().trim().toUpperCase();
+        let currentFilterId = null;
+        
+        // Gắn ID tự động
+        if (text.includes("NIKE")) currentFilterId = 1;
+        else if (text.includes("ADIDAS")) currentFilterId = 2;
+        else if (text.includes("MIZUNO")) currentFilterId = 3;
+        else if (text.includes("PUMA")) currentFilterId = 4;
+        else if ($(this).data("id")) currentFilterId = parseInt($(this).data("id"));
 
-        if (targetId && $(targetId).length) {
-            const headerHeight = $('.main-navbar').outerHeight();
-            $('html, body').animate({
-                scrollTop: $(targetId).offset().top - headerHeight - 15 
-            }, 600); 
+        let filtered = [...allProductsCache];
+
+        // Nếu không phải bấm nút "TẤT CẢ" / "NEW ARRIVALS" thì đem đi lọc
+        if (!text.includes("NEW ARRIVALS") && !text.includes("ALL")) {
+            filtered = filtered.filter(p => {
+                const bName = String(p.brandName || p.brand_name || "").toUpperCase();
+                const pName = String(p.name || "").toUpperCase();
+                const bId = p.brandId || p.brand_id;
+                
+                return bId === currentFilterId || bName.includes(text) || pName.includes(text);
+            });
+            $('#sectionTitleText').text('SẢN PHẨM ' + text);
+            $('#sectionDescText').text('Kết quả lọc theo thương hiệu ' + text);
+        } else {
+            $('#sectionTitleText').text('NEW ARRIVALS');
+            $('#sectionDescText').text('Khám phá những đôi giày mới cập bến.');
         }
+
+        // Render lại khu vực hiển thị New Arrivals
+        renderCardsToSpecificGrid(filtered.slice(0, 12), "#newArrivalsGrid");
+        
+        // Cuộn nhẹ xuống để người dùng thấy kết quả
+        $('html, body').animate({
+            scrollTop: $("#newArrivals").offset().top - 100 
+        }, 300);
     });
 
     // ==========================================
@@ -397,6 +427,7 @@ $(document).ready(function () {
         const detailId = $(this).data('detail-id');
         const variantName = $(this).data('variant-name') || '';
         const userId = localStorage.getItem("user_id");
+        const token = localStorage.getItem("user_token"); // <--- THÊM DÒNG NÀY ĐỂ LẤY TOKEN
         const baseProductName = $(this).data('product-name') || 'Sản phẩm';
         const productName = variantName ? `${baseProductName} - ${variantName}` : baseProductName;
 
@@ -411,6 +442,9 @@ $(document).ready(function () {
         $.ajax({
             url: API_URL + "cart/add", 
             type: "POST",
+            headers: {
+                "Authorization": "Bearer " + token // <--- THÊM DÒNG NÀY ĐỂ ĐÍNH KÈM JWT TOKEN
+            },
             contentType: "application/json",
             data: JSON.stringify(cartRequest),
             success: function () {
@@ -430,6 +464,7 @@ $(document).ready(function () {
     // ==========================================
     function updateCartBadge() {
         const userId = localStorage.getItem("user_id");
+        const token = localStorage.getItem("user_token"); // <--- Lấy token
         
         if (!userId || userId === "undefined") {
             $('#cartBadge').hide();
@@ -439,6 +474,9 @@ $(document).ready(function () {
         $.ajax({
             url: API_URL + "cart/count/" + userId, 
             type: "GET",
+            headers: {
+                "Authorization": "Bearer " + token // <--- Gửi token lên server
+            },
             success: function (totalItems) {
                 const $cartIconLink = $('.nav-actions .fa-shopping-cart').closest('a');
 
@@ -465,7 +503,6 @@ $(document).ready(function () {
             }
         });
     }
-
     // ==========================================
     // HÀM BẬT THÔNG BÁO GÓC MÀN HÌNH 
     // ==========================================

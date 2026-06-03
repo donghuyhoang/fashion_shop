@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**", "/api/product-details/**", "/api/product-images/**").hasRole("ADMIN")
                 
                 .requestMatchers(
-                    "/", "/*.html", "/css/**", "/js/**", "/images/**", "/assets/**", "/fonts/**", "/vendor/**", "/uploads/**", "/error"
+                    "/", "/*.html", "/css/**", "/js/**", "/images/**", "/img/**", "/favicon.ico", "/assets/**", "/fonts/**", "/vendor/**", "/uploads/**", "/error"
                 ).permitAll()
                 
                 .anyRequest().authenticated()
