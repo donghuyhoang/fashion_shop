@@ -63,10 +63,18 @@ $(document).ready(function() {
         if(productsToRender.length > 0) {
                 let html = "";
                 productsToRender.forEach(p => {
-                    let imgSrc = p.thumbnailUrl || p.thumb || p.imageUrl || p.image || p.thumbnailImgUrl || p.thumbnail_img_url;
-                    if (!imgSrc || imgSrc.trim() === "") imgSrc = fallbackImg;
-                    else if (imgSrc.includes(';') && !imgSrc.startsWith('data:image')) imgSrc = imgSrc.split(';')[0].trim();
+					let imgSrc = p.thumbnailUrl || p.thumb || p.imageUrl || p.image || p.thumbnailImgUrl || p.thumbnail_img_url;
 
+					if (!imgSrc || imgSrc.trim() === "") {
+					    imgSrc = fallbackImg;
+					} else {
+					    // Thêm logic xử lý phân cách ||| giống app.js
+					    if (imgSrc.includes('|||')) {
+					        imgSrc = imgSrc.split('|||')[0].trim();
+					    } else if (imgSrc.includes(';') && !imgSrc.startsWith('data:image')) {
+					        imgSrc = imgSrc.split(';')[0].trim();
+					    }
+					}
                     html += `
                         <div class="col-md-4 col-lg-3 mb-4">
                             <div class="card h-100 product-card border-0 shadow-sm dark-card">
