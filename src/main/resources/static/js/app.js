@@ -1,6 +1,13 @@
 $(document).ready(function () {
     const API_URL = "/api/";
-
+        $.ajaxSetup({
+        beforeSend: function(xhr) {
+            const token = localStorage.getItem("user_token");
+            if (token) {
+                xhr.setRequestHeader("Authorization", "Bearer " + token);
+            }
+        }
+    });
     // ==========================================
     // 0. CACHE DỮ LIỆU SIZE VÀ MÀU SẮC TỪ API 
     // ==========================================
@@ -22,7 +29,6 @@ $(document).ready(function () {
     loadStorytellingCollections();
     updateHeaderAfterLogin();
     updateCartBadge(); // Cập nhật số lượng giỏ hàng ngay khi mở trang
-
 	// ==========================================
 	    // 2. HÀM LẤY DATA VÀ HIỂN THỊ ĐỘNG TRÊN TRANG CHỦ
 	    // ==========================================
@@ -155,6 +161,278 @@ $(document).ready(function () {
         $('html, body').animate({
             scrollTop: $("#newArrivals").offset().top - 100 
         }, 300);
+    // ==========================================
+    // 2. HÀM LẤY DATA VÀ HIỂN THỊ ĐỘNG TRÊN TRANG CHỦ
+    // ==========================================
+
+    let homeProducts = [];
+    let homeFilterState = {
+        brandId: null,
+        minPrice: null,
+        maxPrice: null,
+        sort: "default"
+    };
+
+    function loadStorytellingCollections() {
+        // Chỉ chạy phần này ở trang index.html
+        if ($("#newArrivalsGrid").length === 0) return;
+
+        $.ajax({
+            url: API_URL + "products",
+            type: "GET",
+            success: function (allProducts) {
+                console.log("Danh sách sản phẩm trang chủ:", allProducts);
+
+                if (!allProducts || allProducts.length === 0) {
+                    $("#newArrivalsGrid").html(`
+                        <div class="col-12 text-center text-muted py-5">
+                            Không có sản phẩm nào.
+                        </div>
+                    `);
+                    return;
+                }
+
+                // Lưu toàn bộ sản phẩm để lọc lại khi bấm NIKE / ADIDAS / MIZUNO / PUMA
+                homeProducts = [...allProducts];
+
+                // Mặc định hiển thị trang chủ
+                renderHomeDefault();
+            },
+            error: function (xhr) {
+                console.error("Lỗi lấy sản phẩm trang chủ:", xhr.status, xhr.responseText);
+                $("#newArrivalsGrid").html(`
+                    <div class="col-12 text-center text-danger py-5">
+                        Không thể tải sản phẩm từ hệ thống.
+                    </div>
+                `);
+            }
+        });
+    }
+
+    function renderHomeDefault() {
+        let sortedProducts = [...homeProducts].sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+
+        // Sửa ID category theo đúng database của bạn:
+        // Nếu database của bạn đang là:
+        // 1 = RUNNING, 2 = FOOTBALL, 3 = BASKETBALL, 4 = SNEAKERS
+        // thì giữ như dưới đây.
+        const runningShoes = sortedProducts.filter(p => Number(p.categoryId || p.category_id) === 1);
+        const footballShoes = sortedProducts.filter(p => Number(p.categoryId || p.category_id) === 2);
+        const basketballShoes = sortedProducts.filter(p => Number(p.categoryId || p.category_id) === 3);
+        const sneakersShoes = sortedProducts.filter(p => Number(p.categoryId || p.category_id) === 4);
+
+        $("#sectionTitleText").text("NEW ARRIVALS");
+        $("#sectionDescText").text("Khám phá những đôi giày mới cập bến.");
+
+        // Khi bấm NEW ARRIVALS thì hiện lại đầy đủ các section
+        $("#runningShoes").show();
+        $("#basketballShoes").show();
+        $("#lifestyleShoes").show();
+
+        renderCardsToSpecificGrid(sortedProducts.slice(0, 12), "#newArrivalsGrid");
+        renderCardsToSpecificGrid(runningShoes.slice(0, 8), "#runningGrid");
+        renderCardsToSpecificGrid(basketballShoes.slice(0, 8), "#basketballGrid");
+        renderCardsToSpecificGrid(sneakersShoes.slice(0, 8), "#luxuryGrid");
+    }
+
+    function applyHomeFilters() {
+        let filtered = [...homeProducts];
+
+        if (homeFilterState.brandId) {
+            filtered = filtered.filter(p =>
+                Number(p.brandId || p.brand_id) === Number(homeFilterState.brandId)
+            );
+
+            $("#runningShoes").hide();
+            $("#basketballShoes").hide();
+            $("#lifestyleShoes").hide();
+        }
+
+        if (homeFilterState.minPrice !== null) {
+            filtered = filtered.filter(p =>
+                Number(p.price || 0) >= Number(homeFilterState.minPrice)
+            );
+        }
+
+        if (homeFilterState.maxPrice !== null) {
+            filtered = filtered.filter(p =>
+                Number(p.price || 0) <= Number(homeFilterState.maxPrice)
+            );
+        }
+
+        if (homeFilterState.sort === "price_asc") {
+            filtered.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+        } else if (homeFilterState.sort === "price_desc") {
+            filtered.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
+        } else if (homeFilterState.sort === "newest") {
+            filtered.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+        } else {
+            filtered.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+        }
+
+        renderCardsToSpecificGrid(filtered, "#newArrivalsGrid");
+    }
+
+    function renderCardsToSpecificGrid(products, gridId) {
+        const $grid = $(gridId);
+
+        if (!$grid.length) return;
+
+        if (!products || products.length === 0) {
+            $grid.html(`
+                <div class="col-12 text-center text-muted py-5">
+                    <i class="fas fa-box-open fa-3x mb-3"></i>
+                    <h5>Không tìm thấy sản phẩm phù hợp.</h5>
+                    <p>Vui lòng thử bộ lọc khác.</p>
+                </div>
+            `);
+            return;
+        }
+
+        const fallbackImg = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20fill%3D%22%23eee%22%20width%3D%22200%22%20height%3D%22200%22%2F%3E%3Ctext%20fill%3D%22%23999%22%20font-family%3D%22sans-serif%22%20font-size%3D%2216%22%20dy%3D%2210.5%22%20font-weight%3D%22bold%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E";
+
+        let html = "";
+
+        products.forEach(function (product) {
+            let imgSrc =
+                product.thumbnailUrl ||
+                product.thumb ||
+                product.thumbnailImgUrl ||
+                product.thumbnail_img_url ||
+                product.imageUrl ||
+                product.image ||
+                "";
+
+            if (imgSrc && imgSrc.includes("|||")) {
+                imgSrc = imgSrc.split("|||")[0].trim();
+            }
+
+            if (imgSrc && imgSrc.includes(";")) {
+                imgSrc = imgSrc.split(";")[0].trim();
+            }
+
+            if (!imgSrc) {
+                imgSrc = fallbackImg;
+            }
+
+            const price = Number(product.price || 0).toLocaleString("vi-VN");
+            const brandName = product.brandName || product.brand_name || "Sneaker";
+
+            html += `
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100 product-card border-0 shadow-sm dark-card">
+                        <a href="product-detail.html?id=${product.id}" class="product-img text-decoration-none d-block">
+                            <img src="${imgSrc}" alt="${product.name}" onerror="this.onerror=null; this.src='${fallbackImg}';">
+                        </a>
+
+                        <div class="card-body d-flex flex-column">
+                            <a href="product-detail.html?id=${product.id}" class="text-decoration-none text-light">
+                                <h6 class="product-name text-truncate" title="${product.name}">
+                                    ${product.name}
+                                </h6>
+                            </a>
+
+                            <p class="product-category text-truncate" title="${brandName}">
+                                ${brandName}
+                            </p>
+
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <h5 class="product-price mb-0">${price} ₫</h5>
+                                <button class="btn-buy" data-id="${product.id}" title="Thêm vào giỏ">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        $grid.html(html);
+    }
+
+    // ==========================================
+    // 3. XỬ LÝ NÚT LỌC Ở TRANG CHỦ: NEW ARRIVALS / NIKE / ADIDAS / ...
+    // ==========================================
+
+    $(document).on("click", ".category-pills-section .pill-btn", function () {
+        const $btn = $(this);
+
+        $(".category-pills-section .pill-btn").removeClass("active");
+        $btn.addClass("active");
+
+        const filterType = $btn.data("filter");
+        const brandId = Number($btn.data("id"));
+        const brandName = $btn.text().trim();
+
+        if (filterType === "all") {
+            homeFilterState.brandId = null;
+            homeFilterState.minPrice = null;
+            homeFilterState.maxPrice = null;
+            homeFilterState.sort = "default";
+
+            $("#homePriceFilter").val("all");
+            $("#homeSortSelect").val("default");
+
+            $("#sectionTitleText").text("NEW ARRIVALS");
+            $("#sectionDescText").text("Khám phá những đôi giày mới cập bến.");
+
+            renderHomeDefault();
+            return;
+        }
+
+        if (filterType === "brand") {
+            homeFilterState.brandId = brandId;
+
+            $("#sectionTitleText").text("SẢN PHẨM " + brandName.toUpperCase());
+            $("#sectionDescText").text("Danh sách sản phẩm thuộc thương hiệu " + brandName.toUpperCase() + ".");
+
+            $("#runningShoes").hide();
+            $("#basketballShoes").hide();
+            $("#lifestyleShoes").hide();
+
+            applyHomeFilters();
+        }
+    });
+
+    $("#btnHomeApplyFilter").on("click", function () {
+        const priceValue = $("#homePriceFilter").val();
+        const sortValue = $("#homeSortSelect").val();
+
+        if (priceValue === "all") {
+            homeFilterState.minPrice = null;
+            homeFilterState.maxPrice = null;
+        } else {
+            const parts = priceValue.split("-");
+            homeFilterState.minPrice = Number(parts[0]);
+            homeFilterState.maxPrice = Number(parts[1]);
+        }
+
+        homeFilterState.sort = sortValue;
+
+        $("#runningShoes").hide();
+        $("#basketballShoes").hide();
+        $("#lifestyleShoes").hide();
+
+        applyHomeFilters();
+    });
+
+    $("#btnHomeClearFilter").on("click", function () {
+        homeFilterState.brandId = null;
+        homeFilterState.minPrice = null;
+        homeFilterState.maxPrice = null;
+        homeFilterState.sort = "default";
+
+        $(".category-pills-section .pill-btn").removeClass("active");
+        $('.category-pills-section .pill-btn[data-filter="all"]').addClass("active");
+
+        $("#homePriceFilter").val("all");
+        $("#homeSortSelect").val("default");
+
+        $("#sectionTitleText").text("NEW ARRIVALS");
+        $("#sectionDescText").text("Khám phá những đôi giày mới cập bến.");
+
+        renderHomeDefault();
     });
 
     // ==========================================
@@ -557,5 +835,4 @@ $(document).ready(function () {
     $(document).on('click', '.nav-search i', function () {
         performSearch();
     });
-
-});
+});});
