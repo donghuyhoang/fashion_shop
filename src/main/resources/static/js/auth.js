@@ -1,9 +1,4 @@
 $(document).ready(function() {
-    // Áp dụng ngay giao diện Sáng nếu người dùng đã cài đặt
-    if (localStorage.getItem('theme') === 'light') {
-        $('body').addClass('light-theme');
-    }
-
     // Xóa dữ liệu điền sẵn trên form (tránh việc trình duyệt tự điền hoặc HTML có sẵn value)
     // Sử dụng setTimeout để đảm bảo ghi đè cơ chế tự động điền trễ của trình duyệt
     setTimeout(function() {

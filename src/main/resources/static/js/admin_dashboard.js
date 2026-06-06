@@ -1,9 +1,4 @@
 $(document).ready(function() {
-    // Áp dụng ngay giao diện Sáng nếu người dùng đã cài đặt
-    if (localStorage.getItem('theme') === 'light') {
-        $('body').addClass('light-theme');
-    }
-
     // ==========================================
     // 0. KHỞI TẠO VÀ KIỂM TRA QUYỀN TRUY CẬP
     // ==========================================
