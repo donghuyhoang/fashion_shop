@@ -2,126 +2,16 @@ $(document).ready(function() {
     // ==========================================
     // HIỂN THỊ THÔNG TIN ĐĂNG NHẬP TRÊN HEADER
     // ==========================================
-    function updateHeaderUserInfo() {
-    const userId = localStorage.getItem("user_id");
-    const userName = localStorage.getItem("user_name");
-    const userRole = localStorage.getItem("user_role");
-    const token = localStorage.getItem("user_token");
 
-    const $userArea = $("#userArea");
 
-    if (!$userArea.length) return;
-
-    if (userId && token) {
-        $userArea.html(`
-            <div class="user-profile-wrapper">
-                <a href="#" class="user-profile-toggle" id="userProfileToggle">
-                    <i class="fas fa-user-circle user-main-icon"></i>
-                    <span class="user-name-text">${userName || "Người dùng"}</span>
-                    <i class="fas fa-chevron-down user-arrow-icon"></i>
-                </a>
-
-                <div class="user-message-box" id="userMessageBox">
-                    <a href="profile.html" class="dropdown-custom-item">
-                        <i class="fas fa-user me-2"></i> Tài khoản
-                    </a>
-                    <a href="order-history.html" class="dropdown-custom-item">
-                        <i class="fas fa-receipt me-2"></i> Đơn hàng
-                    </a>
-                    ${userRole === "ADMIN" ? `
-                        <a href="admin.html" class="dropdown-custom-item">
-                            <i class="fas fa-cog me-2"></i> Quản trị
-                        </a>
-                    ` : ""}
-                    <a href="#" id="btnLogout" class="dropdown-custom-item text-danger">
-                        <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
-                    </a>
-                </div>
-            </div>
-        `);
-    } else {
-        $userArea.html(`
-            <a href="login.html" class="login-btn">
-                <i class="fas fa-user"></i> LOGIN
-            </a>
-        `);
-    }
-}
-
-    updateHeaderUserInfo();
-
-    $(document).on("click", "#userProfileToggle", function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    $("#userMessageBox").toggle();
-    $(this).toggleClass("active");
-});
-
-    $(document).on("click", function (e) {
-        if (!$(e.target).closest(".user-profile-wrapper").length) {
-            $("#userMessageBox").hide();
-            $("#userProfileToggle").removeClass("active");
-        }
-    });
-
-    $(document).on("click", "#btnLogout", function (e) {
-        e.preventDefault();
-
-        localStorage.removeItem("user_id");
-        localStorage.removeItem("user_name");
-        localStorage.removeItem("user_role");
-        localStorage.removeItem("user_token");
-
-        alert("Đăng xuất thành công!");
-        window.location.href = "index.html";
-    });
-
-    $(document).on("click", "#btnLogout", function (e) {
-        e.preventDefault();
-
-        localStorage.removeItem("user_id");
-        localStorage.removeItem("user_name");
-        localStorage.removeItem("user_role");
-        localStorage.removeItem("user_token");
-
-        alert("Đăng xuất thành công!");
-        window.location.href = "index.html";
-    });
+    //updateHeaderUserInfo();
 
     // ==========================================
     // CẬP NHẬT SỐ LƯỢNG GIỎ HÀNG TRÊN HEADER
     // ==========================================
-    function updateCartBadge() {
-        const userId = localStorage.getItem("user_id");
-        const token = localStorage.getItem("user_token");
 
-        if (!userId || !token) {
-            $("#cartBadge").hide();
-            return;
-        }
-
-        $.ajax({
-            url: "/api/cart/count/" + userId,
-            type: "GET",
-            headers: {
-                "Authorization": "Bearer " + token
-            },
-            success: function (count) {
-                if (count && Number(count) > 0) {
-                    $("#cartBadge").text(count).show();
-                } else {
-                    $("#cartBadge").hide();
-                }
-            },
-            error: function () {
-                $("#cartBadge").hide();
-            }
-        });
-    }
-
-    updateCartBadge();
-    console.log("🚀 [DEBUG] Đã load xong file category.js");
+    //updateCartBadge();
+    //console.log("🚀 [DEBUG] Đã load xong file category.js");
     
     const urlParams = new URLSearchParams(window.location.search);
     const categoryId = parseInt(urlParams.get('id'));

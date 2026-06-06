@@ -36,10 +36,14 @@ $(document).ready(function() {
                     filtered.forEach(product => {
                         const realId = product.id || product.productId;
                         
-                        let imgSrc = product.thumbnailUrl || product.thumb || product.imageUrl || product.image || product.thumbnailImgUrl || product.thumbnail_img_url;
-                        if (!imgSrc || imgSrc.trim() === "") imgSrc = fallbackImg;
-                        else if (imgSrc.includes(';') && !imgSrc.startsWith('data:image')) imgSrc = imgSrc.split(';')[0].trim();
-                        
+						let imgSrc = product.thumbnailUrl || product.thumb || product.imageUrl || product.image || product.thumbnailImgUrl || product.thumbnail_img_url;
+						if (!imgSrc || imgSrc.trim() === "") {
+						    imgSrc = fallbackImg;
+						} else if (imgSrc.includes('|||') && !imgSrc.startsWith('data:image')) {
+						    imgSrc = imgSrc.split('|||')[0].trim(); // Bổ sung bóc tách |||
+						} else if (imgSrc.includes(';') && !imgSrc.startsWith('data:image')) {
+						    imgSrc = imgSrc.split(';')[0].trim();
+						}
                         html += `
                             <div class="col-md-4 col-lg-3 mb-4">
                                 <div class="card h-100 product-card border-0 shadow-sm dark-card">
