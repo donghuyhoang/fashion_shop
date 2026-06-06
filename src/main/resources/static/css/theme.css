@@ -104,3 +104,31 @@ body.light-theme .sidebar .nav-link:hover i, body.light-theme .sidebar .nav-link
 body.light-theme .admin-header, body.light-theme .top-navbar { background-color: #ffffff; border-bottom: 1px solid #cbd5e1; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
 body.light-theme .admin-header .text-white { color: #0f172a !important; }
 body.light-theme .navbar-brand { color: #0f172a !important; font-weight: 900; }
+
+/* USER DROPDOWN - LIGHT THEME */
+body.light-theme .user-info {
+    color: #334155;
+}
+
+body.light-theme .user-info i {
+    color: #64748b;
+}
+
+body.light-theme .user-info:hover {
+    color: #2b5cff;
+}
+
+body.light-theme .user-menu {
+    background-color: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .user-menu a {
+    color: #334155;
+}
+
+body.light-theme .user-menu a:hover {
+    background-color: #f1f5f9;
+    color: #2b5cff;
+}

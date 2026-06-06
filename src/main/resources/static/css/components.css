@@ -189,3 +189,91 @@
     position: relative;
     z-index: 1;
 }
+
+/* ==========================================
+   16. USER PROFILE TOGGLE (ĐỒNG BỘ MÀU TRANG CHỦ)
+   ========================================== */
+#userArea {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.user-profile-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.user-profile-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.user-profile-toggle:hover {
+    color: #ffffff;
+}
+
+.user-main-icon {
+    color: #86efac;
+    font-size: 1.15rem;
+}
+
+.user-name-text {
+    color: #ffffff;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-arrow-icon {
+    color: #9ca3af;
+    font-size: 0.8rem;
+    transition: transform 0.25s ease;
+}
+
+.user-profile-toggle.active .user-arrow-icon {
+    transform: rotate(180deg);
+}
+
+.user-message-box {
+    display: none;
+    position: absolute;
+    top: 130%;
+    right: 0;
+    width: 220px;
+    background: #1e2129;
+    border: 1px solid #3a3f4a;
+    border-radius: 12px;
+    padding: 0.5rem 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    z-index: 1050;
+    overflow: hidden;
+}
+
+.dropdown-custom-item {
+    display: flex;
+    align-items: center;
+    color: #fafbfc;
+    text-decoration: none;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+.dropdown-custom-item:hover {
+    background-color: #242933;
+    color: #2b5cff;
+}
+
+.dropdown-custom-item.text-danger:hover {
+    color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.1);
+}
