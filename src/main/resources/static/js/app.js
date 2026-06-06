@@ -624,22 +624,29 @@ $(document).ready(function () {
         $('#searchInput').val(currentKeyword);
     }
 
-    function performSearch() {
-        const keyword = $('#searchInput').val().trim();
-        if (keyword !== "") {
-            window.location.href = `search.html?keyword=${encodeURIComponent(keyword)}`;
-        }
-    }
+    $("#searchInput").on("keypress", function (e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            const keyword = $(this).val().trim();
 
-    $(document).on('keypress', '#searchInput', function (e) {
-        if (e.which === 13) { 
-            e.preventDefault(); 
-            performSearch();
+            if (keyword.length === 0) {
+                alert("Vui lòng nhập từ khóa tìm kiếm!");
+                return;
+            }
+
+            window.location.href = "search.html?keyword=" + encodeURIComponent(keyword);
         }
     });
 
-    $(document).on('click', '.nav-search i', function () {
-        performSearch();
+    $(".btn-header-search, #btnSearch, .nav-search i").on("click", function () {
+        const keyword = $("#searchInput").val().trim();
+
+        if (keyword.length === 0) {
+            alert("Vui lòng nhập từ khóa tìm kiếm!");
+            return;
+        }
+
+        window.location.href = "search.html?keyword=" + encodeURIComponent(keyword);
     });
 
 });

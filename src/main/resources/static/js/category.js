@@ -303,4 +303,31 @@ $(document).ready(function() {
         });
         $('#categoryGrid').html(html);
     }
+
+    // ==========================================
+    // XỬ LÝ THANH TÌM KIẾM TRÊN TRANG DANH MỤC
+    // ==========================================
+    $("#searchInput").on("keypress", function (e) {
+        if (e.which === 13) {
+            const keyword = $(this).val().trim();
+
+            if (keyword.length === 0) {
+                alert("Vui lòng nhập từ khóa tìm kiếm!");
+                return;
+            }
+
+            window.location.href = "search.html?keyword=" + encodeURIComponent(keyword);
+        }
+    });
+
+    $(".btn-header-search, #btnSearch, .nav-search i").on("click", function () {
+        const keyword = $("#searchInput").val().trim();
+
+        if (keyword.length === 0) {
+            alert("Vui lòng nhập từ khóa tìm kiếm!");
+            return;
+        }
+
+        window.location.href = "search.html?keyword=" + encodeURIComponent(keyword);
+    });
 });

@@ -18,10 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-// Phải import các class từ thư mục gốc vào
-import com.javaweb.api.UserAPI;
-import com.javaweb.repository.impl.UserRepositoryImpl;
+import com.javaweb.repository.impl.UserRepositoryImpl; // Import UserRepositoryImpl thay vì UserService
 import com.javaweb.repository.entity.UserEntity;
 import com.javaweb.security.JwtUtils;
 import model.UserDTO;
@@ -34,7 +31,7 @@ public class UserAPITest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserRepositoryImpl userRepository; 
+    private UserRepositoryImpl userRepository; // Đổi sang mock UserRepositoryImpl giống như Controller Autowired
 
     @MockBean
     private JwtUtils jwtUtils; 
@@ -53,19 +50,29 @@ public class UserAPITest {
         userDTO.setFullName("Test API User");
         userDTO.setPhoneNumber("0987654321");
 
+        // Sử dụng bộ mã hóa để tạo chuỗi BCrypt chuẩn cho mật khẩu "StrongPass@123"
+        org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder = 
+            new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+
         userEntity = new UserEntity();
         userEntity.setUser_id(1);
         userEntity.setEmail("testapi@gmail.com");
-        userEntity.setFullname("Test API User");
+        userEntity.setFullname("Test API User"); // Khớp đúng setFullname() trong UserEntity của bạn
+        userEntity.setPhone("0987654321");       // Khớp đúng setPhone() trong UserEntity của bạn
+        userEntity.setPassword_hash(encoder.encode("StrongPass@123")); // Đồng bộ hash pass
         userEntity.setRole_id(2);
-        userEntity.setIs_active(1); 
+        userEntity.setIs_active(1);
     }
 
     @Test
     void testLoginAPI_Success() throws Exception {
-        when(userRepository.findByEmailAndPassword(anyString(), anyString())).thenReturn(userEntity);
-        when(jwtUtils.generateToken(anyString(), any(Integer.class), any(Integer.class))).thenReturn("mocked-jwt-token");
+        // 1. Giả lập tìm thấy UserEntity có password_hash khớp với mật mã thô sau khi giải mã
+        when(userRepository.findByEmail("testapi@gmail.com")).thenReturn(userEntity);
+        
+        // 2. Giả lập sinh mã Token thành công
+        when(jwtUtils.generateToken("testapi@gmail.com", 2, 1)).thenReturn("mocked-jwt-token");
 
+        // 3. Thực thi gọi API
         mockMvc.perform(post("/api/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userDTO)))
