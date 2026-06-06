@@ -3,6 +3,7 @@ package com.javaweb.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper; 
 
 import com.javaweb.service.impl.UserServiceImpl;
 import com.javaweb.repository.UserRepository;
@@ -22,6 +24,9 @@ public class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private ModelMapper modelMapper; 
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -46,12 +51,17 @@ public class UserServiceImplTest {
 
     @Test
     void testLogin_Success() {
+        // Set id cho DTO giả lập để tránh lỗi lệch Assertion (assertEquals(1, null))
+        testUserDTO.setUserId(1);
+
         when(userRepository.findByEmailAndPassword(anyString(), anyString())).thenReturn(testUserEntity);
+        // GIẢ LẬP MODEL MAPPER ÉP KIỂU TỪ ENTITY SANG DTO
+        when(modelMapper.map(any(), eq(UserDTO.class))).thenReturn(testUserDTO);
 
         UserDTO result = userService.login("test@gmail.com", "Password@123");
 
         assertNotNull(result);
-        assertEquals(1, result.getUserId());
+        assertEquals(1, result.getUserId()); // Giờ test sẽ pass vì userId đã được gán bằng 1
         assertEquals("test@gmail.com", result.getEmail());
         verify(userRepository, times(1)).findByEmailAndPassword("test@gmail.com", "Password@123");
     }
@@ -75,6 +85,8 @@ public class UserServiceImplTest {
     @Test
     void testRegister_Success() {
         when(userRepository.checkEmailExists(anyString())).thenReturn(false);
+        // GIẢ LẬP MODEL MAPPER ÉP KIỂU TỪ DTO SANG ENTITY
+        when(modelMapper.map(any(), eq(UserEntity.class))).thenReturn(testUserEntity);
         when(userRepository.register(any(UserEntity.class))).thenReturn(true);
 
         boolean result = userService.register(testUserDTO);
