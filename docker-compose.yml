@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Cấu hình cho Server Spring Boot
   fashion_app:

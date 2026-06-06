@@ -68,8 +68,32 @@
                 <button class="pill-btn active" data-filter="all">NEW ARRIVALS</button>
                 <button class="pill-btn" data-filter="brand" data-id="1">NIKE</button>
                 <button class="pill-btn" data-filter="brand" data-id="2">ADIDAS</button>
-                <button class="pill-btn" data-filter="brand" data-id="6">MIZUNO</button>
-                <button class="pill-btn" data-filter="brand" data-id="3">PUMA</button>
+                <button class="pill-btn" data-filter="brand" data-id="3">MIZUNO</button>
+                <button class="pill-btn" data-filter="brand" data-id="4">PUMA</button>
+            </div>
+
+            <div class="home-filter-bar d-flex justify-content-end align-items-center gap-2 mb-4 mt-4">
+                <select id="homePriceFilter" class="form-select filter-select">
+                    <option value="all">Khoảng giá: Tất cả</option>
+                    <option value="under_1m">Dưới 1.000.000đ</option>
+                    <option value="1m_to_3m">1.000.000đ - 3.000.000đ</option>
+                    <option value="over_3m">Trên 3.000.000đ</option>
+                </select>
+            
+                <select id="homeSortSelect" class="form-select filter-select">
+                    <option value="default">Sắp xếp: Mặc định</option>
+                    <option value="price_asc">Giá: Thấp đến Cao</option>
+                    <option value="price_desc">Giá: Cao đến Thấp</option>
+                    <option value="newest">Mới nhất</option>
+                </select>
+            
+                <button id="btnHomeApplyFilter" class="btn btn-primary filter-btn" title="Lọc sản phẩm">
+                    <i class="fas fa-filter"></i>
+                </button>
+            
+                <button id="btnHomeClearFilter" class="btn btn-outline-light filter-btn" title="Xóa bộ lọc">
+                    <i class="fas fa-undo"></i>
+                </button>
             </div>
         </div>
 

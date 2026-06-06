@@ -1,6 +1,13 @@
 $(document).ready(function () {
     const API_URL = "/api/";
-
+        $.ajaxSetup({
+        beforeSend: function(xhr) {
+            const token = localStorage.getItem("user_token");
+            if (token) {
+                xhr.setRequestHeader("Authorization", "Bearer " + token);
+            }
+        }
+    });
     // ==========================================
     // 0. CACHE DỮ LIỆU SIZE VÀ MÀU SẮC TỪ API 
     // ==========================================
@@ -26,32 +33,40 @@ $(document).ready(function () {
 	// ==========================================
 	    // 2. HÀM LẤY DATA VÀ HIỂN THỊ ĐỘNG TRÊN TRANG CHỦ
 	    // ==========================================
-	    function loadStorytellingCollections() {
-	        $.ajax({
-	            url: API_URL + "products",
-	            type: "GET",
-	            success: function (allProducts) {
-	                if (!allProducts || allProducts.length === 0) return;
+	    let allProductsCache = []; // <--- THÊM BIẾN NÀY ĐỂ NHỚ DỮ LIỆU
+    let homeProducts = [];
+    let homeFilterState = {
+        brandId: null,
+        price: "all",
+        sort: "default"
+    };
 
-	                // Đảo ngược mảng để sản phẩm vừa thêm (ID lớn nhất) lên đầu tiên
-	                let sortedProducts = [...allProducts].reverse();
+    function loadStorytellingCollections() {
+        $.ajax({
+            url: API_URL + "products",
+            type: "GET",
+            success: function (allProducts) {
+                if (!allProducts || allProducts.length === 0) return;
 
-	                // Lọc sản phẩm theo Category (Khớp với dữ liệu SQL: 2=Chạy Bộ, 4=Bóng Rổ, 1&3=Lifestyle)
-	                const runningShoes = sortedProducts.filter(p => p.categoryId === 2);
-	                const basketballShoes = sortedProducts.filter(p => p.categoryId === 4);
-	                const lifestyleShoes = sortedProducts.filter(p => p.categoryId === 1 || p.categoryId === 3);
+                homeProducts = [...allProducts];
+                let sortedProducts = [...allProducts].sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+                allProductsCache = sortedProducts; // <--- LƯU LẠI VÀO ĐÂY ĐỂ TÍNH SAU LỌC
 
-	                // Render dữ liệu vào các Grid (Tăng giới hạn hiển thị lên 8-12 sản phẩm)
-	                renderCardsToSpecificGrid(sortedProducts.slice(0, 12), "#newArrivalsGrid"); // 12 đôi mới nhất
-	                renderCardsToSpecificGrid(runningShoes.slice(0, 8), "#runningGrid");        // 8 đôi chạy bộ
-	                renderCardsToSpecificGrid(basketballShoes.slice(0, 8), "#basketballGrid");  // 8 đôi bóng rổ
-	                renderCardsToSpecificGrid(lifestyleShoes.slice(0, 8), "#luxuryGrid");       // 8 đôi lifestyle
-	            },
-	            error: function () {
-	                console.error("Lỗi kết nối Backend. Không lấy được sản phẩm!");
-	            }
-	        });
-	    }
+                const runningShoes = sortedProducts.filter(p => Number(p.categoryId || p.category_id) === 1);
+                const footballShoes = sortedProducts.filter(p => Number(p.categoryId || p.category_id) === 2);
+                const basketballShoes = sortedProducts.filter(p => Number(p.categoryId || p.category_id) === 3);
+                const sneakersShoes = sortedProducts.filter(p => Number(p.categoryId || p.category_id) === 4);
+
+                renderCardsToSpecificGrid(sortedProducts.slice(0, 12), "#newArrivalsGrid"); 
+                renderCardsToSpecificGrid(runningShoes.slice(0, 8), "#runningGrid");        
+                renderCardsToSpecificGrid(basketballShoes.slice(0, 8), "#basketballGrid");  
+                renderCardsToSpecificGrid(sneakersShoes.slice(0, 8), "#luxuryGrid");       
+            },
+            error: function () {
+                console.error("Lỗi kết nối Backend. Không lấy được sản phẩm!");
+            }
+        });
+    }
 
 	function renderCardsToSpecificGrid(products, gridId) {
 	        const $grid = $(gridId);
@@ -111,20 +126,119 @@ $(document).ready(function () {
 	        $grid.html(html);
 	    }
 
-    // ==========================================
-    // 3. XỬ LÝ SỰ KIỆN CLICK CATEGORY PILLS (CUỘN TRANG)
-    // ==========================================
-    $(".pill-btn").click(function() {
-        $(".pill-btn").removeClass("active");
-        $(this).addClass("active");
-        const targetId = $(this).attr("data-target");
+    function applyHomeFilters() {
+        let filtered = [...homeProducts];
 
-        if (targetId && $(targetId).length) {
-            const headerHeight = $('.main-navbar').outerHeight();
-            $('html, body').animate({
-                scrollTop: $(targetId).offset().top - headerHeight - 15 
-            }, 600); 
+        // Lọc theo thương hiệu
+        if (homeFilterState.brandId !== null) {
+            filtered = filtered.filter(p =>
+                Number(p.brandId || p.brand_id) === Number(homeFilterState.brandId)
+            );
         }
+
+        // Lọc theo giá
+        if (homeFilterState.price === "under_1m") {
+            filtered = filtered.filter(p => Number(p.price || 0) < 1000000);
+        } else if (homeFilterState.price === "1m_to_3m") {
+            filtered = filtered.filter(p =>
+                Number(p.price || 0) >= 1000000 &&
+                Number(p.price || 0) <= 3000000
+            );
+        } else if (homeFilterState.price === "over_3m") {
+            filtered = filtered.filter(p => Number(p.price || 0) > 3000000);
+        }
+
+        // Sắp xếp
+        if (homeFilterState.sort === "price_asc") {
+            filtered.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+        } else if (homeFilterState.sort === "price_desc") {
+            filtered.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
+        } else if (homeFilterState.sort === "newest") {
+            filtered.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+        } else {
+            filtered.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+        }
+
+        $("#runningShoes").hide();
+        $("#basketballShoes").hide();
+        $("#lifestyleShoes").hide();
+
+        renderCardsToSpecificGrid(filtered, "#newArrivalsGrid");
+    }
+
+    // ==========================================
+    // 3. XỬ LÝ SỰ KIỆN CLICK CATEGORY PILLS (LỌC SẢN PHẨM TRANG CHỦ)
+    // ==========================================
+    $(document).on("click", ".category-pills-section .pill-btn", function (e) {
+        e.preventDefault();
+        
+        $(".category-pills-section .pill-btn").removeClass("active");
+        $(this).addClass("active");
+        
+        const filterType = $(this).data("filter");
+        const brandId = $(this).data("id");
+        const brandName = $(this).text().trim();
+        
+        if (filterType === "all") {
+            homeFilterState.brandId = null;
+            homeFilterState.price = "all";
+            homeFilterState.sort = "default";
+
+            $("#homePriceFilter").val("all");
+            $("#homeSortSelect").val("default");
+
+            $("#sectionTitleText").text("NEW ARRIVALS");
+            $("#sectionDescText").text("Khám phá những đôi giày mới cập bến.");
+
+            $("#runningShoes").show();
+            $("#basketballShoes").show();
+            $("#lifestyleShoes").show();
+
+            loadStorytellingCollections();
+            return;
+        }
+
+        if (filterType === "brand") {
+            homeFilterState.brandId = Number(brandId);
+
+            $("#sectionTitleText").text("SẢN PHẨM " + brandName.toUpperCase());
+            $("#sectionDescText").text("Danh sách sản phẩm thuộc thương hiệu " + brandName.toUpperCase() + ".");
+
+            applyHomeFilters();
+            
+            // Cuộn nhẹ xuống để người dùng thấy kết quả
+            $('html, body').animate({
+                scrollTop: $("#newArrivals").offset().top - 100 
+            }, 300);
+        }
+    });
+
+    $("#btnHomeApplyFilter").on("click", function () {
+        homeFilterState.price = $("#homePriceFilter").val();
+        homeFilterState.sort = $("#homeSortSelect").val();
+
+        applyHomeFilters();
+    });
+
+    $("#btnHomeClearFilter").on("click", function () {
+        homeFilterState.brandId = null;
+        homeFilterState.price = "all";
+        homeFilterState.sort = "default";
+
+        $(".category-pills-section .pill-btn").removeClass("active");
+        $('.category-pills-section .pill-btn[data-filter="all"]').addClass("active");
+
+        $("#homePriceFilter").val("all");
+        $("#homeSortSelect").val("default");
+
+        $("#sectionTitleText").text("NEW ARRIVALS");
+        $("#sectionDescText").text("Khám phá những đôi giày mới cập bến.");
+
+        $("#runningShoes").show();
+        $("#basketballShoes").show();
+        $("#lifestyleShoes").show();
+
+        loadStorytellingCollections();
     });
 
     // ==========================================
@@ -397,6 +511,7 @@ $(document).ready(function () {
         const detailId = $(this).data('detail-id');
         const variantName = $(this).data('variant-name') || '';
         const userId = localStorage.getItem("user_id");
+        const token = localStorage.getItem("user_token"); // <--- THÊM DÒNG NÀY ĐỂ LẤY TOKEN
         const baseProductName = $(this).data('product-name') || 'Sản phẩm';
         const productName = variantName ? `${baseProductName} - ${variantName}` : baseProductName;
 
@@ -411,6 +526,9 @@ $(document).ready(function () {
         $.ajax({
             url: API_URL + "cart/add", 
             type: "POST",
+            headers: {
+                "Authorization": "Bearer " + token // <--- THÊM DÒNG NÀY ĐỂ ĐÍNH KÈM JWT TOKEN
+            },
             contentType: "application/json",
             data: JSON.stringify(cartRequest),
             success: function () {
@@ -430,6 +548,7 @@ $(document).ready(function () {
     // ==========================================
     function updateCartBadge() {
         const userId = localStorage.getItem("user_id");
+        const token = localStorage.getItem("user_token"); // <--- Lấy token
         
         if (!userId || userId === "undefined") {
             $('#cartBadge').hide();
@@ -439,6 +558,9 @@ $(document).ready(function () {
         $.ajax({
             url: API_URL + "cart/count/" + userId, 
             type: "GET",
+            headers: {
+                "Authorization": "Bearer " + token // <--- Gửi token lên server
+            },
             success: function (totalItems) {
                 const $cartIconLink = $('.nav-actions .fa-shopping-cart').closest('a');
 
@@ -465,7 +587,6 @@ $(document).ready(function () {
             }
         });
     }
-
     // ==========================================
     // HÀM BẬT THÔNG BÁO GÓC MÀN HÌNH 
     // ==========================================
