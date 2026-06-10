@@ -1,10 +1,4 @@
 package com.javaweb.api;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,57 +11,61 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.javaweb.builder.ProductSearchBuilder;
-import com.javaweb.service.BrandService;
 import com.javaweb.service.ProductService;
-import com.javaweb.utils.ConnectionJDBCUtil;
 
 import model.*;
 @CrossOrigin
 @RestController
+@RequestMapping("/api/products")
 public class ProductAPI {
 	@Autowired
 	private ProductService productService;
-	@Autowired
-    private BrandService brandService;
-	@GetMapping(value = "")
-    public List<productDTO> getAllProduct(){
-		List<productDTO> result = productService.findAll();
+	
+	@GetMapping
+    public List<ProductDTO> getAllProduct(){
+		List<ProductDTO> result = productService.findAll();
 		return result;
 	}
-	@GetMapping(value = "/api/products/")
-    public List<productDTO> getProduct(@ModelAttribute ProductSearchBuilder params) {
-    	List<productDTO> result = productService.findProduct(params);
+	@GetMapping(value = "/search")
+    public List<ProductDTO> getProduct(@ModelAttribute ProductSearchBuilder params) {
+    	List<ProductDTO> result = productService.findProduct(params);
     	return result;
 	}
-    @GetMapping(value = "/api/brands")
-    public List<ItemDTO> getBrands() {
-    	return brandService.findAll();
-	}
-    @GetMapping(value = "/api/categories")
-    public List<productDTO> getCategories() {
-    	List<productDTO> result = productService.findAll();
-    	return result;
-	}
-    @PostMapping(value = "/api/products")
-	public void addProduct(@RequestBody productDTO dto) {
-		productService.save(dto);
-		System.out.println("Đã thêm sản phẩm thành công vào DB!");
+    @PostMapping
+	public ResponseEntity<?> addProduct(@RequestBody ProductDTO dto) {
+		try {
+			// [QUAN TRỌNG] Phải nhận về ID từ Service
+			Integer newProductId = productService.save(dto); 
+			
+			// Trả về JSON chứa ID để Frontend sử dụng
+			return ResponseEntity.ok().body(java.util.Collections.singletonMap("id", newProductId));
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(java.util.Collections.singletonMap("error", "Lỗi khi thêm sản phẩm: " + e.getMessage()));
+		}
 	}
 
-	@PutMapping(value = "/api/products/{id}")
-	public void updateProduct(@PathVariable Integer id, @RequestBody productDTO dto) {
-		dto.setId(id);
-		productService.update(dto);
-		System.out.println("Đã cập nhật sản phẩm ID: " + id);
+	@PutMapping(value = "/{id}")
+	public ResponseEntity<?> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO dto) {
+		try {
+			dto.setId(id);
+			productService.update(dto);
+			return ResponseEntity.ok().body(java.util.Collections.singletonMap("message", "Đã cập nhật sản phẩm thành công!"));
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(java.util.Collections.singletonMap("error", "Lỗi khi cập nhật: " + e.getMessage()));
+		}
 	}
 
-	@DeleteMapping(value = "/api/products/{id}")
-	public ResponseEntity<String> deleteProduct(@PathVariable Integer id) {
-	    productService.delete(id);
-	    return ResponseEntity.ok("Đã xóa thành công sản phẩm ID: " + id);
+	@DeleteMapping(value = "/{id}")
+	public ResponseEntity<?> deleteProduct(@PathVariable("id") Integer id) {
+	    try {
+	        productService.delete(id);
+	        return ResponseEntity.ok(java.util.Collections.singletonMap("message", "Đã xóa thành công sản phẩm ID: " + id));
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500).body(java.util.Collections.singletonMap("error", e.getMessage()));
+	    }
 	}
 }

@@ -1,16 +1,13 @@
 package com.javaweb.service;
 
+import com.javaweb.builder.ProductSearchBuilder;
+import model.ProductDTO;
 import java.util.List;
 
-import com.javaweb.builder.ProductSearchBuilder;
-
-import model.ItemDTO;
-import model.productDTO;
-
 public interface ProductService {
-	List<productDTO> findAll();
-	List<productDTO> findProduct(ProductSearchBuilder params);
-	void save(model.productDTO dto);
-    void update(model.productDTO dto);
+    List<ProductDTO> findAll();
+    List<ProductDTO> findProduct(ProductSearchBuilder params);
+    Integer save(ProductDTO dto);
+    void update(ProductDTO dto);
     void delete(Integer id);
 }

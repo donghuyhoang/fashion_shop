@@ -1,7 +1,9 @@
 package com.javaweb.repository;
 import java.util.List;
-import model.ItemDTO;
+
+import com.javaweb.repository.entity.CategoryEntity;
+
 
 public interface CategoryRepository {
-    List<ItemDTO> findAll();
+    List<CategoryEntity> findAll();
 }

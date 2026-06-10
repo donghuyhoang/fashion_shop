@@ -3,116 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập hệ thống - Fashion Shop</title>
+    <title>Đăng nhập - SNEAK PEAK</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { 
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
-            display: flex; align-items: center; justify-content: center; height: 100vh; 
-        }
-        .login-card { 
-            width: 100%; max-width: 420px; padding: 40px 30px; 
-            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            background: white; border: none;
-        }
-        .login-card .logo-icon {
-            font-size: 3rem; color: #212529; text-align: center; margin-bottom: 15px;
-        }
-        .form-control:focus {
-            border-color: #212529; box-shadow: 0 0 0 0.25rem rgba(33, 37, 41, 0.25);
-        }
-        .divider {
-            display: flex; align-items: center; text-align: center; margin: 20px 0; color: #6c757d;
-        }
-        .divider::before, .divider::after {
-            content: ''; flex: 1; border-bottom: 1px solid #dee2e6;
-        }
-        .divider:not(:empty)::before { margin-right: .25em; }
-        .divider:not(:empty)::after { margin-left: .25em; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/style.css"> 
 </head>
-<body>
-    <div class="login-card">
-        <div class="logo-icon"><i class="fas fa-shoe-prints"></i></div>
-        <h3 class="text-center fw-bold mb-4">Fashion Shop</h3>
+<body class="login-page d-flex justify-content-center align-items-center">
+
+    <div class="auth-container" id="authContainer">
         
-        <form id="loginForm">
-            <div class="mb-3">
-                <label class="form-label text-muted small fw-bold">Email đăng nhập</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-envelope"></i></span>
-                    <input type="text" class="form-control" id="username" placeholder="Nhập email của bạn" required>
+        <!-- FORM ĐĂNG KÝ -->
+        <div class="form-container sign-up-container">
+            <form id="registerForm">
+                <h2 class="form-title" style="font-size: 1.8rem;">Create Account</h2>
+                <p class="form-subtitle mb-3">Điền thông tin để tham gia cùng Sneak Peak</p>
+                
+                <div id="registerAlert" class="alert d-none small py-2 w-100 rounded-3 mb-2" role="alert"></div>
+                
+                <div class="w-100 text-start">
+                    <label class="form-label text-muted fw-bold mb-1 ps-2" style="font-size: 0.65rem; letter-spacing: 1px;">HỌ VÀ TÊN</label>
+                    <div class="input-group">
+                        <span class="input-group-text input-group-text-custom"><i class="fas fa-user"></i></span>
+                        <input type="text" class="form-control form-control-custom" id="regFullName" placeholder="Nhập họ và tên" required>
+                    </div>
+                </div>
+                <div class="w-100 text-start">
+                    <label class="form-label text-muted fw-bold mb-1 ps-2" style="font-size: 0.65rem; letter-spacing: 1px;">ĐỊA CHỈ EMAIL</label>
+                    <div class="input-group">
+                        <span class="input-group-text input-group-text-custom"><i class="fas fa-envelope"></i></span>
+                        <input type="email" class="form-control form-control-custom" id="regEmail" placeholder="Nhập địa chỉ email" required>
+                    </div>
+                </div>
+                <div class="w-100 text-start">
+                    <label class="form-label text-muted fw-bold mb-1 ps-2" style="font-size: 0.65rem; letter-spacing: 1px;">SỐ ĐIỆN THOẠI</label>
+                    <div class="input-group">
+                        <span class="input-group-text input-group-text-custom"><i class="fas fa-phone"></i></span>
+                        <input type="text" class="form-control form-control-custom" id="regPhone" placeholder="Nhập số điện thoại" required>
+                    </div>
+                </div>
+                <div class="w-100 text-start">
+                    <label class="form-label text-muted fw-bold mb-1 ps-2" style="font-size: 0.65rem; letter-spacing: 1px;">MẬT KHẨU</label>
+                    <div class="input-group">
+                        <span class="input-group-text input-group-text-custom"><i class="fas fa-lock"></i></span>
+                        <input type="password" class="form-control form-control-custom" id="regPassword" placeholder="Tạo mật khẩu" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-login-custom w-100 fw-bold mt-2" style="letter-spacing: 1px;">ĐĂNG KÝ MỚI</button>
+            </form>
+        </div>
+        
+        <!-- FORM ĐĂNG NHẬP -->
+        <div class="form-container sign-in-container">
+            <form id="loginForm">
+                <h2 class="form-title">Welcome Back</h2>
+                <p class="form-subtitle mb-4">Vui lòng đăng nhập vào tài khoản của bạn</p>
+                
+                <div id="loginAlert" class="alert d-none small py-2 w-100 rounded-3" role="alert"></div>
+                
+                <div class="w-100 text-start">
+                    <label class="form-label text-muted fw-bold mb-1 ps-2" style="font-size: 0.7rem; letter-spacing: 1px;">ĐỊA CHỈ EMAIL</label>
+                    <div class="input-group">
+                        <span class="input-group-text input-group-text-custom"><i class="fas fa-envelope"></i></span>
+                        <input type="email" class="form-control form-control-custom" id="email" placeholder="Nhập địa chỉ email" required>
+                    </div>
+                </div>
+                <div class="w-100 text-start">
+                    <label class="form-label text-muted fw-bold mb-1 ps-2" style="font-size: 0.7rem; letter-spacing: 1px;">MẬT KHẨU CỦA BẠN</label>
+                    <div class="input-group">
+                        <span class="input-group-text input-group-text-custom"><i class="fas fa-lock"></i></span>
+                        <input type="password" class="form-control form-control-custom" id="password" placeholder="Nhập mật khẩu" required>
+                    </div>
+                </div>
+                
+                <a href="#" class="text-decoration-none small hover-link mb-4 mt-1 align-self-end d-block text-end">Quên mật khẩu?</a>
+                
+                <button type="submit" class="btn btn-login-custom w-100 fw-bold" id="btnLogin" style="letter-spacing: 1px;">ĐĂNG NHẬP</button>
+            </form>
+        </div>
+
+        <!-- LỚP PHỦ CHUYỂN CẢNH -->
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <a href="index.html" class="text-white text-decoration-none">
+                        <h1 class="fw-black" style="font-size: 2.5rem;">SNEAK<span>PEAK</span></h1>
+                    </a>
+                    <p class="mt-3">Đã có tài khoản?<br>Đăng nhập để tiếp tục hành trình của bạn.</p>
+                    <button class="ghost mt-2" id="signIn">Đăng Nhập</button>
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <a href="index.html" class="text-white text-decoration-none">
+                        <h1 class="fw-black" style="font-size: 2.5rem;">SNEAK<span>PEAK</span></h1>
+                    </a>
+                    <p class="mt-3">Chưa có tài khoản?<br>Nhập thông tin cá nhân và bắt đầu ngay!</p>
+                    <button class="ghost mt-2" id="signUp">Đăng Ký</button>
                 </div>
             </div>
-            
-            <div class="mb-4">
-                <label class="form-label text-muted small fw-bold">Mật khẩu</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="fas fa-lock"></i></span>
-                    <input type="password" class="form-control" id="password" placeholder="••••••••" required>
-                </div>
-            </div>
-            
-            <button type="submit" class="btn btn-dark w-100 py-2 fw-bold shadow-sm">ĐĂNG NHẬP</button>
-        </form>
-
-        <div class="divider">Hoặc</div>
-
-        <div class="text-center">
-            <span class="text-muted">Bạn chưa có tài khoản?</span>
-            <br>
-            <a href="register.html" class="btn btn-outline-dark mt-2 w-100 py-2 fw-bold">ĐĂNG KÝ NGAY</a>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $("#loginForm").submit(function(e) {
-                e.preventDefault();
-                
-                const payload = {
-                    email: $("#username").val(),
-                    password: $("#password").val()
-                };
-
-                const $btn = $(this).find('button[type="submit"]');
-                $btn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm"></span> Đang xử lý...');
-
-                $.ajax({
-                    url: "http://localhost:8081/api/users/login",
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(payload),
-                    success: function(response) {
-                        alert("Đăng nhập thành công!"); 
-                        
-                        // LƯU THÊM THÔNG TIN VÀO LOCALSTORAGE
-                        localStorage.setItem("user_name", response.fullName || "Người dùng");
-                        localStorage.setItem("user_email", response.email);
-
-                        setTimeout(() => {
-                            if (response.roleId === 1) { 
-                                localStorage.setItem("staff_token", "staff-token-" + response.userId);
-                                window.location.href = "adminpage.html"; 
-                            } else if (response.roleId === 2) { 
-                                localStorage.setItem("user_token", "user-token-" + response.userId);
-                                window.location.href = "index.html"; 
-                            } else {
-                                alert("Tài khoản không hợp lệ."); 
-                            }
-                        }, 1000);
-                    },
-                    error: function(xhr) {
-                        alert(xhr.responseText || "Email hoặc mật khẩu không đúng. Vui lòng thử lại!");
-                    },
-                    complete: function() {
-                        $btn.prop("disabled", false).text("ĐĂNG NHẬP");
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="js/auth.js"></script>
 </body>
 </html>

@@ -9,7 +9,7 @@ public class UserEntity
     private String phone;
     private String password_hash;
     private Integer role_id;
-    private boolean is_active;
+    private Integer is_active;
     private LocalDateTime created_at;
 
     // Getter setter
@@ -25,8 +25,8 @@ public class UserEntity
     public void setPassword_hash(String password_hash) { this.password_hash = password_hash; }
     public Integer getRole_id() { return role_id; }
     public void setRole_id(Integer role_id) { this.role_id = role_id; }
-    public boolean isIs_active() { return is_active; }
-    public void setIs_active(boolean is_active) { this.is_active = is_active; }
+    public Integer getIs_active() { return is_active; }
+    public void setIs_active(Integer is_active) { this.is_active = is_active; }
     public LocalDateTime getCreated_at() { return created_at; }
     public void setCreated_at(LocalDateTime created_at) { this.created_at = created_at; }
 

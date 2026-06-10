@@ -7,6 +7,7 @@ public class UserDTO {
     private String password;
     private String phoneNumber;
     private Integer roleId;
+    private Integer isActive;
 
     // Getter Setter
     public Integer getUserId() { return userId; }
@@ -21,4 +22,6 @@ public class UserDTO {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public Integer getRoleId() { return roleId; }
     public void setRoleId(Integer roleId) { this.roleId = roleId; }
+    public Integer getIsActive() { return isActive; }
+    public void setIsActive(Integer isActive) { this.isActive = isActive; }
 }
